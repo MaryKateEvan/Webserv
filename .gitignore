@@ -30,3 +30,12 @@
 *.exe
 *.out
 *.app
+*.dSYM
+
+*.txt
+*.log
+*.pdf
+*.plist
+.vscode
+webserv
+*.conf
