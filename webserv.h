@@ -15,10 +15,15 @@
 # include <climits>
 # include <sstream>
 # include <cstring>
-# include <random>
+# include <poll.h>
+# include <csignal>
 
 # ifndef PORT
 #  define PORT 8080
+# endif 
+
+# ifndef MAX_CLIENTS
+#  define MAX_CLIENTS 8080
 # endif 
 
 #endif /*WEBSERV_H*/
