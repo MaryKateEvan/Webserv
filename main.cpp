@@ -27,7 +27,7 @@ int main()
     if (bind(fd_server, (struct sockaddr *)&address, sizeof(address)) != 0)
     {
     //bind to assign an address to the file descriptor
-        std:cerr << "Binding to socket failed" << std::endl;
+        std::cerr << "Binding to socket failed" << std::endl;
         close(fd_server);
         return (1);
     }
@@ -41,8 +41,8 @@ int main()
         return (1);
     }
     std::cout << "Server is now listening on port " << PORT << std::endl;
-
-    int fd_new_socket = accept(fd_server, (struct sockaddr *)&address, (socklen_t *)&sizeof(address));
+    int addr_len = sizeof(address);
+    int fd_new_socket = accept(fd_server, (struct sockaddr *)&address, (socklen_t *)&addr_len);
     //accepting the first connection req from the queue. Creates a new connected socket (the old socket is unaffected)
 
     if (fd_new_socket == -1)
