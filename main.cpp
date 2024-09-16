@@ -1,9 +1,12 @@
 #include "webserv.h"
 
+void signal_handler(int signum);
+
+int fd_server;
+
 int main()
 {
-	int	fd_server;
-
+	std::signal(SIGINT, signal_handler);
 	fd_server = socket(AF_INET, SOCK_STREAM, 0);
 	// AF_INET for IPv4 (http), SOCK_STREAM as a standart byte based sequenced stream (for tcp), 0 as no specific protocol is used
 
@@ -104,12 +107,14 @@ int main()
 				else
 				{
 					std::cout << "Received request from client on fd " << fds[i].fd << std::endl;
-
-					const char *response = "HTTP/1.1 200 OK\nContent-Type: text/html\n\nHello World this is from Webserv!";
+					std::cout << "Received request: " << std::endl << buffer << std::endl;
+					const char *response = "HTTP/1.1 200 OK\nContent-Type: text/html\n\nA surprise to be sure, but a welcome one!\n";
 					if (send(fds[i].fd, response, strlen(response), 0) == -1)
 					{
 						std::cerr << "Send failed on fd " << fds[i].fd << std::endl;
 					}
+					close(fds[i].fd);
+					fds[i].fd = -1;
 				}
 			}
 		}
@@ -117,4 +122,14 @@ int main()
 	close(fd_server);
 
 	return (0);
+}
+
+void signal_handler(int signum)
+{
+	std::cerr << "Signal " << signum << " received, closing server..." << std::endl;
+	if (fd_server != -1)
+	{
+		close(fd_server);
+	}
+	exit(0);
 }
