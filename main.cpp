@@ -4,6 +4,11 @@ int main()
 {
     int fd_server;
 
+    // Test for responses!
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dist(0, 1);
+
     fd_server = socket(AF_INET, SOCK_STREAM, 0);
     // AF_INET for IPv4 (http), SOCK_STREAM as a standart byte based sequenced stream (for tcp), 0 as no specific protocol is used
     
@@ -59,11 +64,19 @@ int main()
         //just a temporary thing, use something like gnl in the future + a parser to handle requests correctly
         std::cout << "Received request: " << std::endl << buffer << std::endl;
 
-        const char *response = "HTTP/1.1 200 OK\nContent-Type: text/html\n\nHello, World!";
+        if (dist(gen) == 0)
+        {
+            const char *response = "HTTP/1.1 200 OK\nContent-Type: text/html\n\nHello World this is from Webserv!";
+            send(fd_new_socket, response, strlen(response), 0);
+        }
+        else
+        {
+            const char *response = "HTTP/1.1 200 OK\nContent-Type: text/html\n\nHello, World this is the other response from Webserv!";
+            send(fd_new_socket, response, strlen(response), 0);
+            //same as write if the FLAGS are set to 0 like rn
+        }
         //basic hello world page, doesnt matter what the actuall request is for now
 
-        send(fd_new_socket, response, strlen(response), 0);
-        //same as write if the FLAGS are set to 0 like rn
 
         close(fd_new_socket);
     }
