@@ -42,28 +42,31 @@ int main()
     }
     std::cout << "Server is now listening on port " << PORT << std::endl;
     int addr_len = sizeof(address);
-    int fd_new_socket = accept(fd_server, (struct sockaddr *)&address, (socklen_t *)&addr_len);
-    //accepting the first connection req from the queue. Creates a new connected socket (the old socket is unaffected)
-
-    if (fd_new_socket == -1)
+    while (true)
     {
-        std::cerr << "Accept failed" << std::endl;
-        close(fd_server);
-        return (1);
+        int fd_new_socket = accept(fd_server, (struct sockaddr *)&address, (socklen_t *)&addr_len);
+        //accepting the first connection req from the queue. Creates a new connected socket (the old socket is unaffected)
+
+        if (fd_new_socket == -1)
+        {
+            std::cerr << "Accept failed" << std::endl;
+            close(fd_server);
+            return (1);
+        }
+
+        char buffer[2048] = {0};
+        read(fd_new_socket, buffer, 1024);
+        //just a temporary thing, use something like gnl in the future + a parser to handle requests correctly
+        std::cout << "Received request: " << std::endl << buffer << std::endl;
+
+        const char *response = "HTTP/1.1 200 OK\nContent-Type: text/html\n\nHello, World!";
+        //basic hello world page, doesnt matter what the actuall request is for now
+
+        send(fd_new_socket, response, strlen(response), 0);
+        //same as write if the FLAGS are set to 0 like rn
+
+        close(fd_new_socket);
     }
-
-    char buffer[2048] = {0};
-    read(fd_new_socket, buffer, 1024);
-    //just a temporary thing, use something like gnl in the future + a parser to handle requests correctly
-    std::cout << "Received request: " << std::endl << buffer << std::endl;
-
-    const char *response = "HTTP/1.1 200 OK\nContent-Type: text/html\n\nHello, World!";
-    //basic hello world page, doesnt matter what the actuall request is for now
-
-    send(fd_new_socket, response, strlen(response), 0);
-    //same as write if the FLAGS are set to 0 like rn
-
-    close(fd_new_socket);
     close(fd_server);
 
     return (0);
