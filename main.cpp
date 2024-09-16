@@ -16,6 +16,7 @@ int main()
 		return (1);
 	}
 
+	//Makes sure the socket can still be used if the program exited unexpected
 	int opt = 1;
 	if (setsockopt(fd_server, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
 		std::cerr << "setsockopt failed" << std::endl;
@@ -73,7 +74,7 @@ int main()
 			std::cerr << "poll() failed" << std::endl;
 			break ;
 		}
-
+		//checks for new client requests
 		if (fds[0].revents & POLLIN)
 		{
 			socklen_t	addr_len = sizeof(address);
@@ -97,7 +98,7 @@ int main()
 				}
 			}
 		}
-
+		//sends data do available clients
 		for (int i = 1; i < nfds; i++)
 		{
 			if (fds[i].fd != -1 && (fds[i].revents & POLLIN))
@@ -131,6 +132,7 @@ int main()
 	return (0);
 }
 
+//Closes FD to make sure proper cleanup happens
 void signal_handler(int signum)
 {
 	std::cerr << "Signal " << signum << " received, closing server..." << std::endl;
