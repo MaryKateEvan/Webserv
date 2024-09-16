@@ -16,6 +16,7 @@
 # include <sstream>
 # include <cstring>
 # include <poll.h>
+# include <csignal>
 
 # ifndef PORT
 #  define PORT 8080
