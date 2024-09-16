@@ -16,6 +16,13 @@ int main()
 		return (1);
 	}
 
+	int opt = 1;
+	if (setsockopt(fd_server, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+		std::cerr << "setsockopt failed" << std::endl;
+		close(fd_server);
+		return (1);
+	}
+
 	struct sockaddr_in  address;
 
 	address.sin_family = AF_INET;
