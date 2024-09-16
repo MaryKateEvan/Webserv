@@ -22,4 +22,8 @@
 #  define PORT 8080
 # endif 
 
+# ifndef MAX_CLIENTS
+#  define MAX_CLIENTS 8080
+# endif 
+
 #endif /*WEBSERV_H*/
