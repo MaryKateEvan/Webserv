@@ -8,7 +8,15 @@
 # include <algorithm>
 # include <limits>
 # include <sys/time.h>
+# include <sys/types.h>
+# include <sys/socket.h>
+# include <netinet/in.h>
+# include <unistd.h>
 # include <climits>
 # include <sstream>
+
+# ifndef PORT
+#  define PORT 8080
+# endif 
 
 #endif /*WEBSERV_H*/
