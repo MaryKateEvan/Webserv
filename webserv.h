@@ -14,6 +14,7 @@
 # include <unistd.h>
 # include <climits>
 # include <sstream>
+# include <cstring>
 
 # ifndef PORT
 #  define PORT 8080
