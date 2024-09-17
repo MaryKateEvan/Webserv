@@ -11,3 +11,6 @@ const char* BaseException::what() const noexcept
 
 InvalidIPAddressException::InvalidIPAddressException(const std::string& ip_address)
 	: BaseException("IP-Address: " + ip_address + " is invalid") {}
+
+SocketCreationFailedException::SocketCreationFailedException(const std::string& server_name)
+	: BaseException("Socket Creation for " + server_name + " failed") {}

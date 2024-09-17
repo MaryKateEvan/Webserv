@@ -18,4 +18,10 @@ class: InvalidIPAddressException : public BaseException
 		explicit IvalidIPAddressException(const std::string& ip_address);
 };
 
+class: SocketCreationFailedException : public BaseException
+{
+	public:
+		explicit SocketCreationFailedException(const std::string& server_name);
+};
+
 #endif /*EXCEPTIONS_HPP*/
