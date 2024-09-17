@@ -1,5 +1,13 @@
 #include "webserv.h"
 
+/*
+* Use curl localhost:PORT (replace port with actual value) to test responses
+* USE wrk -t12 -c400 -d30s http://localhost:8080 to stress test server
+* -t12 stands for 12 threads
+* -c400 stands for 400 connections
+* -d30s stands for a 30s test lenght
+*/
+
 void signal_handler(int signum);
 
 int fd_server;
