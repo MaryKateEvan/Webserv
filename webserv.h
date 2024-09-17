@@ -21,6 +21,7 @@
 # include <exception>
 
 # include "server/Server.hpp"
+# include "exceptions/Exceptions.hpp"
 
 # ifndef PORT
 #  define PORT 8080

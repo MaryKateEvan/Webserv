@@ -24,4 +24,34 @@ class: SocketCreationFailedException : public BaseException
 		explicit SocketCreationFailedException(const std::string& server_name);
 };
 
+class: SetSocketOptionFailedException : public BaseException
+{
+	public:
+		explicit SetSocketOptionFailedException(const std::string& server_name);
+};
+
+class: InvalidPortException : public BaseException
+{
+	public:
+		explicit InvalidPortException(const std::string& server_name, int port);
+};
+
+class: InvalidIPAdressException : public BaseException
+{
+	public:
+		explicit InvalidIPAdressException(const std::string& server_name, const std::string& ip_address);
+};
+
+class: BindFailedException : public Base Exception
+{
+	public:
+		explicit BindFailedException(const std::string& server_name, const std::string& ip_address);
+};
+
+class: ListenFailedException : public BaseException
+{
+	public:
+		explicit ListenFailedException(const std::string& server_name);
+};
+
 #endif /*EXCEPTIONS_HPP*/
