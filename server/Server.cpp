@@ -52,9 +52,9 @@ Server::Server(const Server& copy)
 	std::cout << "Server Copy Constructor called" << std::endl;
 	if (this != &copy)
 	{
-		this->_fd_server = copy._fd_server;
-		this->_address = copy._address;
-		this->_name = copy._name;
+		// this->_fd_server = copy._fd_server;
+		// this->_address = copy._address;
+		// this->_name = copy._name;
 	}
 }
 
@@ -63,10 +63,10 @@ Server&	Server::operator=(const Server &copy)
 	std::cout << "Server Copy Assignment called" << std::endl;
 	if (this != &copy)
 	{
-		close(this->_fd_server);
-		this->_fd_server = copy._fd_server;
-		this->_address = copy._address;
-		this->_name = copy._name;
+		// close(this->_fd_server);
+		// this->_fd_server = copy._fd_server;
+		// this->_address = copy._address;
+		// this->_name = copy._name;
 	}
 	return (*this);
 }
