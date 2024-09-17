@@ -9,7 +9,7 @@ int main()
 	try
 	{
 		std::signal(SIGINT, signal_handler);
-		Server	server1("A little webserver", PORT, "0.0.0.0")
+		Server	server1("A little webserver", PORT, "0.0.0.0");
 
 		struct pollfd	fds[MAX_CLIENTS];
 		int				nfds = 1;
@@ -35,8 +35,7 @@ int main()
 			//checks for new client requests
 			if (fds[0].revents & POLLIN)
 			{
-				socklen_t	addr_len = sizeof(Server.getAddress());
-				int			fd_new_socket = accept(fd_server, (struct sockaddr *)&Server.getAddress(), &addr_len);
+				int			fd_new_socket = server1.acceptConnection();
 
 				if (fd_new_socket == -1)
 				{
