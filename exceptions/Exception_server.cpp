@@ -28,4 +28,4 @@ BindFailedException::BindFailedException(const std::string& server_name, const s
 	: BaseException("Bindin IP " + ip_address + " to socket for server " + server_name + " failed") {}
 
 ListenFailedException::ListenFailedException(const std::string& server_name)
-	: BaseException("Setting server " + server_name " to listen failed") {}
+	: BaseException("Setting server " + server_name + " to listen failed") {}
