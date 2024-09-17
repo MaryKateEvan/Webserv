@@ -8,8 +8,9 @@ class Server
 	private:
 		int					_fd_server;
 		struct sockaddr_in	_address;
+		const std::string	_name;
 	public:
-		Server(int port, const std::string ip_address);
+		Server(const std::string server_name, int port, const std::string ip_address);
 		//use inet_pton() to convert IP address
 		~Server();
 		Server(const Server& copy);
