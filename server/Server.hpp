@@ -15,6 +15,10 @@ class Server
 		~Server();
 		Server(const Server& copy);
 		Server& operator=(const Server& copy);
+
+		int					getServerFD(void) const;
+		struct sockaddr_in	getAddress(void) const;
+		const std::string	getName(void) const;
 };
 
 #endif /*SERVER_HPP*/

@@ -74,3 +74,24 @@ Server&	Server::operator=(const Server &copy)
 /* -------------------------------------------------------------------------- */
 /*                                  Functions                                 */
 /* -------------------------------------------------------------------------- */
+
+
+
+/* -------------------------------------------------------------------------- */
+/*                                Getter/Setter                               */
+/* -------------------------------------------------------------------------- */
+
+int		Server::getServerFD(void) const
+{
+	return (_fd_server);
+}
+
+struct sockaddr_in	Server::getAddress(void) const
+{
+	return (_address);
+}
+
+const std::string	Server::getName(void) const
+{
+	return (_name);
+}
