@@ -18,6 +18,7 @@
 # include <poll.h>
 # include <csignal>
 # include <arpa/inet.h>
+# include <exception>
 
 # include "server/Server.hpp"
 
