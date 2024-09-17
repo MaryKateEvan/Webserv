@@ -11,7 +11,7 @@ Server::Server(const std::string server_name, int port, const std::string ip_add
 	if (_fd_server == -1)
 		throw SocketCreationFailedException(_name);
 	int opt = 1;
-	if (setsockopt(fd_server, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
+	if (setsockopt(_fd_server, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
 	{
 		close(_fd_server);
 		throw SetSocketOptionFailedException(_name);
@@ -28,14 +28,14 @@ Server::Server(const std::string server_name, int port, const std::string ip_add
 		close(_fd_server);
 		throw InvalidIPAdressException(_name, ip_address);
 	}
-	if (bind(fd_server, (struct sockaddr *)&address, sizeof(address)) != 0)
+	if (bind(_fd_server, (struct sockaddr *)&_address, sizeof(_address)) != 0)
 	{
-		close(fd_server);
-		throw BindFailedException(_name, ip_addresss);
+		close(_fd_server);
+		throw BindFailedException(_name, ip_address);
 	}
-	if (listen(fd_server ,SOMAXCONN) != 0)
+	if (listen(_fd_server ,SOMAXCONN) != 0)
 	{
-		close(fd_server);
+		close(_fd_server);
 		throw ListenFailedException(_name);
 	}
 	std::cout << "Server is now listening on port " << port << std::endl;
@@ -44,7 +44,7 @@ Server::Server(const std::string server_name, int port, const std::string ip_add
 Server::~Server()
 {
 	std::cout << "Server Default Destructor called" << std::endl;
-	close(_server_fd);
+	close(_fd_server);
 }
 
 Server::Server(const Server& copy)
