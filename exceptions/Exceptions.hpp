@@ -12,43 +12,43 @@ class BaseException : public std::exception
 		virtual const char*	what() const noexcept override;
 };
 
-class: InvalidIPAddressException : public BaseException
+class InvalidIPAddressException : public BaseException
 {
 	public:
-		explicit IvalidIPAddressException(const std::string& ip_address);
+		explicit InvalidIPAddressException(const std::string& ip_address);
 };
 
-class: SocketCreationFailedException : public BaseException
+class SocketCreationFailedException : public BaseException
 {
 	public:
 		explicit SocketCreationFailedException(const std::string& server_name);
 };
 
-class: SetSocketOptionFailedException : public BaseException
+class SetSocketOptionFailedException : public BaseException
 {
 	public:
 		explicit SetSocketOptionFailedException(const std::string& server_name);
 };
 
-class: InvalidPortException : public BaseException
+class InvalidPortException : public BaseException
 {
 	public:
 		explicit InvalidPortException(const std::string& server_name, int port);
 };
 
-class: InvalidIPAdressException : public BaseException
+class InvalidIPAdressException : public BaseException
 {
 	public:
 		explicit InvalidIPAdressException(const std::string& server_name, const std::string& ip_address);
 };
 
-class: BindFailedException : public Base Exception
+class BindFailedException : public BaseException
 {
 	public:
 		explicit BindFailedException(const std::string& server_name, const std::string& ip_address);
 };
 
-class: ListenFailedException : public BaseException
+class ListenFailedException : public BaseException
 {
 	public:
 		explicit ListenFailedException(const std::string& server_name);
