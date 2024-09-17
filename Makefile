@@ -20,7 +20,9 @@ SRC				:= main.cpp
 
 UTILS_SRC		:=
 
-SRCS			:= $(SRC) $(UTILS_SRC)
+SERVER_SRC		:= Server.cpp
+
+SRCS			:= $(SRC) $(UTILS_SRC) $(SERVER_SRC)
 
 OBJS			:= $(addprefix $(OBJ_DIR)/, $(SRCS:%.cpp=%.o))
 
