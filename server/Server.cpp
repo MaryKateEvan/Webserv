@@ -75,7 +75,13 @@ Server&	Server::operator=(const Server &copy)
 /*                                  Functions                                 */
 /* -------------------------------------------------------------------------- */
 
-
+int		Server::acceptConnection(void)
+{
+	socklen_t	addr_len = sizeof(_address);
+	int			fd_new_socket = accept(_fd_server,  (struct sockaddr *)&_address, &addr_len);
+	//potentially add exception on accept fail
+	return (fd_new_socket);
+}
 
 /* -------------------------------------------------------------------------- */
 /*                                Getter/Setter                               */

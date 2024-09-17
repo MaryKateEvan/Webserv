@@ -19,6 +19,7 @@ class Server
 		int					getServerFD(void) const;
 		struct sockaddr_in	getAddress(void) const;
 		const std::string	getName(void) const;
+		int					acceptConnection(void);
 };
 
 #endif /*SERVER_HPP*/
