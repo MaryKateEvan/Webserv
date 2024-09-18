@@ -18,6 +18,7 @@ int main()
 	{
 		std::signal(SIGINT, signal_handler);
 		Server	server1("A little webserver", PORT, "0.0.0.0");
+		Server	server2("TheOtherOne", 8081, "0.0.0.0");
 
 		struct pollfd	fds[MAX_CLIENTS];
 		int				nfds = 1;
