@@ -18,6 +18,7 @@ int main()
 	{
 		std::signal(SIGINT, signal_handler);
 		Server	server1("A little webserver", PORT, "0.0.0.0");
+		server1.setResponse("HTTP/1.1 200 OK\nContent-Type: text/html\n\nA surprise to be sure, but a welcome one!\n");
 
 		struct pollfd	fds[MAX_CLIENTS];
 		int				nfds = 1;
@@ -81,8 +82,7 @@ int main()
 					{
 						std::cout << "Received request from client on fd " << fds[i].fd << std::endl;
 						std::cout << "Received request: " << std::endl << buffer << std::endl;
-						const char *response = "HTTP/1.1 200 OK\nContent-Type: text/html\n\nA surprise to be sure, but a welcome one!\n";
-						if (send(fds[i].fd, response, strlen(response), 0) == -1)
+						if (send(fds[i].fd, server1.getResponse().c_str(), strlen(server1.getResponse().c_str()), 0) == -1)
 						{
 							std::cerr << "Send failed on fd " << fds[i].fd << std::endl;
 						}

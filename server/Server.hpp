@@ -9,6 +9,7 @@ class Server
 		int					_fd_server;
 		struct sockaddr_in	_address;
 		const std::string	_name;
+		std::string			_response;
 	public:
 		Server(const std::string server_name, int port, const std::string ip_address);
 		//use inet_pton() to convert IP address
@@ -20,6 +21,8 @@ class Server
 		struct sockaddr_in	getAddress(void) const;
 		const std::string	getName(void) const;
 		int					acceptConnection(void);
+		std::string			getResponse(void) const;
+		void				setResponse(std::string response);
 };
 
 #endif /*SERVER_HPP*/

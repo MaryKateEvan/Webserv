@@ -101,3 +101,13 @@ const std::string	Server::getName(void) const
 {
 	return (_name);
 }
+
+std::string	Server::getResponse(void) const
+{
+	return (_response);
+}
+
+void		Server::setResponse(std::string response)
+{
+	_response = response;
+}
