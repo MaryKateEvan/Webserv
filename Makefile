@@ -14,13 +14,17 @@ CPPFLAGS		:= -Wall -Wextra -Werror
 
 OBJ_DIR			:= ./objs
 
-VPATH			:= ./utils/
+VPATH			:= ./utils/ ./server/ ./exceptions/
 
 SRC				:= main.cpp
 
 UTILS_SRC		:=
 
-SRCS			:= $(SRC) $(UTILS_SRC)
+SERVER_SRC		:= Server.cpp
+
+EXCEPTIONS_SRC	:= Exception_server.cpp
+
+SRCS			:= $(SRC) $(UTILS_SRC) $(SERVER_SRC) $(EXCEPTIONS_SRC)
 
 OBJS			:= $(addprefix $(OBJ_DIR)/, $(SRCS:%.cpp=%.o))
 

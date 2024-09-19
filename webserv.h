@@ -17,6 +17,11 @@
 # include <cstring>
 # include <poll.h>
 # include <csignal>
+# include <arpa/inet.h>
+# include <exception>
+
+# include "server/Server.hpp"
+# include "exceptions/Exceptions.hpp"
 
 # ifndef PORT
 #  define PORT 8080
