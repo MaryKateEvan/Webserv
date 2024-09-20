@@ -83,6 +83,19 @@ int		Server::acceptConnection(void)
 	return (fd_new_socket);
 }
 
+/// @brief Takes the http request and extracts the requested resource
+/// @param request Takes the request sent by the client
+/// @return String of the requested resource
+std::string	Server::extract_request(const std::string& request)
+{
+	std::string::size_type	get = request.find("GET ") + 4;
+	std::string::size_type	http = request.find(" HTTP/");
+
+	if (get == std::string::npos || http == std::string::npos)
+		return ("");
+	return (request.substr(get, http - get));
+}
+
 /* -------------------------------------------------------------------------- */
 /*                                Getter/Setter                               */
 /* -------------------------------------------------------------------------- */

@@ -23,6 +23,7 @@ class Server
 		int					acceptConnection(void);
 		std::string			getResponse(void) const;
 		void				setResponse(std::string response);
+		std::string			extract_request(const std::string& request);
 };
 
 #endif /*SERVER_HPP*/
