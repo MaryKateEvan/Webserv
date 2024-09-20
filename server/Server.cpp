@@ -102,9 +102,9 @@ std::string	Server::extract_request(const std::string& request)
 std::string	Server::map_to_directory(const std::string& file_path)
 {
 	if (file_path == "/")
-		return ("../www/index.html");
+		return ("www/index.html");
 	else
-		return ("../www" + file_path);
+		return ("www" + file_path);
 }
 
 bool	Server::file_exists(const std::string& file_path)
