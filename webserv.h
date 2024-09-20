@@ -19,6 +19,7 @@
 # include <csignal>
 # include <arpa/inet.h>
 # include <exception>
+# include <fstream>
 
 # include "server/Server.hpp"
 # include "exceptions/Exceptions.hpp"
