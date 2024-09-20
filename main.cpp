@@ -86,7 +86,6 @@ int main()
 						std::string	request(buffer);
 						std::string	url = server1.extract_request(request);
 						std::string	file_path = server1.map_to_directory(url);
-						std::cout << file_path << std::endl << "ABOVE IS THE FILEPATH" << std::endl;
 
 						if (server1.file_exists(file_path))
 						{
