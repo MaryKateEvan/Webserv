@@ -83,6 +83,64 @@ int		Server::acceptConnection(void)
 	return (fd_new_socket);
 }
 
+/// @brief Takes the http request and extracts the requested resource
+/// @param request Takes the request sent by the client
+/// @return String of the requested resource
+std::string	Server::extract_request(const std::string& request)
+{
+	std::string::size_type	get = request.find("GET ") + 4;
+	std::string::size_type	http = request.find(" HTTP/");
+
+	if (get == std::string::npos || http == std::string::npos)
+		return ("");
+	return (request.substr(get, http - get));
+}
+
+/// @brief Takes the string from extract request and maps it to the directoy (currently www)
+/// @param file_path the return value from extract_request
+/// @return The path to the requested resource in our directory
+std::string	Server::map_to_directory(const std::string& file_path)
+{
+	if (file_path == "/")
+		return ("www/index.html");
+	else
+		return ("www" + file_path);
+}
+
+bool	Server::file_exists(const std::string& file_path)
+{
+	std::ifstream file(file_path.c_str());
+
+	return (file.is_open());
+}
+
+bool	file_end(const std::string& file_path, const std::string& suffix)
+{
+	if (suffix.size() > file_path.size())
+		return (false);
+	return (std::equal(suffix.rbegin(), suffix.rend(), file_path.rbegin()));
+}
+
+std::string	Server::get_mime_type(const std::string& file_path)
+{
+	if (file_end(file_path, ".html"))
+		return ("text/html");
+	if (file_end(file_path, ".jpg") || file_end(file_path, ".jpeg"))
+		return ("image/jpeg");
+	if (file_end(file_path, ".png"))
+		return ("image/png");
+	return ("text/plain");
+}
+
+std::string	Server::read_file(const std::string& file_path)
+{
+	std::ifstream		file(file_path);
+	std::stringstream	buffer;
+
+	buffer << file.rdbuf();
+	return (buffer.str());
+}
+
 /* -------------------------------------------------------------------------- */
 /*                                Getter/Setter                               */
 /* -------------------------------------------------------------------------- */

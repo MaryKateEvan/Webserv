@@ -82,9 +82,24 @@ int main()
 					{
 						std::cout << "Received request from client on fd " << fds[i].fd << std::endl;
 						std::cout << "Received request: " << std::endl << buffer << std::endl;
-						if (send(fds[i].fd, server1.getResponse().c_str(), strlen(server1.getResponse().c_str()), 0) == -1)
+
+						std::string	request(buffer);
+						std::string	url = server1.extract_request(request);
+						std::string	file_path = server1.map_to_directory(url);
+
+						if (server1.file_exists(file_path))
 						{
-							std::cerr << "Send failed on fd " << fds[i].fd << std::endl;
+							std::string	file_content = server1.read_file(file_path);
+							std::string	mime_type = server1.get_mime_type(file_path);
+							std::string response = "HTTP/1.1 200 OK\nContent-Type: " + mime_type + "\n\n" + file_content;
+							if (send(fds[i].fd, response.c_str(), response.size(), 0) == -1)
+								std::cerr << "Send failed on fd " << fds[i].fd << std::endl;
+						}
+						else
+						{
+							std::string error_response = "HTTP/1.1 404 Not Found\nContent-Type: text/html\n\n404 File Not Found";
+							if (send(fds[i].fd, error_response.c_str(), error_response.size(), 0) == -1)
+								std::cerr << "Send failed on fd " << fds[i].fd << std::endl;
 						}
 						close(fds[i].fd);
 						fds[i].fd = -1;
