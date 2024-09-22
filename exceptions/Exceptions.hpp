@@ -54,4 +54,10 @@ class ListenFailedException : public BaseException
 		explicit ListenFailedException(const std::string& server_name);
 };
 
+class OpenFailedException : public BaseException
+{
+	public:
+		explicit OpenFailedException(const std::string& server_name, const std::string& file_path);
+};
+
 #endif /*EXCEPTIONS_HPP*/

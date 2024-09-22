@@ -29,3 +29,6 @@ BindFailedException::BindFailedException(const std::string& server_name, const s
 
 ListenFailedException::ListenFailedException(const std::string& server_name)
 	: BaseException("Setting server " + server_name + " to listen failed") {}
+
+OpenFailedException::OpenFailedException(const std::string& server_name, const std::string& file_path)
+	: BaseException("Server " + server_name + " couldn't open file " + file_path) {}
