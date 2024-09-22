@@ -7,6 +7,7 @@
 Server::Server(const std::string server_name, int port, const std::string ip_address) : _name(server_name)
 {
 	std::cout << "Server Default Constructor called" << std::endl;
+	load_mime_types("mime_type.csv");
 	_fd_server = socket(AF_INET, SOCK_STREAM, 0);
 	if (_fd_server == -1)
 		throw SocketCreationFailedException(_name);
@@ -114,22 +115,17 @@ bool	Server::file_exists(const std::string& file_path)
 	return (file.is_open());
 }
 
-bool	file_end(const std::string& file_path, const std::string& suffix)
-{
-	if (suffix.size() > file_path.size())
-		return (false);
-	return (std::equal(suffix.rbegin(), suffix.rend(), file_path.rbegin()));
-}
-
 std::string	Server::get_mime_type(const std::string& file_path)
 {
-	if (file_end(file_path, ".html"))
-		return ("text/html");
-	if (file_end(file_path, ".jpg") || file_end(file_path, ".jpeg"))
-		return ("image/jpeg");
-	if (file_end(file_path, ".png"))
-		return ("image/png");
-	return ("text/plain");
+	std::string	file_extension = file_path.substr(file_path.find_last_of('.'));
+	try
+	{
+		return (_mime_types.at(file_extension));
+	}
+	catch (const std::out_of_range& e)
+	{
+		return ("unknown/unknown");
+	}
 }
 
 std::string	Server::read_file(const std::string& file_path)
@@ -139,6 +135,24 @@ std::string	Server::read_file(const std::string& file_path)
 
 	buffer << file.rdbuf();
 	return (buffer.str());
+}
+
+void	Server::load_mime_types(const std::string& file_path)
+{
+	std::ifstream file(file_path);
+	if (!file.is_open())
+		throw OpenFailedException(_name, file_path);
+	std::string	line;
+	while(std::getline(file, line))
+	{
+		std::istringstream	ss(line);
+		std::string			extension;
+		std::string			mime_type;
+
+		if (std::getline(ss, extension, '\t') && std::getline(ss, mime_type))
+			_mime_types[extension] = mime_type;
+	}
+	file.close();
 }
 
 /* -------------------------------------------------------------------------- */
