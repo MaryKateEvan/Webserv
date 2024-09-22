@@ -20,6 +20,7 @@
 # include <arpa/inet.h>
 # include <exception>
 # include <fstream>
+# include <unordered_map>
 
 # include "server/Server.hpp"
 # include "exceptions/Exceptions.hpp"
