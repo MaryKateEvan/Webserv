@@ -7,6 +7,7 @@
 Server::Server(const std::string server_name, int port, const std::string ip_address) : _name(server_name)
 {
 	std::cout << "Server Default Constructor called" << std::endl;
+	load_mime_types("mime_type.csv");
 	_fd_server = socket(AF_INET, SOCK_STREAM, 0);
 	if (_fd_server == -1)
 		throw SocketCreationFailedException(_name);
@@ -139,6 +140,24 @@ std::string	Server::read_file(const std::string& file_path)
 
 	buffer << file.rdbuf();
 	return (buffer.str());
+}
+
+void	Server::load_mime_types(const std::string& file_path)
+{
+	std::ifstream file(file_path);
+	if (!file.is_open())
+		throw OpenFailedException(_name, file_path);
+	std::string	line;
+	while(std::getline(file, line))
+	{
+		std::istringstream	ss(line);
+		std::string			extension;
+		std::string			mime_type;
+
+		if (std::getline(ss, extension, '\t') && std::getline(ss, mime_type))
+			_mime_types[extension] = mime_type;
+	}
+	file.close();
 }
 
 /* -------------------------------------------------------------------------- */

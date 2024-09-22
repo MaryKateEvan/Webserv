@@ -10,6 +10,8 @@ class Server
 		struct sockaddr_in	_address;
 		const std::string	_name;
 		std::string			_response;
+		std::unordered_map<std::string, std::string> _mime_types;
+		void				load_mime_types(const std::string& file_path);
 	public:
 		Server(const std::string server_name, int port, const std::string ip_address);
 		//use inet_pton() to convert IP address
