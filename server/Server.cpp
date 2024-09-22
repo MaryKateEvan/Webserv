@@ -115,22 +115,17 @@ bool	Server::file_exists(const std::string& file_path)
 	return (file.is_open());
 }
 
-bool	file_end(const std::string& file_path, const std::string& suffix)
-{
-	if (suffix.size() > file_path.size())
-		return (false);
-	return (std::equal(suffix.rbegin(), suffix.rend(), file_path.rbegin()));
-}
-
 std::string	Server::get_mime_type(const std::string& file_path)
 {
-	if (file_end(file_path, ".html"))
-		return ("text/html");
-	if (file_end(file_path, ".jpg") || file_end(file_path, ".jpeg"))
-		return ("image/jpeg");
-	if (file_end(file_path, ".png"))
-		return ("image/png");
-	return ("text/plain");
+	std::string	file_extension = file_path.substr(file_path.find_last_of('.'));
+	try
+	{
+		return (_mime_types.at(file_extension));
+	}
+	catch (const std::out_of_range& e)
+	{
+		return ("unknown/unknown");
+	}
 }
 
 std::string	Server::read_file(const std::string& file_path)
