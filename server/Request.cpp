@@ -16,6 +16,7 @@ Request::Request(const std::string& request)
 	else if (request.compare(0, 4, "POST") == 0)
 	{
 		_method = POST;
+		//! Add an extraction for _content_type
 		method = request.find("POST ") + 5;
 	}
 	else if (request.compare(0, 6, "DELETE") == 0)
