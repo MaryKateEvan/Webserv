@@ -19,9 +19,9 @@
 class Request
 {
 	private:
-		int			method; // Assign one of the three defines above
-		std::string	file_path;
-		std::string	content_type;
+		int			_method; // Assign one of the three defines above
+		std::string	_file_path;
+		std::string	_content_type;
 	public:
 		Request(const std::string& request);
 		~Request();
