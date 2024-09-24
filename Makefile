@@ -22,7 +22,7 @@ UTILS_SRC		:=
 
 SERVER_SRC		:= Server.cpp Request.cpp
 
-EXCEPTIONS_SRC	:= Exception_server.cpp
+EXCEPTIONS_SRC	:= Exception_server.cpp Exception_request.cpp
 
 SRCS			:= $(SRC) $(UTILS_SRC) $(SERVER_SRC) $(EXCEPTIONS_SRC)
 
