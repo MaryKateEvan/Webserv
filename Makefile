@@ -20,7 +20,7 @@ SRC				:= main.cpp
 
 UTILS_SRC		:=
 
-SERVER_SRC		:= Server.cpp
+SERVER_SRC		:= Server.cpp Request.cpp
 
 EXCEPTIONS_SRC	:= Exception_server.cpp
 
