@@ -18,6 +18,7 @@ int main()
 	{
 		std::signal(SIGINT, signal_handler);
 		Server	server1("A little webserver", PORT, "0.0.0.0");
+		// Set response Method is outdated since the server is using the file system in dir /www/
 		server1.setResponse("HTTP/1.1 200 OK\nContent-Type: text/html\n\nA surprise to be sure, but a welcome one!\n");
 
 		struct pollfd	fds[MAX_CLIENTS];
@@ -84,7 +85,8 @@ int main()
 						std::cout << "Received request: " << std::endl << buffer << std::endl;
 
 						std::string	request(buffer);
-						std::string	url = server1.extract_request(request);
+						//Only for the get method for now
+						std::string	url = server1.extract_get_request(request);
 						std::string	file_path = server1.map_to_directory(url);
 
 						if (server1.file_exists(file_path))
