@@ -81,6 +81,7 @@ int main()
 					}
 					else
 					{
+						//! Use the Request Class here!
 						std::cout << "Received request from client on fd " << fds[i].fd << std::endl;
 						std::cout << "Received request: " << std::endl << buffer << std::endl;
 

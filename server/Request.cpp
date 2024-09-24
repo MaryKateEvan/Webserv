@@ -4,7 +4,7 @@
 /*                           Orthodox Canonical Form                          */
 /* -------------------------------------------------------------------------- */
 
-Request::Request()
+Request::Request(const std::string& request)
 {
 	std::cout << "Request Default Constructor called" << std::endl;
 }
