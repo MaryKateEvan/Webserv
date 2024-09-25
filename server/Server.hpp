@@ -3,6 +3,8 @@
 
 # include "../webserv.h"
 
+class Request;
+
 class Server
 {
 	private:

@@ -179,12 +179,12 @@ int	Server::process_get(const Request& req)
 		std::string	response = "HTTP/1.1 200 OK\nContent-Type: " + mime_type + "\n\n" + file_content;
 		if (send(req.get_fd(), response.c_str(), response.size(), 0) == -1)
 				throw SendFailedException(_name, req.get_fd());
-		else
-		{
-			std::string error_response = "HTTP/1.1 404 Not Found\nContent-Type: text/html\n\n404 File Not Found";
-			if (send(req.get_fd(), error_response.c_str(), error_response.size(), 0) == -1)
-				throw SendFailedException(_name, req.get_fd());
-		}
+	}
+	else
+	{
+		std::string error_response = "HTTP/1.1 404 Not Found\nContent-Type: text/html\n\n404 File Not Found";
+		if (send(req.get_fd(), error_response.c_str(), error_response.size(), 0) == -1)
+			throw SendFailedException(_name, req.get_fd());
 	}
 	return (0);
 }
