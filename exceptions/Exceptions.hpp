@@ -66,4 +66,10 @@ class NoMethodFoundException : public BaseException
 		explicit NoMethodFoundException(const std::string& request);
 };
 
+class SendFailedException : public BaseException
+{
+	public:
+		explicit SendFailedException(const std::string& server_name, const int& fd);
+};
+
 #endif /*EXCEPTIONS_HPP*/

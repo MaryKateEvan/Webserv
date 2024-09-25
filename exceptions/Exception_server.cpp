@@ -32,3 +32,6 @@ ListenFailedException::ListenFailedException(const std::string& server_name)
 
 OpenFailedException::OpenFailedException(const std::string& server_name, const std::string& file_path)
 	: BaseException("Server " + server_name + " couldn't open file " + file_path) {}
+
+SendFailedException::SendFailedException(const std::string&server_name, const int& fd)
+	: BaseException("Server " + server_name + " sending to " + std::to_string(fd) + " failed") {}
