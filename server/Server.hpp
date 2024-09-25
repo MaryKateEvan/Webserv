@@ -12,6 +12,7 @@ class Server
 		std::string			_response;
 		std::unordered_map<std::string, std::string> _mime_types;
 		void				load_mime_types(const std::string& file_path);
+		int					process_get(const Request& req);
 	public:
 		Server(const std::string server_name, int port, const std::string ip_address);
 		//use inet_pton() to convert IP address
@@ -30,6 +31,7 @@ class Server
 		bool				file_exists(const std::string& file_path);
 		std::string			get_mime_type(const std::string& file_path);
 		std::string			read_file(const std::string& file_path);
+		int					process_request(const Request& req);
 };
 
 #endif /*SERVER_HPP*/
