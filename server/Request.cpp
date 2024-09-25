@@ -4,9 +4,10 @@
 /*                           Orthodox Canonical Form                          */
 /* -------------------------------------------------------------------------- */
 
-Request::Request(const std::string& request)
+Request::Request(const std::string& request, int fd)
 {
 	std::cout << "Request Default Constructor called" << std::endl;
+	_fd = fd;
 	std::string::size_type	method;
 	if (request.compare(0, 3, "GET") == 0)
 	{
@@ -58,3 +59,27 @@ Request&	Request::operator=(const Request &copy)
 /* -------------------------------------------------------------------------- */
 /*                                  Functions                                 */
 /* -------------------------------------------------------------------------- */
+
+/* -------------------------------------------------------------------------- */
+/*                                Getter/Setter                               */
+/* -------------------------------------------------------------------------- */
+
+int	Request::get_method(void) const
+{
+	return (_method);
+}
+
+int	Request::get_fd(void) const
+{
+	return (_fd);
+}
+
+std::string	Request::get_file_path(void) const
+{
+	return (_file_path);
+}
+
+std::string	Request::get_content_type(void) const
+{
+	return (_content_type);
+}
