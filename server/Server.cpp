@@ -219,7 +219,7 @@ int	Server::process_delete(const Request& req)
 int	Server::send_error_message(int error_code, const Request& req)
 {
 	std::string	url = std::to_string(error_code);
-	std::string	file_path = "/www/error_pages/" + url + ".jpg";
+	std::string	file_path = "www/error_pages/" + url + ".jpg";
 	if (file_exists(file_path))
 	{
 		std::string	file_content = read_file(file_path);
