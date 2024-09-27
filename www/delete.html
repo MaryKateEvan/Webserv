@@ -8,10 +8,38 @@
 </head>
 <body>
     <h1>Delete an Image</h1>
-    <form action="/delete" method="POST">
+    <form id="deleteForm">
         <label for="filename">Enter image filename to delete:</label>
         <input type="text" id="filename" name="filename">
         <button type="submit">Delete</button>
     </form>
+    <script>
+        document.getElementById('deleteForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the form from submitting via POST
+
+            const filename = document.getElementById('filename').value;
+
+            if (!filename) {
+                alert('Please enter a filename.');
+                return;
+            }
+
+            // Make a DELETE request with the filename in the URL
+            fetch(filename, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('File deleted successfully!');
+                } else {
+                    alert('Failed to delete file. Status: ' + response.status);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            });
+        });
+    </script>
 </body>
 </html>
