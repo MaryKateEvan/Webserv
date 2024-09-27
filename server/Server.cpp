@@ -195,7 +195,7 @@ int	Server::process_get(const Request& req)
 int	Server::process_delete(const Request& req)
 {
 	std::string	url = req.get_file_path();
-	std::string	file_path = ("www/usrimg" + file_path);
+	std::string	file_path = "www/usrimg" + url;
 	if (file_exists(file_path))
 	{
 		if (std::remove(file_path.c_str()) == 0)

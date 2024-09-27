@@ -82,6 +82,7 @@ int main()
 					else
 					{
 						std::string	request(buffer);
+						std::cout << request << std::endl;
 						Request	req(buffer, fds[i].fd);
 						server1.process_request(req);
 						close(fds[i].fd);
