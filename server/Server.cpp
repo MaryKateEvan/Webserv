@@ -184,11 +184,7 @@ int	Server::process_get(const Request& req)
 				throw SendFailedException(_name, req.get_fd());
 	}
 	else
-	{
-		std::string error_response = "HTTP/1.1 404 Not Found\nContent-Type: text/html\n\n404 File Not Found";
-		if (send(req.get_fd(), error_response.c_str(), error_response.size(), 0) == -1)
-			throw SendFailedException(_name, req.get_fd());
-	}
+		send_error_message(404, req);
 	return (0);
 }
 
@@ -215,6 +211,35 @@ int	Server::process_delete(const Request& req)
 	{
 		std::string error_response = "HTTP/1.1 404 Not Found\nContent-Type: text/html\n\n404 File Not Found";
 		if (send(req.get_fd(), error_response.c_str(), error_response.size(), 0) == -1)
+			throw SendFailedException(_name, req.get_fd());
+	}
+	return (0);
+}
+
+int	Server::send_error_message(int error_code, const Request& req)
+{
+	std::string	url = std::to_string(error_code);
+	std::string	file_path = "/www/error_pages/" + url + ".jpg";
+	if (file_exists(file_path))
+	{
+		std::string	file_content = read_file(file_path);
+		std::string	mime_type = get_mime_type(file_path);
+		std::string	response = "HTTP/1.1 " + std::to_string(error_code) + " Error\r\n";
+		response += "Content-Type: " + mime_type + "\r\n";
+		response += "Content-Length: " + std::to_string(file_content.size()) + "\r\n"; // Include Content-Length
+		response += "\r\n";
+		response += file_content;
+		if (send(req.get_fd(), response.c_str(), response.size(), 0) == -1)
+				throw SendFailedException(_name, req.get_fd());
+	}
+	else
+	{
+		std::string response = "HTTP/1.1 404 Not Found\r\n";
+		response += "Content-Type: text/html\r\n";
+		response += "Content-Length: " + std::to_string(strlen("404 File Not Found")) + "\r\n"; // Include Content-Length
+		response += "\r\n"; // End of headers
+		response += "404 File Not Found"; // Body
+		if (send(req.get_fd(), response.c_str(), response.size(), 0) == -1)
 			throw SendFailedException(_name, req.get_fd());
 	}
 	return (0);

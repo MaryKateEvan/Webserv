@@ -35,6 +35,7 @@ class Server
 		std::string			getResponse(void) const;
 		void				setResponse(std::string response);
 		int					process_request(const Request& req);
+		int					send_error_message(int error_code, const Request& req);
 };
 
 #endif /*SERVER_HPP*/
