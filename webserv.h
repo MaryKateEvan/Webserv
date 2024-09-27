@@ -23,6 +23,7 @@
 # include <unordered_map>
 
 # include "server/Server.hpp"
+# include "server/Request.hpp"
 # include "exceptions/Exceptions.hpp"
 
 # ifndef PORT

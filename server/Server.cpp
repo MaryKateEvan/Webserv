@@ -87,7 +87,7 @@ int		Server::acceptConnection(void)
 /// @brief Takes the http request and extracts the requested resource
 /// @param request Takes the request sent by the client
 /// @return String of the requested resource
-std::string	Server::extract_request(const std::string& request)
+std::string	Server::extract_get_request(const std::string& request)
 {
 	std::string::size_type	get = request.find("GET ") + 4;
 	std::string::size_type	http = request.find(" HTTP/");
@@ -153,6 +153,40 @@ void	Server::load_mime_types(const std::string& file_path)
 			_mime_types[extension] = mime_type;
 	}
 	file.close();
+}
+
+int	Server::process_request(const Request& req)
+{
+	int	method = req.get_method();
+
+	switch (method)
+	{
+		case GET:
+			return (process_get(req));
+			break;
+	}
+	return (1);
+}
+
+int	Server::process_get(const Request& req)
+{
+	std::string	url = req.get_file_path();
+	std::string	file_path = map_to_directory(url);
+	if (file_exists(file_path))
+	{
+		std::string	file_content = read_file(file_path);
+		std::string	mime_type = get_mime_type(file_path);
+		std::string	response = "HTTP/1.1 200 OK\nContent-Type: " + mime_type + "\n\n" + file_content;
+		if (send(req.get_fd(), response.c_str(), response.size(), 0) == -1)
+				throw SendFailedException(_name, req.get_fd());
+	}
+	else
+	{
+		std::string error_response = "HTTP/1.1 404 Not Found\nContent-Type: text/html\n\n404 File Not Found";
+		if (send(req.get_fd(), error_response.c_str(), error_response.size(), 0) == -1)
+			throw SendFailedException(_name, req.get_fd());
+	}
+	return (0);
 }
 
 /* -------------------------------------------------------------------------- */

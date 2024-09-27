@@ -18,6 +18,7 @@ int main()
 	{
 		std::signal(SIGINT, signal_handler);
 		Server	server1("A little webserver", PORT, "0.0.0.0");
+		// Set response Method is outdated since the server is using the file system in dir /www/
 		server1.setResponse("HTTP/1.1 200 OK\nContent-Type: text/html\n\nA surprise to be sure, but a welcome one!\n");
 
 		struct pollfd	fds[MAX_CLIENTS];
@@ -80,27 +81,9 @@ int main()
 					}
 					else
 					{
-						std::cout << "Received request from client on fd " << fds[i].fd << std::endl;
-						std::cout << "Received request: " << std::endl << buffer << std::endl;
-
 						std::string	request(buffer);
-						std::string	url = server1.extract_request(request);
-						std::string	file_path = server1.map_to_directory(url);
-
-						if (server1.file_exists(file_path))
-						{
-							std::string	file_content = server1.read_file(file_path);
-							std::string	mime_type = server1.get_mime_type(file_path);
-							std::string response = "HTTP/1.1 200 OK\nContent-Type: " + mime_type + "\n\n" + file_content;
-							if (send(fds[i].fd, response.c_str(), response.size(), 0) == -1)
-								std::cerr << "Send failed on fd " << fds[i].fd << std::endl;
-						}
-						else
-						{
-							std::string error_response = "HTTP/1.1 404 Not Found\nContent-Type: text/html\n\n404 File Not Found";
-							if (send(fds[i].fd, error_response.c_str(), error_response.size(), 0) == -1)
-								std::cerr << "Send failed on fd " << fds[i].fd << std::endl;
-						}
+						Request	req(buffer, fds[i].fd);
+						server1.process_request(req);
 						close(fds[i].fd);
 						fds[i].fd = -1;
 					}
