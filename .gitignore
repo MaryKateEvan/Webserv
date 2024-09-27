@@ -39,3 +39,5 @@
 .vscode
 webserv
 *.conf
+
+www/usrimg/imag*

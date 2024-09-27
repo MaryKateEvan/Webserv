@@ -164,6 +164,9 @@ int	Server::process_request(const Request& req)
 		case GET:
 			return (process_get(req));
 			break;
+		case DELETE:
+			return (process_delete(req));
+			break;
 	}
 	return (1);
 }
@@ -179,6 +182,34 @@ int	Server::process_get(const Request& req)
 		std::string	response = "HTTP/1.1 200 OK\nContent-Type: " + mime_type + "\n\n" + file_content;
 		if (send(req.get_fd(), response.c_str(), response.size(), 0) == -1)
 				throw SendFailedException(_name, req.get_fd());
+	}
+	else
+	{
+		std::string error_response = "HTTP/1.1 404 Not Found\nContent-Type: text/html\n\n404 File Not Found";
+		if (send(req.get_fd(), error_response.c_str(), error_response.size(), 0) == -1)
+			throw SendFailedException(_name, req.get_fd());
+	}
+	return (0);
+}
+
+int	Server::process_delete(const Request& req)
+{
+	std::string	url = req.get_file_path();
+	std::string	file_path = "www/usrimg" + url;
+	if (file_exists(file_path))
+	{
+		if (std::remove(file_path.c_str()) == 0)
+		{
+			std::string	response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
+			if (send(req.get_fd(), response.c_str(), response.size(), 0) == -1)
+				throw SendFailedException(_name, req.get_fd());
+		}
+		else
+		{
+			std::string	response = "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/html\r\n\r\n";
+			if (send(req.get_fd(), response.c_str(), response.size(), 0) == -1)
+				throw SendFailedException(_name, req.get_fd());
+		}
 	}
 	else
 	{
