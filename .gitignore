@@ -41,3 +41,6 @@ webserv
 *.conf
 
 www/usrimg/imag*
+__pycache__
+env
+media
