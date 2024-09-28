@@ -13,8 +13,8 @@ class Server
 		const std::string	_name;
 		std::string			_response;
 		const std::string	_index_file;
-		const std::string	_www_dir;
 		const std::string	_data_dir;
+		const std::string	_www_dir;
 		std::unordered_map<std::string, std::string> _mime_types;
 
 		void				load_mime_types(const std::string& file_path);
