@@ -63,7 +63,7 @@ Request&	Request::operator=(const Request &copy)
 
 int	Request::process_post(const std::string& request)
 {
-	std::istringstream	stream(request);
+std::istringstream	stream(request);
 	std::string			line;
 	std::string			last_line;
 	size_t				pos;
@@ -75,7 +75,7 @@ int	Request::process_post(const std::string& request)
 		if (pos != std::string::npos)
 			break ;
 	}
-	if (!std::getline(stream, last_line))
+	if (line.empty() || !std::getline(stream, last_line))
 		return (1);
 	size_t	end = line.find(';');
 	if (end == std::string::npos)
@@ -83,11 +83,40 @@ int	Request::process_post(const std::string& request)
 	pos += 14;
 	std::string	con_type = line.substr(pos, end - pos);
 	_content_type = con_type;
-	// std::cout << "CONTENT typE: " + con_type << std::endl;
+	std::cout << "CONTENT typE: " + con_type << std::endl;
 	if (con_type == "multipart/form-data")
 	{
-		std::string	boundary = line.substr(end + 12);
-		std::cout << "Boundary = " + boundary << std::endl;
+		std::string	boundary = "--" + line.substr(end + 12);
+		// std::cout << "Boundary = " + boundary << std::endl;
+		std::istringstream	stream2(request);
+		while (std::getline(stream2, line) && line != "\r") {}
+		while (std::getline(stream2, line))
+		{
+			if (line.find(boundary) != std::string::npos)
+			{
+				if (last_line.find(boundary) != std::string::npos)
+					break;
+			}
+				std::string file_name;
+				std::getline(stream2, line);
+				pos = line.find("filename=\"");
+				if (pos == std::string::npos)
+					file_name = "unknown";
+				else
+					file_name = line.substr(pos + 10, line.length() - (pos + 10) - 2);
+				std::cout << "filename: " + file_name << "|" << std::endl;
+				std::getline(stream2, line);
+				std::getline(stream2, line);
+				std::string content;
+				while (std::getline(stream2, line))
+				{
+					if (line.find(boundary) != std::string::npos)
+						break;
+					content += line + "\n";
+				}
+			_post_files[file_name] = content; 
+		}
+		last_line = line;
 	}
 	return (0);
 }

@@ -71,23 +71,37 @@ int main()
 			{
 				if (fds[i].fd != -1 && (fds[i].revents & POLLIN))
 				{
-					char	buffer[4096] = {0};
-					int		bytes_read = read(fds[i].fd, buffer, 4096);
+					std::vector<char> accumulated_request;
+					std::vector<char> buffer(4096); 
+					while (true)
+					{
+						int bytes_read = read(fds[i].fd, buffer.data(), buffer.size());
 
-					if (bytes_read <= 0)
-					{
-						std::cout << "Client on fd " << fds[i].fd << " disconnected" << std::endl;
-						close(fds[i].fd);
-						fds[i].fd = -1;
-					}
-					else
-					{
-						std::string	request(buffer);
-						std::cout << request << std::endl;
-						Request	req(buffer, fds[i].fd);
-						server1.process_request(req);
-						close(fds[i].fd);
-						fds[i].fd = -1;
+						if (bytes_read < 0)
+						{
+							std::cerr << "Error reading from fd " << fds[i].fd << std::endl;
+							close(fds[i].fd);
+							fds[i].fd = -1;
+							break;
+						}
+						if (bytes_read == 0)
+						{
+							std::cout << "Client on fd " << fds[i].fd << " disconnected" << std::endl;
+							close(fds[i].fd);
+							fds[i].fd = -1;
+							break;
+						}
+						accumulated_request.insert(accumulated_request.end(), buffer.begin(), buffer.begin() + bytes_read);
+						std::string temp_request(accumulated_request.begin(), accumulated_request.end());
+						if (temp_request.find("\r\n\r\n") != std::string::npos)
+						{
+							Request req(std::string(accumulated_request.begin(), accumulated_request.end()), fds[i].fd);
+							server1.process_request(req);
+							accumulated_request.clear();
+							close(fds[i].fd);
+							fds[i].fd = -1;
+							break;
+						}
 					}
 				}
 			}
