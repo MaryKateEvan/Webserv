@@ -12,7 +12,7 @@
 # endif /*POST*/
 
 # ifndef DELETE
-#  define DELETE 1
+#  define DELETE 2
 # endif /*DELETE*/
 
 /// @brief Takes the request from a client and parses it.
@@ -23,6 +23,8 @@ class Request
 		int			_fd;
 		std::string	_file_path;
 		std::string	_content_type;
+		std::unordered_map<std::string, std::string> _post_files;
+		int			process_post(const std::string& request);
 	public:
 		Request(const std::string& request, int fd);
 		~Request();

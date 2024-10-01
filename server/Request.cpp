@@ -17,7 +17,8 @@ Request::Request(const std::string& request, int fd)
 	else if (request.compare(0, 4, "POST") == 0)
 	{
 		_method = POST;
-		//! Add an extraction for _content_type
+		if (process_post(request) == 1)
+			std::cout << "RETURNED 1\n";
 		method = request.find("POST ") + 5;
 	}
 	else if (request.compare(0, 6, "DELETE") == 0)
@@ -59,6 +60,56 @@ Request&	Request::operator=(const Request &copy)
 /* -------------------------------------------------------------------------- */
 /*                                  Functions                                 */
 /* -------------------------------------------------------------------------- */
+
+int	Request::process_post(const std::string& request)
+{
+	std::istringstream	stream(request);
+	std::string			line;
+	std::string			last_line;
+	size_t				pos;
+
+	while (std::getline(stream, line))
+	{
+		// std::cout << "LINE: " + line << std::endl;
+		pos = line.find("Content-Type: ");
+		if (pos != std::string::npos)
+			break ;
+	}
+	if (!std::getline(stream, last_line))
+		return (1);
+	size_t	end = line.find(';');
+	if (end == std::string::npos)
+		return (1);
+	pos += 14;
+	std::string	con_type = line.substr(pos, end - pos);
+	_content_type = con_type;
+	// std::cout << "CONTENT typE: " + con_type << std::endl;
+	if (con_type == "multipart/form-data")
+	{
+		std::string	boundary = line.substr(end + 12);
+		std::cout << "Boundary = " + boundary << std::endl;
+	}
+	return (0);
+}
+
+// void	Server::load_mime_types(const std::string& file_path)
+// {
+// 	std::ifstream file(file_path);
+// 	if (!file.is_open())
+// 		throw OpenFailedException(_name, file_path);
+// 	std::string	line;
+// 	while(std::getline(file, line))
+// 	{
+// 		std::istringstream	ss(line);
+// 		std::string			extension;
+// 		std::string			mime_type;
+
+// 		if (std::getline(ss, extension, '\t') && std::getline(ss, mime_type))
+// 			_mime_types[extension] = mime_type;
+// 	}
+// 	file.close();
+// }
+
 
 /* -------------------------------------------------------------------------- */
 /*                                Getter/Setter                               */

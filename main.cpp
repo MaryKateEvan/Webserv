@@ -17,8 +17,8 @@ int main()
 	try
 	{
 		std::signal(SIGINT, signal_handler);
-		// Server	server1("A little webserver", PORT, "0.0.0.0", "index.html", "usrimg", "www");
-		Server	server1("A Instagram Knockoff", PORT, "0.0.0.0", "index.html", "images", "image_website");
+		Server	server1("A little webserver", PORT, "0.0.0.0", "index.html", "usrimg", "www");
+		// Server	server1("A Instagram Knockoff", PORT, "0.0.0.0", "index.html", "images", "image_website");
 		// Set response Method is outdated since the server is using the file system in dir /www/
 		server1.setResponse("HTTP/1.1 200 OK\nContent-Type: text/html\n\nA surprise to be sure, but a welcome one!\n");
 
