@@ -12,7 +12,11 @@ class Server
 		struct sockaddr_in	_address;
 		const std::string	_name;
 		std::string			_response;
+		const std::string	_index_file;
+		const std::string	_data_dir;
+		const std::string	_www_dir;
 		std::unordered_map<std::string, std::string> _mime_types;
+
 		void				load_mime_types(const std::string& file_path);
 		int					process_get(const Request& req);
 		int					process_delete(const Request& req);
@@ -22,7 +26,7 @@ class Server
 		std::string			get_mime_type(const std::string& file_path);
 		std::string			read_file(const std::string& file_path);
 	public:
-		Server(const std::string server_name, int port, const std::string ip_address);
+		Server(const std::string server_name, int port, const std::string ip_address, const std::string index_file, const std::string data_dir, const std::string www_dir);
 		//use inet_pton() to convert IP address
 		~Server();
 		Server(const Server& copy);

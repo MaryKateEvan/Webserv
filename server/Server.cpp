@@ -4,7 +4,8 @@
 /*                           Orthodox Canonical Form                          */
 /* -------------------------------------------------------------------------- */
 
-Server::Server(const std::string server_name, int port, const std::string ip_address) : _name(server_name)
+Server::Server(const std::string server_name, int port, const std::string ip_address, const std::string index_file, const std::string data_dir, const std::string www_dir)
+	: _name(server_name), _index_file(index_file), _data_dir(data_dir), _www_dir(www_dir)
 {
 	std::cout << "Server Default Constructor called" << std::endl;
 	load_mime_types("mime_type.csv");
@@ -103,9 +104,9 @@ std::string	Server::extract_get_request(const std::string& request)
 std::string	Server::map_to_directory(const std::string& file_path)
 {
 	if (file_path == "/")
-		return ("www/index.html");
+		return (_www_dir + "/" + _index_file);
 	else
-		return ("www" + file_path);
+		return (_www_dir + file_path);
 }
 
 bool	Server::file_exists(const std::string& file_path)
@@ -195,7 +196,7 @@ int	Server::process_get(const Request& req)
 int	Server::process_delete(const Request& req)
 {
 	std::string	url = req.get_file_path();
-	std::string	file_path = "www/usrimg" + url;
+	std::string	file_path = _www_dir + "/" + _data_dir + "/" + url;
 	if (file_exists(file_path))
 	{
 		if (std::remove(file_path.c_str()) == 0)
@@ -215,7 +216,7 @@ int	Server::process_delete(const Request& req)
 int	Server::send_error_message(int error_code, const Request& req)
 {
 	std::string	url = std::to_string(error_code);
-	std::string	file_path = "www/error_pages/" + url + ".jpg";
+	std::string	file_path = "error_pages/" + url + ".jpg";
 	if (file_exists(file_path))
 	{
 		std::string	file_content = read_file(file_path);
