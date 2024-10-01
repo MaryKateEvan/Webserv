@@ -168,6 +168,9 @@ int	Server::process_request(const Request& req)
 		case DELETE:
 			return (process_delete(req));
 			break;
+		// case POST:
+		// 	return (process_post(req))<
+		// 	break;
 	}
 	return (1);
 }
@@ -212,6 +215,11 @@ int	Server::process_delete(const Request& req)
 		send_error_message(404, req);
 	return (0);
 }
+
+// int	Server::process_post(const Request& req)
+// {
+	
+// }
 
 int	Server::send_error_message(int error_code, const Request& req)
 {
