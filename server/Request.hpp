@@ -23,9 +23,9 @@ class Request
 		int			_fd;
 		std::string	_file_path;
 		std::string	_content_type;
-		std::unordered_map<std::string, std::string> _post_files;
 		int			process_post(const std::string& request);
 	public:
+		std::unordered_map<std::string, std::string> _post_files;
 		Request(const std::string& request, int fd);
 		~Request();
 		Request(const Request& copy);
