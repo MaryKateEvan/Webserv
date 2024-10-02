@@ -83,6 +83,13 @@ bool	file_to_string(std::string name, std::string & text)
 
 
 
+void	print_func_args(std::string func, int argc, std::string args[])
+{
+	std::cout << func << "(";
+	for (int i = 0; i < argc; i++)
+		std::cout << " " << args[i];
+	std::cout << " );\n";
+}
 /*
 	these are for gather all the configuration data
 	and setting default values
@@ -111,24 +118,24 @@ class server_location_config_data
 		static void	set_root(void * ptr, int argc, std::string args[])
 		{
 			server_location_config_data * p = (server_location_config_data *)ptr;
-			std::cout << "    server_location.set_root() '" << args[0] << "'\n";
+			print_func_args("      server_location.set_root", argc, args);
 
 			p -> root = args[0];
 		}
 		static void	set_allowed(void * ptr, int argc, std::string args[])
 		{
 			server_location_config_data * p = (server_location_config_data *)ptr;
-			std::cout << "    server_location.set_allowed()";
+			print_func_args("      server_location.set_allowed", argc, args);
 
 			delete [] p -> allowed_methods;
 			p -> allowed_methods = new std::string[argc];
 			p -> allowed_methods_num = argc;
 			for (int i = 0; i < argc; i++)
 			{
-				std::cout << " " << args[i];
+				//std::cout << " " << args[i];
 				p -> allowed_methods[i] = args[i];
 			}
-			std::cout << "\n";
+			//std::cout << "\n";
 		}
 };
 class server_config_data
@@ -153,28 +160,28 @@ class server_config_data
 		static void	set_name(void *ptr, int argc, std::string args[])
 		{
 			server_config_data * p = (server_config_data *)ptr;
-			std::cout << "    server.set_name() '" << args[0] << "'\n";
+			print_func_args("    server.set_name", argc, args);
 
 			p -> name = args[0];
 		}
 		static void	set_listen(void *ptr, int argc, std::string args[])
 		{
 			server_config_data * p = (server_config_data *)ptr;
-			std::cout << "    server.set_listen() '" << args[0] << "'\n";
+			print_func_args("    server.set_listen", argc, args);
 
 			p -> listen = args[0];
 		}
 		static void	set_root(void *ptr, int argc, std::string args[])
 		{
 			server_config_data * p = (server_config_data *)ptr;
-			std::cout << "    server.set_root() '" << args[0] << "'\n";
+			print_func_args("    server.set_root", argc, args);
 
 			p -> root = args[0];
 		}
 		static void	set_index(void *ptr, int argc, std::string args[])
 		{
 			server_config_data * p = (server_config_data *)ptr;
-			std::cout << "    server.set_index() '" << args[0] << "'\n";
+			print_func_args("    server.set_index", argc, args);
 
 			p -> index = args[0];
 		}
@@ -182,7 +189,7 @@ class server_config_data
 		static void	*new_location(void *ptr, int argc, std::string args[])
 		{
 			server_config_data * p = (server_config_data *)ptr;
-			std::cout << "    server.new_location() '" << args[0] << "'\n";
+			print_func_args("    server.new_location", argc, args);
 
 			server_location_config_data * location = new server_location_config_data(args[0]);
 			p -> location.push_back(location);
@@ -206,7 +213,7 @@ class http_config_data
 		static void	*new_server(void *ptr, int argc, std::string args[])
 		{
 			http_config_data * p = (http_config_data *)ptr;
-			std::cout << "  http.new_server()\n";
+			print_func_args("  http.new_server", argc, args);
 
 			server_config_data * server = new server_config_data();
 			p -> server.push_back(server);
@@ -230,7 +237,7 @@ class main_config_data
 		static void	*new_http(void *ptr, int argc, std::string args[])
 		{
 			main_config_data * p = (main_config_data *)ptr;
-			std::cout << "main.new_http()\n";
+			print_func_args("main.new_http", argc, args);
 
 			http_config_data * http = new http_config_data();
 			p -> http.push_back(http);
@@ -271,7 +278,7 @@ bool	read_config_file(std::string file)
 				ConfigParse("listen", 1, 1, NULL, server_config_data::set_listen, 0, NULL),
 				ConfigParse("root", 1, 1, NULL, server_config_data::set_root, 0, NULL),
 				ConfigParse("index", 1, 1, NULL, server_config_data::set_index, 0, NULL),
-				ConfigParse("location", 1, 1, server_config_data::new_location, NULL, 2, (ConfigParse[])
+				ConfigParse("location", 1, 2, server_config_data::new_location, NULL, 2, (ConfigParse[])
 				{
 					ConfigParse("root", 1, 1, NULL, server_location_config_data::set_root, 0, NULL),
 					ConfigParse("allowed_methods", 1, 3, NULL, server_location_config_data::set_allowed, 0, NULL),
@@ -291,7 +298,7 @@ bool	read_config_file(std::string file)
 	{
 		main_config_data data;
 		how2parse.parse(&data, conf);	//	<--- config data is read here
-
+		std::cout << "\nfile read (past tense)\n";
 
 		/*
 			this is where you would turn the data into the read servers and stuff
