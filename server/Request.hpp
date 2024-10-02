@@ -24,6 +24,7 @@ class Request
 		std::string	_file_path;
 		std::string	_content_type;
 		int			process_post(const std::string& request);
+		void		fill_string_to_map(std::string input);
 	public:
 		std::unordered_map<std::string, std::string> _post_files;
 		Request(const std::string& request, int fd);

@@ -61,22 +61,41 @@ Request&	Request::operator=(const Request &copy)
 /*                                  Functions                                 */
 /* -------------------------------------------------------------------------- */
 
-std::vector<std::string> tokenize(const std::string& str, const std::string& delim) {
-    std::vector<std::string> tokens;
-    size_t start = 0;
-    size_t end = str.find(delim);
-    
-    while (end != std::string::npos) {
-        tokens.push_back(str.substr(start, end - start));
-        start = end + 1;
-        end = str.find(delim, start);
-    }
-    
-    tokens.push_back(str.substr(start));
-    
-    return tokens;
-}
+void	Request::fill_string_to_map(std::string input)
+{
+			std::istringstream	ss(input);
+			std::string			line;
+			size_t				line_count = 0;
+			std::string			file_name;
+			std::string			file_content;
+			size_t				pos;
 
+			while (std::getline(ss, line))
+			{
+				if (line_count == 0)
+				{
+					line_count++;
+					continue;
+				}
+				if (line_count == 1)
+				{
+					pos = line.find("filename=\"");
+					if (pos == std::string::npos)
+						file_name = "unknown";
+					else
+						file_name = line.substr(pos + 10, line.length() - (pos + 10) - 2);
+					line_count++;
+					continue;
+				}
+				if (line_count == 2 || line_count == 3)
+				{
+					line_count++;
+					continue;
+				}
+				file_content += line + "\n";
+			}
+			_post_files[file_name] = file_content;
+}
 
 int	Request::process_post(const std::string& request)
 {
@@ -103,64 +122,14 @@ int	Request::process_post(const std::string& request)
 	if (con_type == "multipart/form-data")
 	{
 		std::string	boundary = "--" + line.substr(end + 12);
-		std::cout << "Boundary = " + boundary << std::endl;
 		std::vector<std::string>	temp = tokenize(request, boundary);
 		for (size_t i = 1; i < temp.size(); ++i)
 		{
-			std::istringstream	ss(temp[i]);
-			std::string			line2;
-			size_t				line_count = 0;
-			std::string			file_name;
-			std::string			file_content;
-
-			while (std::getline(ss, line2))
-			{
-				if (line_count == 0)
-				{
-					line_count++;
-					continue;
-				}
-				if (line_count == 1)
-				{
-					pos = line2.find("filename=\"");
-					if (pos == std::string::npos)
-						file_name = "unknown";
-					else
-						file_name = line2.substr(pos + 10, line2.length() - (pos + 10) - 2);
-					line_count++;
-					continue;
-				}
-				if (line_count == 2 || line_count == 3)
-				{
-					line_count++;
-					continue;
-				}
-				file_content += line2 + "\n";
-			}
-			_post_files[file_name] = file_content;
+			fill_string_to_map(temp[i]);
 		}
 	}
 	return (0);
 }
-
-// void	Server::load_mime_types(const std::string& file_path)
-// {
-// 	std::ifstream file(file_path);
-// 	if (!file.is_open())
-// 		throw OpenFailedException(_name, file_path);
-// 	std::string	line;
-// 	while(std::getline(file, line))
-// 	{
-// 		std::istringstream	ss(line);
-// 		std::string			extension;
-// 		std::string			mime_type;
-
-// 		if (std::getline(ss, extension, '\t') && std::getline(ss, mime_type))
-// 			_mime_types[extension] = mime_type;
-// 	}
-// 	file.close();
-// }
-
 
 /* -------------------------------------------------------------------------- */
 /*                                Getter/Setter                               */
