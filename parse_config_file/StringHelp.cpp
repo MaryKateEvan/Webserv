@@ -157,6 +157,15 @@ bool			StringHelp::is_whitespace(char c)
 {
 	return (c == ' ' || c == '\t' || c == '\n' || c == '\r');
 }
+bool			StringHelp::only_whitespace(std::string str)
+{
+	for (int i = 0; i < str.length(); i++)
+	{
+		if (!is_whitespace(str[i]))
+			return (false);
+	}
+	return (true);
+}
 std::string		StringHelp::trim_whitespace(std::string str)
 {
 	std::string trim = "";
@@ -275,6 +284,15 @@ void	StringHelp::StringDataTracker::trackQuotes(std::string str, size_t from, si
 	}
 }
 
+void	warning_landmark_not_found(int line)
+{
+	std::cout
+		<< "warning: a problem occured with the StringDataTracker, "
+		<< "Line Numbers and Quote parsing may be inaccurate after this point"
+		<< "(line:" << line << ")."
+		<< " Someone should probably fix that\n";
+}
+
 void	StringHelp::StringDataTracker::update(std::string landmark)
 {
 	size_t	p = find_ignore(file, pos, landmark, FIND_IGNORE_COMMENT);
@@ -286,7 +304,7 @@ void	StringHelp::StringDataTracker::update(std::string landmark)
 	}
 	else
 	{
-		std::cout << "warning: a problem occured with the new-line-tracker\n  readings after point may be inaccurate.\n";
+		warning_landmark_not_found(newLines);
 	}
 	//std::cout << "  landmark '" << landmark << "' found on line [" << newLines << "]\n";
 }
@@ -301,7 +319,7 @@ void	StringHelp::StringDataTracker::update(size_t move)
 	}
 	else
 	{
-		std::cout << "warning: a problem occured with the new-line-tracker\n  readings after point may be inaccurate.\n";
+		warning_landmark_not_found(newLines);
 	}
 	//std::cout << "  landmark '" << landmark << "' found on line [" << newLines << "]\n";
 }

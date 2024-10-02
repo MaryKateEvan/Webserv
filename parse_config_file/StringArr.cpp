@@ -74,51 +74,21 @@ StringArr	StringArr::cut_name_args_content(std::string & name, std::string ** co
 	name = arr[0];
 	n--;
 
-	StringArr args(n);
+	std::vector<std::string> vec;
+	std::string temp;
 	for (size_t i = 0; i < n; i++)
-		args[i] = remove_quotes(arr[i + 1]);
-	return (args);
+	{
+		temp = remove_quotes(arr[i + 1]);
+		if (!StringHelp::only_whitespace(temp))
+			vec.push_back(temp);
+	}
+	return (vec);
 }
 
 
 
 StringArr	StringArr::split(std::string str, char c)
 {
-/*
-	size_t	num, p1, p2;
-	num = 0;
-	p1 = 0;
-	p2 = StringHelp::find_ignore(str, p1, c, FIND_IGNORE_QUOTE);
-	while (p2 != std::string::npos)
-	{
-		if (p1 != p2)
-			num++;
-		p1 = p2 + 1;
-		p2 = StringHelp::find_ignore(str, p1, c, FIND_IGNORE_QUOTE);
-	}
-	if (p1 < str.length())
-		num++;
-
-	StringArr splt(num);
-	num = 0;
-	p1 = 0;
-	p2 = StringHelp::find_ignore(str, p1, c, FIND_IGNORE_QUOTE);
-	while (p2 != std::string::npos)
-	{
-		if (p1 != p2)
-		{
-			splt.arr[num] = StringHelp::cut(str, p1, p2);
-			num++;
-		}
-		p1 = p2 + 1;
-		p2 = StringHelp::find_ignore(str, p1, c, FIND_IGNORE_QUOTE);
-	}
-	if (p1 < str.length())
-		splt.arr[num] = str.substr(p1);
-
-	return (splt);
-*/
-
 	size_t	p1, p2;
 	std::vector<std::string> vec;
 
@@ -139,45 +109,6 @@ StringArr	StringArr::split(std::string str, char c)
 
 StringArr	StringArr::split(std::string str, char c1, char c2)
 {
-/*
-	size_t	num, p;
-	StringHelp::Pair pair;
-
-	num = 0;
-	p = 0;
-	pair = StringHelp::Pair::find(str, p, c1, c2);
-	while (pair.p1 != -1)
-	{
-		if (p != pair.p1)
-			num++;
-		num++;
-		p = pair.p2 + 1;
-		pair = StringHelp::Pair::find(str, p, c1, c2);
-	}
-	num++;
-
-	StringArr splt(num);
-	num = 0;
-	p = 0;
-	pair = StringHelp::Pair::find(str, p, c1, c2);
-	while (pair.p1 != -1)
-	{
-		if (p != pair.p1)
-		{
-			splt.arr[num] = StringHelp::cut(str, p, pair.p1);
-			num++;
-		}
-		//splt.arr[num] = StringHelp::cut(str, pair.p1 + 1, pair.p2 - 1);	//	without {}
-		splt.arr[num] = StringHelp::cut(str, pair.p1, pair.p2);			//	with {}
-		num++;
-		p = pair.p2 + 1;
-		pair = StringHelp::Pair::find(str, p, c1, c2);
-	}
-	splt.arr[num] = str.substr(p);
-
-	return (splt);
-*/
-
 	size_t	p;
 	StringHelp::Pair pair;
 	std::vector<std::string> vec;
@@ -204,64 +135,6 @@ StringArr	StringArr::split(std::string str, char c1, char c2)
 */
 StringArr	StringArr::split_elements(std::string str)
 {
-/*
-	size_t	pos;
-	size_t	semi;
-	StringHelp::Pair	pair;
-	size_t	num;
-
-	num = 0;
-	pos = 0;
-	semi = StringHelp::find_ignore(str, pos, ';');
-	pair = StringHelp::Pair::find(str, pos, '{', '}');
-	while (semi != std::string::npos || (pair.p1 != std::string::npos && pair.p2 != std::string::npos))
-	{
-		if (semi < pair.p1)
-		{
-			num++;
-			pos = semi + 1;
-			semi = StringHelp::find_ignore(str, pos, ';');
-		}
-		else if (pair.p1 < semi)
-		{
-			num++;
-			pos = pair.p2 + 1;
-			semi = StringHelp::find_ignore(str, pos, ';');
-			pair = StringHelp::Pair::find(str, pos, '{', '}');
-		}
-		else
-			break;
-	}
-
-	StringArr splt(num);
-	num = 0;
-	pos = 0;
-	semi = StringHelp::find_ignore(str, pos, ';');
-	pair = StringHelp::Pair::find(str, pos, '{', '}');
-	while (semi != std::string::npos || (pair.p1 != std::string::npos && pair.p2 != std::string::npos))
-	{
-		if (semi < pair.p1)
-		{
-			splt.arr[num] = StringHelp::cut(str, pos, semi + 1);
-			num++;
-			pos = semi + 1;
-			semi = StringHelp::find_ignore(str, pos, ';');
-		}
-		else if (pair.p1 < semi)
-		{
-			splt.arr[num] = StringHelp::cut(str, pos, pair.p2 + 1);
-			num++;
-			pos = pair.p2 + 1;
-			semi = StringHelp::find_ignore(str, pos, ';');
-			pair = StringHelp::Pair::find(str, pos, '{', '}');
-		}
-		else
-			break;
-	}
-
-	return (splt);
-*/
-
 	size_t	pos;
 	size_t	semi;
 	StringHelp::Pair	pair;
@@ -297,77 +170,6 @@ StringArr	StringArr::split_elements(std::string str)
 */
 StringArr	StringArr::split_segments(std::string str)
 {
-/*
-	size_t	pos;
-	size_t	space;
-	size_t	semi;
-	StringHelp::Pair	pair;
-	size_t	num;
-
-	num = 0;
-	pos = 0;
-	space = StringHelp::find_ignore(str, pos, ' ', FIND_IGNORE_QUOTE);
-	semi = StringHelp::find_ignore(str, pos, ';', FIND_IGNORE_QUOTE);
-	pair = StringHelp::Pair::find(str, pos, '{', '}');
-	while (1)
-	{
-		if (space < pair.p1)
-		{
-			if (space > pos)
-				num++;
-			pos = space + 1;
-			space = StringHelp::find_ignore(str, pos, ' ', FIND_IGNORE_QUOTE);
-		}
-		else if (space > pair.p1)
-		{
-			//num++;
-			num++;
-			break;
-		}
-		else if (space > semi)
-		{
-			num++;
-			break;
-		}
-	}
-
-	StringArr splt(num);
-	num = 0;
-	pos = 0;
-	space = StringHelp::find_ignore(str, pos, ' ', FIND_IGNORE_QUOTE);
-	semi = StringHelp::find_ignore(str, pos, ';', FIND_IGNORE_QUOTE);
-	pair = StringHelp::Pair::find(str, pos, '{', '}');
-	while (1)
-	{
-		if (space < pair.p1)
-		{
-			if (space > pos)
-			{
-				splt.arr[num] = StringHelp::cut(str, pos, space);
-				num++;
-			}
-			pos = space + 1;
-			space = StringHelp::find_ignore(str, pos, ' ', FIND_IGNORE_QUOTE);
-		}
-		else if (space > pair.p1)
-		{
-			//splt.arr[num] = StringHelp::cut(str, pos, space);
-			//num++;
-			splt.arr[num] = pair.cut_in(str);
-			num++;
-			break;
-		}
-		else if (space > semi)
-		{
-			splt.arr[num] = StringHelp::cut(str, pos, semi);
-			num++;
-			break;
-		}
-	}
-
-	return (splt);
-*/
-
 	size_t	pos;
 	size_t	space;
 	size_t	semi;

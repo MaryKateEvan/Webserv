@@ -18,6 +18,11 @@ ConfigParse::ConfigParse(
 	this -> set_func = set_func;
 	this -> sub_num = sub_num;
 	this -> sub = sub;
+
+	if (new_func == NULL && set_func == NULL)
+	{
+		std::cout << "NOTE: Configuration Parsing Element '" << name << "' was given neighter a new() nor a set() function.\n";
+	}
 }
 ConfigParse::~ConfigParse()
 {
@@ -32,7 +37,7 @@ void	warning_args_number(std::string type, int min, int max, int num)
 		<< "warning: "
 		<< "line:" << tracker -> newLines << ": "
 		<< "type '" << type << "' got invalid number of arguments: "
-		<< "expected " << min << " to " << max 
+		<< "expected between " << min << " and " << max 
 		<< ", got " << num << ".\n";
 }
 
@@ -69,68 +74,61 @@ void	ConfigParse::parse(void * ptr, std::string str)
 		std::string * content;
 		StringArr args = seg.cut_name_args_content(name, &content);
 
-		std::cout << "\e[38;2;255;0;0melement\e[m\n";
-		std::cout << "\e[38;2;255;0;0m[" << i << "]" << elem[i] << "\e[m\n";
-		std::cout << "\e[38;2;0;0;255msegments\e[m\n";
-		for (size_t j = 0; j < seg.num; j++)
-			std::cout << "\e[38;2;0;0;255m  [" << j << "]" << seg[j] << "\e[m\n";
-		std::cout << "\e[38;2;0;255;0mname:" << name << ";\e[m\n";
-		for (size_t j = 0; j < args.num; j++)
-			std::cout << "\e[38;2;0;255;0marg[" << j << "]:" << args[j] << ";\e[m\n";
-		std::cout << "\e[38;2;0;255;0mcontent:" << content << ";\e[m\n";
-		if (content != NULL)
-			std::cout << "\e[38;2;0;255;0mcontent:" << *content << ";\e[m\n";
+		//std::cout << "\e[38;2;255;0;0melement\e[m\n";
+		//std::cout << "\e[38;2;255;0;0m[" << i << "]" << elem[i] << "\e[m\n";
+		//std::cout << "\e[38;2;0;0;255msegments\e[m\n";
+		//for (size_t j = 0; j < seg.num; j++)
+		//	std::cout << "\e[38;2;0;0;255m  [" << j << "]" << seg[j] << "\e[m\n";
+		//std::cout << "\e[38;2;0;255;0mname:" << name << ";\e[m\n";
+		//for (size_t j = 0; j < args.num; j++)
+		//	std::cout << "\e[38;2;0;255;0marg[" << j << "]:" << args[j] << ";\e[m\n";
+		//std::cout << "\e[38;2;0;255;0mcontent:" << content << ";\e[m\n";
+		//if (content != NULL)
+		//	std::cout << "\e[38;2;0;255;0mcontent:" << *content << ";\e[m\n";
 
 		tracker -> update(name);
 		for (size_t j = 0; j < args.num; j++)
 			tracker -> update(args[j]);
 
 		void *	tmp;
-		bool	found = false;
+		ConfigParse	* found = NULL;
 		for (size_t j = 0; j < sub_num; j++)
 		{
 			if (name == sub[j].name)
 			{
-				found = true;
-				if (content == NULL && sub[j].sub_num != 0)
+				found = &(sub[j]);
+				if (content == NULL && found -> sub_num != 0)
 				{
-					warning_not_content(sub[j].name);
+					warning_not_content(found -> name);
 					break;
 				}
-				if (content != NULL && sub[j].sub_num == 0)
+				if (content != NULL && found -> sub_num == 0)
 				{
-					warning_got_content(sub[j].name);
+					warning_got_content(found -> name);
 					break;
 				}
 
-				if (sub[j].new_func != NULL)
+				if (found -> arg_min <= args.num && args.num <= found -> arg_max)
 				{
-					if (sub[j].arg_min <= args.num && args.num <= sub[j].arg_max)
+					if (found -> new_func != NULL)
 					{
-						tmp = sub[j].new_func(ptr, args.num, args.arr);
-						sub[j].parse(tmp, *content);
+						tmp = found -> new_func(ptr, args.num, args.arr);
+						found -> parse(tmp, *content);
 					}
-					else
+					else if (found -> set_func != NULL)
 					{
-						warning_args_number(sub[j].name, sub[j].arg_min, sub[j].arg_max, args.num);
+						found -> set_func(ptr, args.num, args.arr);
 					}
 				}
-				else if (sub[j].set_func != NULL)
+				else
 				{
-					if (sub[j].arg_min <= args.num && args.num <= sub[j].arg_max)
-					{
-						sub[j].set_func(ptr, args.num, args.arr);
-					}
-					else
-					{
-						warning_args_number(sub[j].name, sub[j].arg_min, sub[j].arg_max, args.num);
-					}
+					warning_args_number(found -> name, found -> arg_min, found -> arg_max, args.num);
 				}
 				break;
 			}
 		}
 
-		if (!found)
+		if (found == NULL)
 		{
 			warning_unknown_subtype(this -> name, name);
 		}
