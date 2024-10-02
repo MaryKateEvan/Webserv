@@ -4,7 +4,7 @@ BaseException::BaseException(const std::string& msg) : message(msg)
 {
 }
 
-const char* BaseException::what() const noexcept
+const char* BaseException::what() const NOEXCEPT_SPEC
 {
 	return message.c_str();
 }

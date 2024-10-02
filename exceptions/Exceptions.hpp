@@ -3,13 +3,19 @@
 
 # include "../webserv.h"
 
+# ifdef __APPLE__
+#  define NOEXCEPT_SPEC _NOEXCEPT
+# else
+#  define NOEXCEPT_SPEC noexcept
+# endif
+
 class BaseException : public std::exception
 {
 	protected:
 		std::string			message;
 	public:
 		explicit			BaseException(const std::string& msg);
-		virtual const char*	what() const noexcept override;
+		virtual const char*	what() const NOEXCEPT_SPEC override;
 };
 
 class InvalidIPAddressException : public BaseException
