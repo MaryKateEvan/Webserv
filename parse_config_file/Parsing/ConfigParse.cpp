@@ -21,7 +21,7 @@ ConfigParse::ConfigParse(
 
 	if (new_func == NULL && set_func == NULL)
 	{
-		std::cout << "NOTE: Configuration Parsing Element '" << name << "' was given neighter a new() nor a set() function.\n";
+		std::cout << "NOTE: Configuration Parsing Element '" << name << "' was given neither a new() nor a set() function.\n";
 	}
 }
 ConfigParse::~ConfigParse()
@@ -29,7 +29,7 @@ ConfigParse::~ConfigParse()
 
 }
 
-extern StringHelp::StringDataTracker	*tracker;
+extern StringDataTracker	*tracker;
 
 void	warning_args_number(std::string type, int min, int max, int num)
 {

@@ -64,7 +64,7 @@ StringArr	StringArr::cut_name_args_content(std::string & name, std::string ** co
 	*content = NULL;
 	if (num > 1)
 	{
-		StringHelp::Pair pair = StringHelp::Pair::find(arr[num - 1], 0, '{', '}');
+		Pair pair = Pair::find(arr[num - 1], 0, '{', '}');
 		if (pair.all_good())
 		{
 			*content = new std::string((pair.cut_ex(arr[num - 1])).c_str());
@@ -110,18 +110,18 @@ StringArr	StringArr::split(std::string str, char c)
 StringArr	StringArr::split(std::string str, char c1, char c2)
 {
 	size_t	p;
-	StringHelp::Pair pair;
+	Pair pair;
 	std::vector<std::string> vec;
 
 	p = 0;
-	pair = StringHelp::Pair::find(str, p, c1, c2);
+	pair = Pair::find(str, p, c1, c2);
 	while (pair.p1 != -1)
 	{
 		if (p != pair.p1)
 			vec.push_back(StringHelp::cut(str, p, pair.p1));
 		vec.push_back(pair.cut_ex(str));
 		p = pair.p2 + 1;
-		pair = StringHelp::Pair::find(str, p, c1, c2);
+		pair = Pair::find(str, p, c1, c2);
 	}
 	vec.push_back(str.substr(p));
 
@@ -137,12 +137,12 @@ StringArr	StringArr::split_elements(std::string str)
 {
 	size_t	pos;
 	size_t	semi;
-	StringHelp::Pair	pair;
+	Pair	pair;
 	std::vector<std::string> vec;
 
 	pos = 0;
 	semi = StringHelp::find_ignore(str, pos, ';', FIND_IGNORE_QUOTE);
-	pair = StringHelp::Pair::find(str, pos, '{', '}');
+	pair = Pair::find(str, pos, '{', '}');
 	while (semi != std::string::npos || (pair.p1 != std::string::npos && pair.p2 != std::string::npos))
 	{
 		if (semi < pair.p1)
@@ -156,7 +156,7 @@ StringArr	StringArr::split_elements(std::string str)
 			vec.push_back(StringHelp::cut(str, pos, pair.p2 + 1));
 			pos = pair.p2 + 1;
 			semi = StringHelp::find_ignore(str, pos, ';', FIND_IGNORE_QUOTE);
-			pair = StringHelp::Pair::find(str, pos, '{', '}');
+			pair = Pair::find(str, pos, '{', '}');
 		}
 		else
 			break;
@@ -173,13 +173,13 @@ StringArr	StringArr::split_segments(std::string str)
 	size_t	pos;
 	size_t	space;
 	size_t	semi;
-	StringHelp::Pair	pair;
+	Pair	pair;
 	std::vector<std::string> vec;
 
 	pos = 0;
 	space = StringHelp::find_ignore(str, pos, ' ', FIND_IGNORE_QUOTE);
 	semi = StringHelp::find_ignore(str, pos, ';', FIND_IGNORE_QUOTE);
-	pair = StringHelp::Pair::find(str, pos, '{', '}');
+	pair = Pair::find(str, pos, '{', '}');
 
 	while (1)
 	{

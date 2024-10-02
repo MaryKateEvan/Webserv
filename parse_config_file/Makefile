@@ -3,8 +3,10 @@ Name = test
 File_C = \
 	Stringing/StringHelp.cpp \
 	Stringing/StringArr.cpp \
-	Parsing/ConfigParse.cpp \
-	Parsing/parse_config_file.cpp
+	Stringing/Pair.cpp \
+	Stringing/StringDataTracker.cpp \
+		Parsing/ConfigParse.cpp \
+		Parsing/parse_config_file.cpp
 File_O = $(File_C:.cpp=.o)
 
 #Flags = -Wall -Wextra -Werror

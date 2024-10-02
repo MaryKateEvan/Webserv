@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include "StringHelp.hpp"
+#include "Pair.hpp"
 
 class StringArr
 {

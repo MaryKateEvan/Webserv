@@ -3,6 +3,7 @@
 #include <iostream>
 #include "../Stringing/StringHelp.hpp"
 #include "../Stringing/StringArr.hpp"
+#include "../Stringing/StringDataTracker.hpp"
 
 class ConfigParse
 {

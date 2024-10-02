@@ -241,17 +241,19 @@ class main_config_data
 
 
 //	this thing is for giving the line when a "warning unknown" is printed
-StringHelp::StringDataTracker	*tracker;
+StringDataTracker	*tracker;
 
 bool	read_config_file(std::string file)
 {
+	std::cout << "\n";
+
 	std::string conf;
 	if (!file_to_string(file, conf))
 	{
 		std::cerr << "could not read config file because: '" << strerror(errno) << "'\n";
 		return (false);
 	}
-	tracker = new StringHelp::StringDataTracker(conf);
+	tracker = new StringDataTracker(conf);
 
 	conf = StringHelp::remove_comments(conf);
 	conf = StringHelp::trim_whitespace(conf);
@@ -279,7 +281,7 @@ bool	read_config_file(std::string file)
 	});
 
 	std::cout << "\n";
-	StringHelp::Pair pair = StringHelp::Pair::find(conf, 0, '{', '}');
+	Pair pair = Pair::find(conf, 0, '{', '}');
 	if (!pair.all_good())
 	{
 		std::cout << "unpaired {} in config file\n";
@@ -328,7 +330,7 @@ bool	read_config_file(std::string file)
 void	test_quote_tracking()
 {
 	std::string str = "0000'1111'0000\"2222'2222\"'1111''1111\"1111'0000";
-	tracker = new StringHelp::StringDataTracker(str);
+	tracker = new StringDataTracker(str);
 
 	char	quotes[str.length() + 1];
 	for (int i = 0; i < str.length(); i++)
