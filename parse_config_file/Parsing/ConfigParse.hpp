@@ -1,8 +1,8 @@
 
 #pragma once
 #include <iostream>
-#include "StringHelp.hpp"
-#include "StringArr.hpp"
+#include "../Stringing/StringHelp.hpp"
+#include "../Stringing/StringArr.hpp"
 
 class ConfigParse
 {

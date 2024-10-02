@@ -3,9 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
-#include "StringHelp.hpp"
-#include "StringArr.hpp"
-#include "ConfigParse.hpp"
+#include "parse_config_file.hpp"
 
 /*
 this is done now
@@ -274,7 +272,7 @@ bool	read_config_file(std::string file)
 				ConfigParse("location", 1, 1, server_config_data::new_location, NULL, 2, (ConfigParse[])
 				{
 					ConfigParse("root", 1, 1, NULL, server_location_config_data::set_root, 0, NULL),
-					ConfigParse("allowed_methods", 1, 1, NULL, server_location_config_data::set_allowed, 0, NULL),
+					ConfigParse("allowed_methods", 1, 3, NULL, server_location_config_data::set_allowed, 0, NULL),
 				}),
 			}),
 		}),

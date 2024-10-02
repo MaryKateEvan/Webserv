@@ -1,6 +1,10 @@
 
 Name = test
-File_C = parse_config_file.cpp StringHelp.cpp StringArr.cpp ConfigParse.cpp
+File_C = \
+	Stringing/StringHelp.cpp \
+	Stringing/StringArr.cpp \
+	Parsing/ConfigParse.cpp \
+	Parsing/parse_config_file.cpp
 File_O = $(File_C:.cpp=.o)
 
 #Flags = -Wall -Wextra -Werror

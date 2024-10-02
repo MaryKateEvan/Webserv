@@ -41,7 +41,7 @@ class StringHelp
 
 				static Pair	find(std::string str, size_t pos, char c1, char c2);
 		};
-		class	Twin
+		/*class	Twin
 		{
 			public:
 				size_t	p1;
@@ -56,7 +56,7 @@ class StringHelp
 				std::string	cut_ex(std::string str) const;
 
 				static Twin	find(std::string str, size_t pos, char c, char i);
-		};
+		};*/
 
 
 		static bool			is_whitespace(char c);
