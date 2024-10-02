@@ -1,6 +1,7 @@
 
 #pragma once
 #include <iostream>
+#include "StringHelp.hpp"
 
 class	Twin
 {
@@ -10,10 +11,11 @@ class	Twin
 
 		Twin();
 
-		bool	all_good();
-		bool	any_good();
+		bool	all_good() const;
+		bool	any_good() const;
 
 		std::string	cut_in(std::string str) const;
 		std::string	cut_ex(std::string str) const;
-			static Twin	find(std::string str, size_t pos, char c, char i);
+
+		static Twin	find(std::string str, size_t pos, char c, char i);
 };

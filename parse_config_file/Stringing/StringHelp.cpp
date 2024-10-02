@@ -100,22 +100,46 @@ bool			StringHelp::only_whitespace(std::string str)
 }
 std::string		StringHelp::trim_whitespace(std::string str)
 {
+	Twin	sQ, dQ, next;
+	sQ = Twin::find(str, 0, '\'', '\"');
+	dQ = Twin::find(str, 0, '\"', '\'');
+	if (sQ.p1 < dQ.p1)
+		next = sQ;
+	else
+		next = dQ;
+
 	std::string trim = "";
 	bool last_was_white = false;
 	for (int i = 0; i < str.length(); i++)
 	{
-		if (is_whitespace(str[i]))
+		if (next.all_good() && i >= next.p1)
 		{
-			if (!last_was_white)
-			{
-				trim += ' ';
-				last_was_white = true;
-			}
+			trim += next.cut_in(str);
+			i = next.p2;
+			sQ = Twin::find(str, i + 1, '\'', '\"');
+			dQ = Twin::find(str, i + 1, '\"', '\'');
+			if (sQ.p1 < dQ.p1)
+				next = sQ;
+			else
+				next = dQ;
+
+			last_was_white = false;
 		}
 		else
 		{
-			last_was_white = false;
-			trim += str[i];
+			if (is_whitespace(str[i]))
+			{
+				if (!last_was_white)
+				{
+					trim += ' ';
+					last_was_white = true;
+				}
+			}
+			else
+			{
+				last_was_white = false;
+				trim += str[i];
+			}
 		}
 	}
 	return (trim);

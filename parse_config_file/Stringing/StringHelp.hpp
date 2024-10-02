@@ -2,6 +2,7 @@
 #pragma once
 #include <iostream>
 #include "StringDataTracker.hpp"
+#include "Twin.hpp"
 
 #define FIND_IGNORE_SINGLE_QUOTE 0b001
 #define FIND_IGNORE_DOUBLE_QUOTE 0b010

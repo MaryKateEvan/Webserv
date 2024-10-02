@@ -329,30 +329,78 @@ bool	read_config_file(std::string file)
 
 void	test_quote_tracking()
 {
-	std::string str = "0000'1111'0000\"2222'2222\"'1111''1111\"1111'0000";
+	std::string str = "    \' 123 456 \'  \"777 _ _ _ 8\" 9   ";
+
+	std::cout << "\n";
+	std::cout << "[" << str << "]\n";
+	str = StringHelp::trim_whitespace(str);
+	std::cout << "[" << str << "]\n";
+	std::cout << "\n";
+
+/*
+	std::string str = "0000'1111'0000\"2222'2222\"'1111''1111\"1111\"1111'0000";
 	tracker = new StringDataTracker(str);
-
-	char	quotes[str.length() + 1];
-	for (int i = 0; i < str.length(); i++)
-		quotes[i] = ' ';
-	quotes[str.length()] = ' ';
-
-	int	step_size = 3;
-	for (int i = 0; i < str.length(); i += step_size)
-	{
-		if (tracker -> isSingleQuote)
-			quotes[i] = '\'';
-		else if (tracker -> isDoubleQuote)
-			quotes[i] = '\"';
-		else
-			quotes[i] = '|';
-
-		tracker -> update(step_size);
-	}
-
 	std::cout << str << "\n";
-	//std::cout << tracker -> quotes << "\n";
-	std::cout << quotes << "\n";
+
+	Twin	s, d;
+	size_t	pos = 0;
+
+	while (pos != std::string::npos)
+	{
+		s = Twin::find(str, pos, '\'', '\"');
+		d = Twin::find(str, pos, '\"', '\'');
+
+		if (d.all_good() && s.all_good())
+		{
+			if (s.p1 < d.p1)
+			{
+				std::cout << "s[" << s.cut_in(str) << "]\n";
+				pos = s.p2 + 1;
+			}
+			if (d.p1 < s.p1)
+			{
+				std::cout << "d[" << d.cut_in(str) << "]\n";
+				pos = d.p2 + 1;
+			}
+		}
+		else if (s.all_good())
+		{
+			std::cout << "s[" << s.cut_in(str) << "]\n";
+			pos = s.p2 + 1;
+		}
+		else if (d.all_good())
+		{
+			std::cout << "d[" << d.cut_in(str) << "]\n";
+			pos = d.p2 + 1;
+		}
+		else
+		{
+			pos = std::string::npos;
+		}
+	}
+*/
+
+//	char	quotes[str.length() + 1];
+//	for (int i = 0; i < str.length(); i++)
+//		quotes[i] = ' ';
+//	quotes[str.length()] = ' ';
+//
+//	int	step_size = 3;
+//	for (int i = 0; i < str.length(); i += step_size)
+//	{
+//		if (tracker -> isSingleQuote)
+//			quotes[i] = '\'';
+//		else if (tracker -> isDoubleQuote)
+//			quotes[i] = '\"';
+//		else
+//			quotes[i] = '|';
+//
+//		tracker -> update(step_size);
+//	}
+//
+//	std::cout << str << "\n";
+//	//std::cout << tracker -> quotes << "\n";
+//	std::cout << quotes << "\n";
 
 	delete tracker;
 }

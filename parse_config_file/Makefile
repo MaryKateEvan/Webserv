@@ -4,6 +4,7 @@ File_C = \
 	Stringing/StringHelp.cpp \
 	Stringing/StringArr.cpp \
 	Stringing/Pair.cpp \
+	Stringing/Twin.cpp \
 	Stringing/StringDataTracker.cpp \
 		Parsing/ConfigParse.cpp \
 		Parsing/parse_config_file.cpp
