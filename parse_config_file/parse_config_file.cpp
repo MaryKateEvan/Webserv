@@ -100,8 +100,9 @@ class server_location_config_data
 		{
 			path = p;
 			root = "\e[31mNOT SET\e[m";
-			allowed_methods = NULL;
-			allowed_methods_num = 0;
+			allowed_methods = new std::string[1];
+			allowed_methods[0] = "\e[31mNOT SET\e[m";
+			allowed_methods_num = 1;
 		}
 		~server_location_config_data()
 		{
@@ -121,6 +122,7 @@ class server_location_config_data
 			server_location_config_data * p = (server_location_config_data *)ptr;
 			std::cout << "    server_location.set_allowed()";
 
+			delete [] p -> allowed_methods;
 			p -> allowed_methods = new std::string[argc];
 			p -> allowed_methods_num = argc;
 			for (int i = 0; i < argc; i++)
@@ -265,14 +267,14 @@ bool	read_config_file(std::string file)
 		{
 			ConfigParse("server", 0, 0, http_config_data::new_server, NULL, 5, (ConfigParse[])
 			{
-				ConfigParse("server_names", 0, 0, NULL, server_config_data::set_name, 0, NULL),
-				ConfigParse("listen", 0, 0, NULL, server_config_data::set_listen, 0, NULL),
-				ConfigParse("root", 0, 0, NULL, server_config_data::set_root, 0, NULL),
-				ConfigParse("index", 0, 0, NULL, server_config_data::set_index, 0, NULL),
-				ConfigParse("location", 0, 0, server_config_data::new_location, NULL, 2, (ConfigParse[])
+				ConfigParse("server_names", 1, 1, NULL, server_config_data::set_name, 0, NULL),
+				ConfigParse("listen", 1, 1, NULL, server_config_data::set_listen, 0, NULL),
+				ConfigParse("root", 1, 1, NULL, server_config_data::set_root, 0, NULL),
+				ConfigParse("index", 1, 1, NULL, server_config_data::set_index, 0, NULL),
+				ConfigParse("location", 1, 1, server_config_data::new_location, NULL, 2, (ConfigParse[])
 				{
-					ConfigParse("root", 0, 0, NULL, server_location_config_data::set_root, 0, NULL),
-					ConfigParse("allowed_methods", 0, 0, NULL, server_location_config_data::set_allowed, 0, NULL),
+					ConfigParse("root", 1, 1, NULL, server_location_config_data::set_root, 0, NULL),
+					ConfigParse("allowed_methods", 1, 1, NULL, server_location_config_data::set_allowed, 0, NULL),
 				}),
 			}),
 		}),

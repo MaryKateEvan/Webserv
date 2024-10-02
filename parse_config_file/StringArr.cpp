@@ -57,20 +57,19 @@ std::string	StringArr::remove_quotes(std::string str)
 //	the first element in StringArr will be considered the {name}
 //	if the last element starts with '{' and ends with '}', is is considered {content}
 //	everything else will be returned as {args}
-StringArr	StringArr::cut_name_args_content(std::string & name, std::string & content)
+StringArr	StringArr::cut_name_args_content(std::string & name, std::string ** content)
 {
 	int n = num;
 
+	*content = NULL;
 	if (num > 1)
 	{
 		StringHelp::Pair pair = StringHelp::Pair::find(arr[num - 1], 0, '{', '}');
 		if (pair.all_good())
 		{
-			content = pair.cut_ex(arr[num - 1]);
+			*content = new std::string((pair.cut_ex(arr[num - 1])).c_str());
 			n--;
 		}
-		else
-			content = "";
 	}
 	name = arr[0];
 	n--;

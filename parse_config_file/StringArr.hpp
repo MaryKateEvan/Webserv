@@ -22,7 +22,7 @@ class StringArr
 		std::string & operator[](size_t idx);
 
 		static std::string	remove_quotes(std::string str);
-		StringArr	cut_name_args_content(std::string & name, std::string & content);
+		StringArr	cut_name_args_content(std::string & name, std::string ** content);
 
 		static StringArr	split(std::string str, char c);
 		static StringArr	split(std::string str, char c1, char c2);

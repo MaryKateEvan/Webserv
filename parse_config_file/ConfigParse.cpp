@@ -26,6 +26,39 @@ ConfigParse::~ConfigParse()
 
 extern StringHelp::StringDataTracker	*tracker;
 
+void	warning_args_number(std::string type, int min, int max, int num)
+{
+	std::cout
+		<< "warning: "
+		<< "line:" << tracker -> newLines << ": "
+		<< "type '" << type << "' got invalid number of arguments: "
+		<< "expected " << min << " to " << max 
+		<< ", got " << num << ".\n";
+}
+
+void	warning_unknown_subtype(std::string type, std::string subtype)
+{
+	std::cout
+		<< "warning: "
+		<< "line:" << tracker -> newLines << ": "
+		<< "type '" << type << "' got unknown subtype '" << subtype << "'.\n";
+}
+
+void	warning_not_content(std::string type)
+{
+	std::cout
+		<< "warning: "
+		<< "line:" << tracker -> newLines << ": "
+		<< "type '" << type << "' did not get {Content} when expected.\n";
+}
+void	warning_got_content(std::string type)
+{
+	std::cout
+		<< "warning: "
+		<< "line:" << tracker -> newLines << ": "
+		<< "type '" << type << "' got {Content} when not expected.\n";
+}
+
 void	ConfigParse::parse(void * ptr, std::string str)
 {
 	StringArr elem = StringArr::split_elements(str);
@@ -33,18 +66,20 @@ void	ConfigParse::parse(void * ptr, std::string str)
 	{
 		StringArr seg = StringArr::split_segments(elem[i]);
 		std::string name;
-		std::string content;
-		StringArr args = seg.cut_name_args_content(name, content);
+		std::string * content;
+		StringArr args = seg.cut_name_args_content(name, &content);
 
-		//std::cout << "\e[38;2;255;0;0melement\e[m\n";
-		//std::cout << "\e[38;2;255;0;0m[" << i << "]" << elem[i] << "\e[m\n";
-		//std::cout << "\e[38;2;0;0;255msegments\e[m\n";
-		//for (size_t j = 0; j < seg.num; j++)
-		//	std::cout << "\e[38;2;0;0;255m  [" << j << "]" << seg[j] << "\e[m\n";
-		//std::cout << "\e[38;2;0;255;0mname:" << name << ";\e[m\n";
-		//for (size_t j = 0; j < args.num; j++)
-		//	std::cout << "\e[38;2;0;255;0marg[" << j << "]:" << args[j] << ";\e[m\n";
-		//std::cout << "\e[38;2;0;255;0mcontent:" << content << ";\e[m\n";
+		std::cout << "\e[38;2;255;0;0melement\e[m\n";
+		std::cout << "\e[38;2;255;0;0m[" << i << "]" << elem[i] << "\e[m\n";
+		std::cout << "\e[38;2;0;0;255msegments\e[m\n";
+		for (size_t j = 0; j < seg.num; j++)
+			std::cout << "\e[38;2;0;0;255m  [" << j << "]" << seg[j] << "\e[m\n";
+		std::cout << "\e[38;2;0;255;0mname:" << name << ";\e[m\n";
+		for (size_t j = 0; j < args.num; j++)
+			std::cout << "\e[38;2;0;255;0marg[" << j << "]:" << args[j] << ";\e[m\n";
+		std::cout << "\e[38;2;0;255;0mcontent:" << content << ";\e[m\n";
+		if (content != NULL)
+			std::cout << "\e[38;2;0;255;0mcontent:" << *content << ";\e[m\n";
 
 		tracker -> update(name);
 		for (size_t j = 0; j < args.num; j++)
@@ -56,30 +91,49 @@ void	ConfigParse::parse(void * ptr, std::string str)
 		{
 			if (name == sub[j].name)
 			{
-				if (content.length() == 0 && sub[j].sub_num != 0)
-					std::cout << "warning: did not get {Content} when expected.\n";
-				if (content.length() != 0 && sub[j].sub_num == 0)
-					std::cout << "warning: got {Content} when not expected.\n";
+				found = true;
+				if (content == NULL && sub[j].sub_num != 0)
+				{
+					warning_not_content(sub[j].name);
+					break;
+				}
+				if (content != NULL && sub[j].sub_num == 0)
+				{
+					warning_got_content(sub[j].name);
+					break;
+				}
 
 				if (sub[j].new_func != NULL)
 				{
-					tmp = sub[j].new_func(ptr, args.num, args.arr);
-					if (content.length() != 0)
-						sub[j].parse(tmp, content);
+					if (sub[j].arg_min <= args.num && args.num <= sub[j].arg_max)
+					{
+						tmp = sub[j].new_func(ptr, args.num, args.arr);
+						sub[j].parse(tmp, *content);
+					}
+					else
+					{
+						warning_args_number(sub[j].name, sub[j].arg_min, sub[j].arg_max, args.num);
+					}
 				}
-				if (sub[j].set_func != NULL)
+				else if (sub[j].set_func != NULL)
 				{
-					sub[j].set_func(ptr, args.num, args.arr);
+					if (sub[j].arg_min <= args.num && args.num <= sub[j].arg_max)
+					{
+						sub[j].set_func(ptr, args.num, args.arr);
+					}
+					else
+					{
+						warning_args_number(sub[j].name, sub[j].arg_min, sub[j].arg_max, args.num);
+					}
 				}
-				found = true;
 				break;
 			}
 		}
+
 		if (!found)
 		{
-			std::cout << "warning: "
-				<< "line:" << tracker -> newLines << ": "
-				<< "unknown " << this -> name << " argument '" << seg[0] << "'.\n";
+			warning_unknown_subtype(this -> name, name);
 		}
+		delete content;
 	}
 }

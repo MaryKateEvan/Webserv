@@ -2,6 +2,8 @@
 #include "StringHelp.hpp"
 
 //	checks if position is inside a comment, comment being anything betweedd '#' and the next '\n'
+//	in files ending with .conf, vscode also marks anything after ';' to the end of the line as a comment (makes it green)
+//		but here it only considers '#'
 bool		StringHelp::is_comment(std::string str, size_t pos)
 {
 	size_t hash = str.rfind('#', pos);
