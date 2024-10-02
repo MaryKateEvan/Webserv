@@ -71,8 +71,12 @@ int main()
 			{
 				if (fds[i].fd != -1 && (fds[i].revents & POLLIN))
 				{
-					std::vector<char> accumulated_request;
-					std::vector<char> buffer(4096); 
+					std::cout << "I AM HERE MOTHERF\n";
+					std::vector<char>	accumulated_request;
+					std::vector<char>	buffer(4096);
+					size_t				content_len = 0;
+					bool				header_parsed = false;
+					size_t				body_bytes_read = 0;
 					while (true)
 					{
 						int bytes_read = read(fds[i].fd, buffer.data(), buffer.size());
@@ -93,17 +97,39 @@ int main()
 						}
 						accumulated_request.insert(accumulated_request.end(), buffer.begin(), buffer.begin() + bytes_read);
 						std::string temp_request(accumulated_request.begin(), accumulated_request.end());
-						if (temp_request.find("\r\n\r\n") != std::string::npos)
+						if (!header_parsed)
 						{
-							// std::cout << "Request:\n\n" << std::string(accumulated_request.begin(), accumulated_request.end()) << std::endl;
-							Request req(std::string(accumulated_request.begin(), accumulated_request.end()), fds[i].fd);
-							server1.process_request(req);
-							accumulated_request.clear();
-							close(fds[i].fd);
-							fds[i].fd = -1;
-							break;
+							size_t	header_end = temp_request.find("\r\n\r\n");
+							if (header_end != std::string::npos)
+							{
+								header_parsed = true;
+								std::string	headers = temp_request.substr(0, header_end + 4);
+								size_t content_len_pos = headers.find("Content-Length: ");
+								if (content_len_pos != std::string::npos)
+								{
+									size_t content_length_start = content_len_pos + 16;
+									size_t content_length_end = headers.find("\r\n", content_length_start);
+									std::string content_length_str = headers.substr(content_length_start, content_length_end - content_length_start);
+									content_len = std::stoul(content_length_str);
+								}
+								body_bytes_read = temp_request.size() - (header_end + 4);
+							}
+						}
+
+						if (header_parsed && content_len > 0)
+						{
+							if (body_bytes_read >= content_len)
+								break ;
 						}
 					}
+					if (header_parsed && (content_len == 0 || body_bytes_read >= content_len))
+					{
+						Request req(std::string(accumulated_request.begin(), accumulated_request.end()), fds[i].fd);
+ 						server1.process_request(req);
+					}
+					accumulated_request.clear();
+					close(fds[i].fd);
+					fds[i].fd = -1;
 				}
 			}
 		}
