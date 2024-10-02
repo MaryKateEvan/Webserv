@@ -24,7 +24,7 @@ ConfigParse::~ConfigParse()
 
 }
 
-extern StringHelp::NewLineTracker	*nlt;
+extern StringHelp::StringDataTracker	*tracker;
 
 void	ConfigParse::parse(void * ptr, std::string str)
 {
@@ -34,21 +34,20 @@ void	ConfigParse::parse(void * ptr, std::string str)
 		StringArr seg = StringArr::split_segments(elem[i]);
 		std::string name;
 		std::string content;
-
-		//std::cout << "\e[38;2;255;0;0m[" << i << "]" << elem[i] << "\e[m\n";
-		//for (size_t j = 0; j < seg.num; j++)
-		//	std::cout << "\e[38;2;0;0;255m  [" << j << "]" << seg[j] << "\e[m\n";
-
 		StringArr args = seg.remove_name_and_content(name, content);
-		//std::cout << "\e[38;2;0;255;0mname '" << name << "'\e[m\n";
-		//for (size_t j = 0; j < args.num; j++)
-		//	std::cout << "\e[38;2;0;255;0m[" << j << "] '" << args[j] << "'\e[m\n";
-		//std::cout << "\e[38;2;0;255;0mcontent '" << content << "'\e[m\n";
 
-		nlt -> count(name);
+		std::cout << "\e[38;2;255;0;0m[" << i << "]" << elem[i] << "\e[m\n";
+		for (size_t j = 0; j < seg.num; j++)
+			std::cout << "\e[38;2;0;0;255m  [" << j << "]" << seg[j] << "\e[m\n";
+		std::cout << "\e[38;2;0;255;0mname '" << name << "'\e[m\n";
+		for (size_t j = 0; j < args.num; j++)
+			std::cout << "\e[38;2;0;255;0marg[" << j << "] '" << args[j] << "'\e[m\n";
+		std::cout << "\e[38;2;0;255;0mcontent '" << content << "'\e[m\n";
+
+		tracker -> update(name);
 		for (size_t j = 0; j < args.num; j++)
 		{
-			nlt -> count(args[j]);
+			tracker -> update(args[j]);
 		}
 
 		void *	tmp;
@@ -79,7 +78,7 @@ void	ConfigParse::parse(void * ptr, std::string str)
 		if (!found)
 		{
 			std::cout << "warning: "
-				<< "line:" << nlt -> num << ": "
+				<< "line:" << tracker -> newLines << ": "
 				<< "unknown " << this -> name << " argument '" << seg[0] << "'.\n";
 		}
 	}

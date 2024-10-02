@@ -241,7 +241,7 @@ class main_config_data
 
 
 //	this thing is for giving the line when a "warning unknown" is printed
-StringHelp::NewLineTracker	*nlt;
+StringHelp::StringDataTracker	*tracker;
 
 bool	read_config_file(std::string file)
 {
@@ -251,7 +251,7 @@ bool	read_config_file(std::string file)
 		std::cerr << "could not read config file because: '" << strerror(errno) << "'\n";
 		return (false);
 	}
-	nlt = new StringHelp::NewLineTracker(conf);
+	tracker = new StringHelp::StringDataTracker(conf);
 
 	conf = StringHelp::remove_comments(conf);
 	conf = StringHelp::trim_whitespace(conf);
@@ -297,18 +297,18 @@ bool	read_config_file(std::string file)
 		std::cout << "\n";
 		for (int i = 0; i < data.http.size(); i++)
 		{
-			std::cout << "http [" << i << "]\n";
 			http_config_data * http = data.http[i];
+			std::cout << "http [" << i << "]\n";
 			for (int j = 0; j < http -> server.size(); j++)
 			{
-				std::cout << "  server [" << j << "]\n";
 				server_config_data * server = http -> server[j];
+				std::cout << "  server [" << j << "]\n";
 				std::cout << "    listen:" << server -> listen << "\n";
 				std::cout << "    root:" << server -> root << "\n";
 				for (int k = 0; k < server -> location.size(); k++)
 				{
-					std::cout << "    location [" << k << "]\n";
 					server_location_config_data * location = server -> location[k];
+					std::cout << "    location [" << k << "]\n";
 					std::cout << "      path:" << location -> path << "\n";
 					std::cout << "      root:" << location -> root << "\n";
 					std::cout << "      allowed_methods:";
@@ -321,12 +321,43 @@ bool	read_config_file(std::string file)
 	}
 
 	std::cout << "\n";
-	delete nlt;
+	delete tracker;
 	return (true);
+}
+
+void	test_quote_tracking()
+{
+	std::string str = "0000'1111'0000\"2222'2222\"'1111''1111\"1111'0000";
+	tracker = new StringHelp::StringDataTracker(str);
+
+	char	quotes[str.length() + 1];
+	for (int i = 0; i < str.length(); i++)
+		quotes[i] = ' ';
+	quotes[str.length()] = ' ';
+
+	int	step_size = 3;
+	for (int i = 0; i < str.length(); i += step_size)
+	{
+		if (tracker -> isSingleQuote)
+			quotes[i] = '\'';
+		else if (tracker -> isDoubleQuote)
+			quotes[i] = '\"';
+		else
+			quotes[i] = '|';
+
+		tracker -> update(step_size);
+	}
+
+	std::cout << str << "\n";
+	//std::cout << tracker -> quotes << "\n";
+	std::cout << quotes << "\n";
+
+	delete tracker;
 }
 
 int main(int argc, char * argv[])
 {
+	//test_quote_tracking();
 	if (argc == 2)
 		read_config_file(argv[1]);
 	return (0);

@@ -65,13 +65,13 @@ StringArr	StringArr::split(std::string str, char c)
 	size_t	num, p1, p2;
 	num = 0;
 	p1 = 0;
-	p2 = StringHelp::find_unquoted(str, p1, c);
+	p2 = StringHelp::find_regular(str, p1, c, FIND_IGNORE_QUOTE);
 	while (p2 != std::string::npos)
 	{
 		if (p1 != p2)
 			num++;
 		p1 = p2 + 1;
-		p2 = StringHelp::find_unquoted(str, p1, c);
+		p2 = StringHelp::find_regular(str, p1, c, FIND_IGNORE_QUOTE);
 	}
 	if (p1 < str.length())
 		num++;
@@ -79,7 +79,7 @@ StringArr	StringArr::split(std::string str, char c)
 	StringArr splt(num);
 	num = 0;
 	p1 = 0;
-	p2 = StringHelp::find_unquoted(str, p1, c);
+	p2 = StringHelp::find_regular(str, p1, c, FIND_IGNORE_QUOTE);
 	while (p2 != std::string::npos)
 	{
 		if (p1 != p2)
@@ -88,7 +88,7 @@ StringArr	StringArr::split(std::string str, char c)
 			num++;
 		}
 		p1 = p2 + 1;
-		p2 = StringHelp::find_unquoted(str, p1, c);
+		p2 = StringHelp::find_regular(str, p1, c, FIND_IGNORE_QUOTE);
 	}
 	if (p1 < str.length())
 		splt.arr[num] = str.substr(p1);
@@ -150,7 +150,7 @@ StringArr	StringArr::split_elements(std::string str)
 
 	num = 0;
 	pos = 0;
-	semi = StringHelp::find_unquoted(str, pos, ';');
+	semi = StringHelp::find_regular(str, pos, ';');
 	pair = StringHelp::Pair::find(str, pos, '{', '}');
 	while (semi != std::string::npos || (pair.p1 != std::string::npos && pair.p2 != std::string::npos))
 	{
@@ -158,26 +158,23 @@ StringArr	StringArr::split_elements(std::string str)
 		{
 			num++;
 			pos = semi + 1;
-			semi = StringHelp::find_unquoted(str, pos, ';');
+			semi = StringHelp::find_regular(str, pos, ';');
 		}
 		else if (pair.p1 < semi)
 		{
 			num++;
 			pos = pair.p2 + 1;
-			semi = StringHelp::find_unquoted(str, pos, ';');
+			semi = StringHelp::find_regular(str, pos, ';');
 			pair = StringHelp::Pair::find(str, pos, '{', '}');
 		}
 		else
-			break;
-
-		if (num > 10)
 			break;
 	}
 
 	StringArr splt(num);
 	num = 0;
 	pos = 0;
-	semi = StringHelp::find_unquoted(str, pos, ';');
+	semi = StringHelp::find_regular(str, pos, ';');
 	pair = StringHelp::Pair::find(str, pos, '{', '}');
 	while (semi != std::string::npos || (pair.p1 != std::string::npos && pair.p2 != std::string::npos))
 	{
@@ -186,14 +183,14 @@ StringArr	StringArr::split_elements(std::string str)
 			splt.arr[num] = StringHelp::cut(str, pos, semi + 1);
 			num++;
 			pos = semi + 1;
-			semi = StringHelp::find_unquoted(str, pos, ';');
+			semi = StringHelp::find_regular(str, pos, ';');
 		}
 		else if (pair.p1 < semi)
 		{
 			splt.arr[num] = StringHelp::cut(str, pos, pair.p2 + 1);
 			num++;
 			pos = pair.p2 + 1;
-			semi = StringHelp::find_unquoted(str, pos, ';');
+			semi = StringHelp::find_regular(str, pos, ';');
 			pair = StringHelp::Pair::find(str, pos, '{', '}');
 		}
 		else
@@ -216,8 +213,8 @@ StringArr	StringArr::split_segments(std::string str)
 
 	num = 0;
 	pos = 0;
-	space = StringHelp::find_unquoted(str, pos, ' ');
-	semi = StringHelp::find_unquoted(str, pos, ';');
+	space = StringHelp::find_regular(str, pos, ' ', FIND_IGNORE_QUOTE);
+	semi = StringHelp::find_regular(str, pos, ';', FIND_IGNORE_QUOTE);
 	pair = StringHelp::Pair::find(str, pos, '{', '}');
 	while (1)
 	{
@@ -226,7 +223,7 @@ StringArr	StringArr::split_segments(std::string str)
 			if (space > pos)
 				num++;
 			pos = space + 1;
-			space = StringHelp::find_unquoted(str, pos, ' ');
+			space = StringHelp::find_regular(str, pos, ' ', FIND_IGNORE_QUOTE);
 		}
 		else if (space > pair.p1)
 		{
@@ -244,8 +241,8 @@ StringArr	StringArr::split_segments(std::string str)
 	StringArr splt(num);
 	num = 0;
 	pos = 0;
-	space = StringHelp::find_unquoted(str, pos, ' ');
-	semi = StringHelp::find_unquoted(str, pos, ';');
+	space = StringHelp::find_regular(str, pos, ' ', FIND_IGNORE_QUOTE);
+	semi = StringHelp::find_regular(str, pos, ';', FIND_IGNORE_QUOTE);
 	pair = StringHelp::Pair::find(str, pos, '{', '}');
 	while (1)
 	{
@@ -257,7 +254,7 @@ StringArr	StringArr::split_segments(std::string str)
 				num++;
 			}
 			pos = space + 1;
-			space = StringHelp::find_unquoted(str, pos, ' ');
+			space = StringHelp::find_regular(str, pos, ' ', FIND_IGNORE_QUOTE);
 		}
 		else if (space > pair.p1)
 		{

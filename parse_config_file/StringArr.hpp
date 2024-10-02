@@ -2,7 +2,6 @@
 #pragma once
 #include <iostream>
 #include "StringHelp.hpp"
-#include "ConfigParse.hpp"
 
 class StringArr
 {
@@ -15,6 +14,7 @@ class StringArr
 		StringArr(size_t n);
 		StringArr(StringArr const & othr);
 		~StringArr();
+
 
 	public:
 		std::string & operator[](size_t idx);
