@@ -218,7 +218,6 @@ int	Server::process_delete(const Request& req)
 
 int	Server::process_post(const Request& req)
 {
-	std::cout << "I AM HERE" << std::endl;
 	long unsigned int	failed = 0;
 	for (const auto& entry : req._post_files)
 	{
@@ -229,11 +228,9 @@ int	Server::process_post(const Request& req)
 		if (!out_file)
 		{
 			failed++;
-	std::cout << "I AM HERE2222" << std::endl;
 			continue;
 		}
 		out_file << content;
-		// out_file.write(content.c_str(), content.size()); 
 		out_file.close();
 	}
 	if (failed == req._post_files.size())

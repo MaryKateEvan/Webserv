@@ -100,13 +100,11 @@ int	Request::process_post(const std::string& request)
 	pos += 14;
 	std::string	con_type = line.substr(pos, end - pos);
 	_content_type = con_type;
-	std::cout << "CONTENT typE: " + con_type << std::endl;
 	if (con_type == "multipart/form-data")
 	{
 		std::string	boundary = "--" + line.substr(end + 12);
 		std::cout << "Boundary = " + boundary << std::endl;
 		std::vector<std::string>	temp = tokenize(request, boundary);
-		// for (const auto& str : temp) std::cout << "NEW PART:\n\n\n|" << str << std::endl;
 		for (size_t i = 1; i < temp.size(); ++i)
 		{
 			std::istringstream	ss(temp[i]);
@@ -115,7 +113,6 @@ int	Request::process_post(const std::string& request)
 			std::string			file_name;
 			std::string			file_content;
 
-			// std::cout << "NEW PART:\n\n\n|" << temp[i] << std::endl;
 			while (std::getline(ss, line2))
 			{
 				if (line_count == 0)

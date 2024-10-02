@@ -17,8 +17,8 @@ int main()
 	try
 	{
 		std::signal(SIGINT, signal_handler);
-		Server	server1("A little webserver", PORT, "0.0.0.0", "index.html", "usrimg", "www");
-		// Server	server1("A Instagram Knockoff", PORT, "0.0.0.0", "index.html", "images", "image_website");
+		// Server	server1("A little webserver", PORT, "0.0.0.0", "index.html", "usrimg", "www");
+		Server	server1("A Instagram Knockoff", PORT, "0.0.0.0", "index.html", "images", "image_website");
 		// Set response Method is outdated since the server is using the file system in dir /www/
 		server1.setResponse("HTTP/1.1 200 OK\nContent-Type: text/html\n\nA surprise to be sure, but a welcome one!\n");
 
@@ -71,7 +71,6 @@ int main()
 			{
 				if (fds[i].fd != -1 && (fds[i].revents & POLLIN))
 				{
-					std::cout << "I AM HERE MOTHERF\n";
 					std::vector<char>	accumulated_request;
 					std::vector<char>	buffer(4096);
 					size_t				content_len = 0;
@@ -105,22 +104,28 @@ int main()
 								header_parsed = true;
 								std::string	headers = temp_request.substr(0, header_end + 4);
 								size_t content_len_pos = headers.find("Content-Length: ");
+								std::cout << "Headers:\n" << headers << std::endl;
 								if (content_len_pos != std::string::npos)
 								{
 									size_t content_length_start = content_len_pos + 16;
 									size_t content_length_end = headers.find("\r\n", content_length_start);
 									std::string content_length_str = headers.substr(content_length_start, content_length_end - content_length_start);
 									content_len = std::stoul(content_length_str);
+									// std::cout << "|TEMPREQUESTBEGIN:\n\n\n|" << temp_request << "|TEMPREQUESTEND\n\n\n|" << std::endl;
 								}
 								body_bytes_read = temp_request.size() - (header_end + 4);
 							}
 						}
-
+						// std::cout << "Body Bytes Read: " << body_bytes_read << std::endl;
 						if (header_parsed && content_len > 0)
 						{
 							if (body_bytes_read >= content_len)
 								break ;
 						}
+						if (header_parsed && content_len == 0)
+								break ;
+						if (header_parsed)
+							body_bytes_read += bytes_read;
 					}
 					if (header_parsed && (content_len == 0 || body_bytes_read >= content_len))
 					{
