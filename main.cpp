@@ -95,6 +95,7 @@ int main()
 						std::string temp_request(accumulated_request.begin(), accumulated_request.end());
 						if (temp_request.find("\r\n\r\n") != std::string::npos)
 						{
+							// std::cout << "Request:\n\n" << std::string(accumulated_request.begin(), accumulated_request.end()) << std::endl;
 							Request req(std::string(accumulated_request.begin(), accumulated_request.end()), fds[i].fd);
 							server1.process_request(req);
 							accumulated_request.clear();

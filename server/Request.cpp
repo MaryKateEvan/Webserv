@@ -61,9 +61,26 @@ Request&	Request::operator=(const Request &copy)
 /*                                  Functions                                 */
 /* -------------------------------------------------------------------------- */
 
+std::vector<std::string> tokenize(const std::string& str, const std::string& delim) {
+    std::vector<std::string> tokens;
+    size_t start = 0;
+    size_t end = str.find(delim);
+    
+    while (end != std::string::npos) {
+        tokens.push_back(str.substr(start, end - start));
+        start = end + 1;
+        end = str.find(delim, start);
+    }
+    
+    tokens.push_back(str.substr(start));
+    
+    return tokens;
+}
+
+
 int	Request::process_post(const std::string& request)
 {
-std::istringstream	stream(request);
+	std::istringstream	stream(request);
 	std::string			line;
 	std::string			last_line;
 	size_t				pos;
@@ -87,36 +104,44 @@ std::istringstream	stream(request);
 	if (con_type == "multipart/form-data")
 	{
 		std::string	boundary = "--" + line.substr(end + 12);
-		// std::cout << "Boundary = " + boundary << std::endl;
-		std::istringstream	stream2(request);
-		while (std::getline(stream2, line) && line != "\r") {}
-		while (std::getline(stream2, line))
+		std::cout << "Boundary = " + boundary << std::endl;
+		std::vector<std::string>	temp = tokenize(request, boundary);
+		// for (const auto& str : temp) std::cout << "NEW PART:\n\n\n|" << str << std::endl;
+		for (size_t i = 1; i < temp.size(); ++i)
 		{
-			if (line.find(boundary) != std::string::npos)
+			std::istringstream	ss(temp[i]);
+			std::string			line2;
+			size_t				line_count = 0;
+			std::string			file_name;
+			std::string			file_content;
+
+			// std::cout << "NEW PART:\n\n\n|" << temp[i] << std::endl;
+			while (std::getline(ss, line2))
 			{
-				if (last_line.find(boundary) != std::string::npos)
-					break;
-			}
-				std::string file_name;
-				std::getline(stream2, line);
-				pos = line.find("filename=\"");
-				if (pos == std::string::npos)
-					file_name = "unknown";
-				else
-					file_name = line.substr(pos + 10, line.length() - (pos + 10) - 2);
-				std::cout << "filename: " + file_name << "|" << std::endl;
-				std::getline(stream2, line);
-				std::getline(stream2, line);
-				std::string content;
-				while (std::getline(stream2, line))
+				if (line_count == 0)
 				{
-					if (line.find(boundary) != std::string::npos)
-						break;
-					content += line + "\n";
+					line_count++;
+					continue;
 				}
-			_post_files[file_name] = content; 
+				if (line_count == 1)
+				{
+					pos = line2.find("filename=\"");
+					if (pos == std::string::npos)
+						file_name = "unknown";
+					else
+						file_name = line2.substr(pos + 10, line2.length() - (pos + 10) - 2);
+					line_count++;
+					continue;
+				}
+				if (line_count == 2 || line_count == 3)
+				{
+					line_count++;
+					continue;
+				}
+				file_content += line2 + "\n";
+			}
+			_post_files[file_name] = file_content;
 		}
-		last_line = line;
 	}
 	return (0);
 }
