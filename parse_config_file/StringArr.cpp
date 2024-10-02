@@ -11,6 +11,13 @@ StringArr::StringArr(size_t n) : num(n)
 	//std::cout << "++++ String Arr [" << num << "]\n";
 	arr = new std::string[num];
 }
+StringArr::StringArr(std::vector<std::string> vec) : num(vec.size())
+{
+	//std::cout << "++++ String Arr <" << num << ">\n";
+	arr = new std::string[num];
+	for (size_t i = 0; i < num; i++)
+		arr[i] = vec[i];
+}
 StringArr::StringArr(StringArr const & othr) : num(othr.num)
 {
 	//std::cout << "++++ String Arr [[" << num << "]]\n";
@@ -34,7 +41,23 @@ std::string & StringArr::operator[](size_t idx)
 
 
 
-StringArr	StringArr::remove_name_and_content(std::string & name, std::string & content)
+//	checks if the string starts and ends with '' or ""
+//	and if so, removes them
+std::string	StringArr::remove_quotes(std::string str)
+{
+	size_t	l = str.length();
+
+	if ((str[0] == '\"' && str[l - 1] == '\"') ||
+		(str[0] == '\'' && str[l - 1] == '\''))
+	{
+		return (str.substr(1, l - 2));
+	}
+	return (str);
+}
+//	the first element in StringArr will be considered the {name}
+//	if the last element starts with '{' and ends with '}', is is considered {content}
+//	everything else will be returned as {args}
+StringArr	StringArr::cut_name_args_content(std::string & name, std::string & content)
 {
 	int n = num;
 
@@ -54,7 +77,7 @@ StringArr	StringArr::remove_name_and_content(std::string & name, std::string & c
 
 	StringArr args(n);
 	for (size_t i = 0; i < n; i++)
-		args[i] = arr[i + 1];
+		args[i] = remove_quotes(arr[i + 1]);
 	return (args);
 }
 
@@ -62,16 +85,17 @@ StringArr	StringArr::remove_name_and_content(std::string & name, std::string & c
 
 StringArr	StringArr::split(std::string str, char c)
 {
+/*
 	size_t	num, p1, p2;
 	num = 0;
 	p1 = 0;
-	p2 = StringHelp::find_regular(str, p1, c, FIND_IGNORE_QUOTE);
+	p2 = StringHelp::find_ignore(str, p1, c, FIND_IGNORE_QUOTE);
 	while (p2 != std::string::npos)
 	{
 		if (p1 != p2)
 			num++;
 		p1 = p2 + 1;
-		p2 = StringHelp::find_regular(str, p1, c, FIND_IGNORE_QUOTE);
+		p2 = StringHelp::find_ignore(str, p1, c, FIND_IGNORE_QUOTE);
 	}
 	if (p1 < str.length())
 		num++;
@@ -79,7 +103,7 @@ StringArr	StringArr::split(std::string str, char c)
 	StringArr splt(num);
 	num = 0;
 	p1 = 0;
-	p2 = StringHelp::find_regular(str, p1, c, FIND_IGNORE_QUOTE);
+	p2 = StringHelp::find_ignore(str, p1, c, FIND_IGNORE_QUOTE);
 	while (p2 != std::string::npos)
 	{
 		if (p1 != p2)
@@ -88,16 +112,35 @@ StringArr	StringArr::split(std::string str, char c)
 			num++;
 		}
 		p1 = p2 + 1;
-		p2 = StringHelp::find_regular(str, p1, c, FIND_IGNORE_QUOTE);
+		p2 = StringHelp::find_ignore(str, p1, c, FIND_IGNORE_QUOTE);
 	}
 	if (p1 < str.length())
 		splt.arr[num] = str.substr(p1);
 
 	return (splt);
+*/
+
+	size_t	p1, p2;
+	std::vector<std::string> vec;
+
+	p1 = 0;
+	p2 = StringHelp::find_ignore(str, p1, c, FIND_IGNORE_QUOTE);
+	while (p2 != std::string::npos)
+	{
+		if (p1 != p2)
+			vec.push_back(StringHelp::cut(str, p1, p2));
+		p1 = p2 + 1;
+		p2 = StringHelp::find_ignore(str, p1, c, FIND_IGNORE_QUOTE);
+	}
+	if (p1 < str.length())
+		vec.push_back(str.substr(p1));
+
+	return (StringArr(vec));
 }
 
 StringArr	StringArr::split(std::string str, char c1, char c2)
 {
+/*
 	size_t	num, p;
 	StringHelp::Pair pair;
 
@@ -134,6 +177,25 @@ StringArr	StringArr::split(std::string str, char c1, char c2)
 	splt.arr[num] = str.substr(p);
 
 	return (splt);
+*/
+
+	size_t	p;
+	StringHelp::Pair pair;
+	std::vector<std::string> vec;
+
+	p = 0;
+	pair = StringHelp::Pair::find(str, p, c1, c2);
+	while (pair.p1 != -1)
+	{
+		if (p != pair.p1)
+			vec.push_back(StringHelp::cut(str, p, pair.p1));
+		vec.push_back(pair.cut_ex(str));
+		p = pair.p2 + 1;
+		pair = StringHelp::Pair::find(str, p, c1, c2);
+	}
+	vec.push_back(str.substr(p));
+
+	return (StringArr(vec));
 }
 
 
@@ -143,6 +205,7 @@ StringArr	StringArr::split(std::string str, char c1, char c2)
 */
 StringArr	StringArr::split_elements(std::string str)
 {
+/*
 	size_t	pos;
 	size_t	semi;
 	StringHelp::Pair	pair;
@@ -150,7 +213,7 @@ StringArr	StringArr::split_elements(std::string str)
 
 	num = 0;
 	pos = 0;
-	semi = StringHelp::find_regular(str, pos, ';');
+	semi = StringHelp::find_ignore(str, pos, ';');
 	pair = StringHelp::Pair::find(str, pos, '{', '}');
 	while (semi != std::string::npos || (pair.p1 != std::string::npos && pair.p2 != std::string::npos))
 	{
@@ -158,13 +221,13 @@ StringArr	StringArr::split_elements(std::string str)
 		{
 			num++;
 			pos = semi + 1;
-			semi = StringHelp::find_regular(str, pos, ';');
+			semi = StringHelp::find_ignore(str, pos, ';');
 		}
 		else if (pair.p1 < semi)
 		{
 			num++;
 			pos = pair.p2 + 1;
-			semi = StringHelp::find_regular(str, pos, ';');
+			semi = StringHelp::find_ignore(str, pos, ';');
 			pair = StringHelp::Pair::find(str, pos, '{', '}');
 		}
 		else
@@ -174,7 +237,7 @@ StringArr	StringArr::split_elements(std::string str)
 	StringArr splt(num);
 	num = 0;
 	pos = 0;
-	semi = StringHelp::find_regular(str, pos, ';');
+	semi = StringHelp::find_ignore(str, pos, ';');
 	pair = StringHelp::Pair::find(str, pos, '{', '}');
 	while (semi != std::string::npos || (pair.p1 != std::string::npos && pair.p2 != std::string::npos))
 	{
@@ -183,14 +246,14 @@ StringArr	StringArr::split_elements(std::string str)
 			splt.arr[num] = StringHelp::cut(str, pos, semi + 1);
 			num++;
 			pos = semi + 1;
-			semi = StringHelp::find_regular(str, pos, ';');
+			semi = StringHelp::find_ignore(str, pos, ';');
 		}
 		else if (pair.p1 < semi)
 		{
 			splt.arr[num] = StringHelp::cut(str, pos, pair.p2 + 1);
 			num++;
 			pos = pair.p2 + 1;
-			semi = StringHelp::find_regular(str, pos, ';');
+			semi = StringHelp::find_ignore(str, pos, ';');
 			pair = StringHelp::Pair::find(str, pos, '{', '}');
 		}
 		else
@@ -198,6 +261,36 @@ StringArr	StringArr::split_elements(std::string str)
 	}
 
 	return (splt);
+*/
+
+	size_t	pos;
+	size_t	semi;
+	StringHelp::Pair	pair;
+	std::vector<std::string> vec;
+
+	pos = 0;
+	semi = StringHelp::find_ignore(str, pos, ';', FIND_IGNORE_QUOTE);
+	pair = StringHelp::Pair::find(str, pos, '{', '}');
+	while (semi != std::string::npos || (pair.p1 != std::string::npos && pair.p2 != std::string::npos))
+	{
+		if (semi < pair.p1)
+		{
+			vec.push_back(StringHelp::cut(str, pos, semi + 1));
+			pos = semi + 1;
+			semi = StringHelp::find_ignore(str, pos, ';', FIND_IGNORE_QUOTE);
+		}
+		else if (pair.p1 < semi)
+		{
+			vec.push_back(StringHelp::cut(str, pos, pair.p2 + 1));
+			pos = pair.p2 + 1;
+			semi = StringHelp::find_ignore(str, pos, ';', FIND_IGNORE_QUOTE);
+			pair = StringHelp::Pair::find(str, pos, '{', '}');
+		}
+		else
+			break;
+	}
+
+	return (StringArr(vec));
 }
 
 /*
@@ -205,6 +298,7 @@ StringArr	StringArr::split_elements(std::string str)
 */
 StringArr	StringArr::split_segments(std::string str)
 {
+/*
 	size_t	pos;
 	size_t	space;
 	size_t	semi;
@@ -213,8 +307,8 @@ StringArr	StringArr::split_segments(std::string str)
 
 	num = 0;
 	pos = 0;
-	space = StringHelp::find_regular(str, pos, ' ', FIND_IGNORE_QUOTE);
-	semi = StringHelp::find_regular(str, pos, ';', FIND_IGNORE_QUOTE);
+	space = StringHelp::find_ignore(str, pos, ' ', FIND_IGNORE_QUOTE);
+	semi = StringHelp::find_ignore(str, pos, ';', FIND_IGNORE_QUOTE);
 	pair = StringHelp::Pair::find(str, pos, '{', '}');
 	while (1)
 	{
@@ -223,7 +317,7 @@ StringArr	StringArr::split_segments(std::string str)
 			if (space > pos)
 				num++;
 			pos = space + 1;
-			space = StringHelp::find_regular(str, pos, ' ', FIND_IGNORE_QUOTE);
+			space = StringHelp::find_ignore(str, pos, ' ', FIND_IGNORE_QUOTE);
 		}
 		else if (space > pair.p1)
 		{
@@ -241,8 +335,8 @@ StringArr	StringArr::split_segments(std::string str)
 	StringArr splt(num);
 	num = 0;
 	pos = 0;
-	space = StringHelp::find_regular(str, pos, ' ', FIND_IGNORE_QUOTE);
-	semi = StringHelp::find_regular(str, pos, ';', FIND_IGNORE_QUOTE);
+	space = StringHelp::find_ignore(str, pos, ' ', FIND_IGNORE_QUOTE);
+	semi = StringHelp::find_ignore(str, pos, ';', FIND_IGNORE_QUOTE);
 	pair = StringHelp::Pair::find(str, pos, '{', '}');
 	while (1)
 	{
@@ -254,7 +348,7 @@ StringArr	StringArr::split_segments(std::string str)
 				num++;
 			}
 			pos = space + 1;
-			space = StringHelp::find_regular(str, pos, ' ', FIND_IGNORE_QUOTE);
+			space = StringHelp::find_ignore(str, pos, ' ', FIND_IGNORE_QUOTE);
 		}
 		else if (space > pair.p1)
 		{
@@ -273,4 +367,40 @@ StringArr	StringArr::split_segments(std::string str)
 	}
 
 	return (splt);
+*/
+
+	size_t	pos;
+	size_t	space;
+	size_t	semi;
+	StringHelp::Pair	pair;
+	std::vector<std::string> vec;
+
+	pos = 0;
+	space = StringHelp::find_ignore(str, pos, ' ', FIND_IGNORE_QUOTE);
+	semi = StringHelp::find_ignore(str, pos, ';', FIND_IGNORE_QUOTE);
+	pair = StringHelp::Pair::find(str, pos, '{', '}');
+
+	while (1)
+	{
+		if (space < pair.p1)
+		{
+			if (space > pos)
+				vec.push_back(StringHelp::cut(str, pos, space));
+			pos = space + 1;
+			space = StringHelp::find_ignore(str, pos, ' ', FIND_IGNORE_QUOTE);
+		}
+		else if (space > pair.p1)
+		{
+			vec.push_back(pair.cut_in(str));
+			break;
+		}
+		else if (space > semi)
+		{
+			vec.push_back(StringHelp::cut(str, pos, semi));
+			break;
+		}
+	}
+
+	return (StringArr(vec));
+
 }

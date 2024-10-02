@@ -1,6 +1,7 @@
 
 #pragma once
 #include <iostream>
+#include <vector>
 #include "StringHelp.hpp"
 
 class StringArr
@@ -12,6 +13,7 @@ class StringArr
 
 		StringArr();
 		StringArr(size_t n);
+		StringArr(std::vector<std::string> vec);
 		StringArr(StringArr const & othr);
 		~StringArr();
 
@@ -19,7 +21,8 @@ class StringArr
 	public:
 		std::string & operator[](size_t idx);
 
-		StringArr	remove_name_and_content(std::string & name, std::string & content);
+		static std::string	remove_quotes(std::string str);
+		StringArr	cut_name_args_content(std::string & name, std::string & content);
 
 		static StringArr	split(std::string str, char c);
 		static StringArr	split(std::string str, char c1, char c2);

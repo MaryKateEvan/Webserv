@@ -34,21 +34,21 @@ void	ConfigParse::parse(void * ptr, std::string str)
 		StringArr seg = StringArr::split_segments(elem[i]);
 		std::string name;
 		std::string content;
-		StringArr args = seg.remove_name_and_content(name, content);
+		StringArr args = seg.cut_name_args_content(name, content);
 
-		std::cout << "\e[38;2;255;0;0m[" << i << "]" << elem[i] << "\e[m\n";
-		for (size_t j = 0; j < seg.num; j++)
-			std::cout << "\e[38;2;0;0;255m  [" << j << "]" << seg[j] << "\e[m\n";
-		std::cout << "\e[38;2;0;255;0mname '" << name << "'\e[m\n";
-		for (size_t j = 0; j < args.num; j++)
-			std::cout << "\e[38;2;0;255;0marg[" << j << "] '" << args[j] << "'\e[m\n";
-		std::cout << "\e[38;2;0;255;0mcontent '" << content << "'\e[m\n";
+		//std::cout << "\e[38;2;255;0;0melement\e[m\n";
+		//std::cout << "\e[38;2;255;0;0m[" << i << "]" << elem[i] << "\e[m\n";
+		//std::cout << "\e[38;2;0;0;255msegments\e[m\n";
+		//for (size_t j = 0; j < seg.num; j++)
+		//	std::cout << "\e[38;2;0;0;255m  [" << j << "]" << seg[j] << "\e[m\n";
+		//std::cout << "\e[38;2;0;255;0mname:" << name << ";\e[m\n";
+		//for (size_t j = 0; j < args.num; j++)
+		//	std::cout << "\e[38;2;0;255;0marg[" << j << "]:" << args[j] << ";\e[m\n";
+		//std::cout << "\e[38;2;0;255;0mcontent:" << content << ";\e[m\n";
 
 		tracker -> update(name);
 		for (size_t j = 0; j < args.num; j++)
-		{
 			tracker -> update(args[j]);
-		}
 
 		void *	tmp;
 		bool	found = false;

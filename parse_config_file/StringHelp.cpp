@@ -16,9 +16,10 @@ bool		StringHelp::is_comment(std::string str, size_t pos)
 
 
 //	setting ignore means that anything found inside ignore will be ignored and the next result will be searched for
-size_t		StringHelp::find_regular(std::string str, size_t pos, char c, char ignore)
+size_t		StringHelp::find_ignore(std::string str, size_t pos, char c, char ignore)
 {
 	size_t p = std::string::npos;
+	bool isSQ = false, isDQ = false;
 	do
 	{
 		p = str.find(c, pos);
@@ -26,8 +27,6 @@ size_t		StringHelp::find_regular(std::string str, size_t pos, char c, char ignor
 			pos = p + 1;
 		else if (ignore & (FIND_IGNORE_SINGLE_QUOTE | FIND_IGNORE_DOUBLE_QUOTE))
 		{
-			bool isSQ = false;
-			bool isDQ = false;
 			StringDataTracker::trackQuotes(str, pos, p, isSQ, isDQ);
 			if ((ignore & FIND_IGNORE_SINGLE_QUOTE) && isSQ)
 				pos = p + 1;
@@ -42,18 +41,17 @@ size_t		StringHelp::find_regular(std::string str, size_t pos, char c, char ignor
 	while (p != std::string::npos);
 	return (p);
 }
-size_t		StringHelp::find_regular(std::string str, size_t pos, std::string s, char ignore)
+size_t		StringHelp::find_ignore(std::string str, size_t pos, std::string s, char ignore)
 {
 	size_t p = std::string::npos;
+	bool isSQ = false, isDQ = false;
 	do
 	{
 		p = str.find(s, pos);
 		if ((ignore & FIND_IGNORE_COMMENT) && is_comment(str, p))
 			pos = p + 1;
-		else if (ignore & (FIND_IGNORE_SINGLE_QUOTE | FIND_IGNORE_DOUBLE_QUOTE))
+		else if (ignore & FIND_IGNORE_QUOTE)
 		{
-			bool isSQ = false;
-			bool isDQ = false;
 			StringDataTracker::trackQuotes(str, pos, p, isSQ, isDQ);
 			if ((ignore & FIND_IGNORE_SINGLE_QUOTE) && isSQ)
 				pos = p + 1;
@@ -116,7 +114,7 @@ std::string StringHelp::Pair::cut_ex(std::string str) const
 StringHelp::Pair	StringHelp::Pair::find(std::string str, size_t pos, char c1, char c2)
 {
 	Pair pair;
-	pos = StringHelp::find_regular(str, pos, c1);
+	pos = StringHelp::find_ignore(str, pos, c1, FIND_IGNORE_QUOTE);
 	if (pos == std::string::npos)
 		return pair;
 	pair.p1 = pos;
@@ -124,8 +122,8 @@ StringHelp::Pair	StringHelp::Pair::find(std::string str, size_t pos, char c1, ch
 	size_t unpaired = 0;
 	do
 	{
-		p1 = StringHelp::find_regular(str, pos, c1);
-		p2 = StringHelp::find_regular(str, pos, c2);
+		p1 = StringHelp::find_ignore(str, pos, c1, FIND_IGNORE_QUOTE);
+		p2 = StringHelp::find_ignore(str, pos, c2, FIND_IGNORE_QUOTE);
 		if (p1 == std::string::npos && p2 == std::string::npos)
 		{
 			return pair;
@@ -188,12 +186,12 @@ std::string		StringHelp::remove_comments(std::string str)
 	size_t	p1, p2;
 
 	p1 = 0;
-	p2 = find_regular(str, p1, '#');
+	p2 = find_ignore(str, p1, '#');
 	while (p2 != std::string::npos)
 	{
 		trim += cut(str, p1, p2);
-		p1 = find_regular(str, p2, '\n');
-		p2 = find_regular(str, p1, '#');
+		p1 = find_ignore(str, p2, '\n');
+		p2 = find_ignore(str, p1, '#');
 	}
 	trim += cut(str, p1);
 
@@ -277,7 +275,7 @@ void	StringHelp::StringDataTracker::trackQuotes(std::string str, size_t from, si
 
 void	StringHelp::StringDataTracker::update(std::string landmark)
 {
-	size_t	p = find_regular(file, pos, landmark, FIND_IGNORE_COMMENT);
+	size_t	p = find_ignore(file, pos, landmark, FIND_IGNORE_COMMENT);
 	if (p != std::string::npos)
 	{
 		newLines += countNewLines(file, pos, p);

@@ -14,8 +14,8 @@ class StringHelp
 		static bool			is_single_quote(std::string str, size_t pos);
 		static bool			is_double_quote(std::string str, size_t pos);
 
-		static size_t		find_regular(std::string str, size_t pos, char c, char ignore = 0);
-		static size_t		find_regular(std::string str, size_t pos, std::string s, char ignore = 0);
+		static size_t		find_ignore(std::string str, size_t pos, char c, char ignore = 0);
+		static size_t		find_ignore(std::string str, size_t pos, std::string s, char ignore = 0);
 
 		static std::string	cut(std::string str, size_t from, size_t to);
 		static std::string	cut(std::string str, size_t from);

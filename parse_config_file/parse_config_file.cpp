@@ -303,18 +303,18 @@ bool	read_config_file(std::string file)
 			{
 				server_config_data * server = http -> server[j];
 				std::cout << "  server [" << j << "]\n";
-				std::cout << "    listen:" << server -> listen << "\n";
-				std::cout << "    root:" << server -> root << "\n";
+				std::cout << "    listen:" << server -> listen << ";\n";
+				std::cout << "    root:" << server -> root << ";\n";
 				for (int k = 0; k < server -> location.size(); k++)
 				{
 					server_location_config_data * location = server -> location[k];
 					std::cout << "    location [" << k << "]\n";
-					std::cout << "      path:" << location -> path << "\n";
-					std::cout << "      root:" << location -> root << "\n";
+					std::cout << "      path:" << location -> path << ";\n";
+					std::cout << "      root:" << location -> root << ";\n";
 					std::cout << "      allowed_methods:";
 					for (int l = 0; l < location -> allowed_methods_num; l++)
 						std::cout << " " << location -> allowed_methods[l];
-					std::cout << "\n";
+					std::cout << ";\n";
 				}
 			}
 		}
