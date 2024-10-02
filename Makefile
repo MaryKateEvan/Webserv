@@ -18,7 +18,7 @@ VPATH			:= ./utils/ ./server/ ./exceptions/
 
 SRC				:= main.cpp
 
-UTILS_SRC		:=
+UTILS_SRC		:= utils1.cpp
 
 SERVER_SRC		:= Server.cpp Request.cpp
 
