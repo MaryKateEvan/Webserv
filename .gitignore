@@ -40,7 +40,8 @@
 webserv
 *.conf
 
-www/usrimg/imag*
+www/usrimg/*
+!www/usrimg/no-bedbugs.jpg
 
 __pycache__
 env

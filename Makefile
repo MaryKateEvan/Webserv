@@ -6,7 +6,7 @@
 
 NAME			:= webserv
 CPP				:= c++
-CPPFLAGS		:= -Wall -Wextra -Werror
+CPPFLAGS		:= -Wall -Wextra -Werror -std=c++17
 
 # ---------------------------------------------------------------------------- #
 #                                     Files                                    #
@@ -18,7 +18,7 @@ VPATH			:= ./utils/ ./server/ ./exceptions/
 
 SRC				:= main.cpp
 
-UTILS_SRC		:=
+UTILS_SRC		:= utils1.cpp
 
 SERVER_SRC		:= Server.cpp Request.cpp
 

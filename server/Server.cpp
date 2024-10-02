@@ -168,6 +168,9 @@ int	Server::process_request(const Request& req)
 		case DELETE:
 			return (process_delete(req));
 			break;
+		case POST:
+			return (process_post(req));
+			break;
 	}
 	return (1);
 }
@@ -212,6 +215,32 @@ int	Server::process_delete(const Request& req)
 		send_error_message(404, req);
 	return (0);
 }
+
+int	Server::process_post(const Request& req)
+{
+	long unsigned int	failed = 0;
+	for (const auto& entry : req._post_files)
+	{
+		const std::string&	file_name = entry.first;
+		const std::string&	content = entry.second;
+		std::string			full_path = _www_dir + "/" + _data_dir + "/" +file_name;
+		std::ofstream out_file(full_path, std::ios::binary);
+		if (!out_file)
+		{
+			failed++;
+			continue;
+		}
+		out_file << content;
+		out_file.close();
+	}
+	if (failed == req._post_files.size())
+		send_error_message(500, req);
+	if (failed > 0)
+		send_error_message(207, req);
+	send_error_message(200, req);
+	return (0);
+}
+
 
 int	Server::send_error_message(int error_code, const Request& req)
 {
