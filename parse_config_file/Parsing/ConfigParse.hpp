@@ -26,9 +26,8 @@ class ConfigParse
 			int sub_num,
 			ConfigParse *sub
 		);
+		ConfigParse(ConfigParse const & othr);
 		~ConfigParse();
 
-		void	parse(void * ptr, std::string str);
-
-		//static StringHelp::NewLineTracker	nlt;
+		void	parse(void * ptr, std::string str) const;
 };

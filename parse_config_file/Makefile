@@ -7,6 +7,7 @@ File_C = \
 	Stringing/Twin.cpp \
 	Stringing/StringDataTracker.cpp \
 		Parsing/ConfigParse.cpp \
+		Parsing/ConfigData.cpp \
 		Parsing/parse_config_file.cpp
 File_O = $(File_C:.cpp=.o)
 

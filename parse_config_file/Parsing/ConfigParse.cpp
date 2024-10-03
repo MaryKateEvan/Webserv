@@ -24,10 +24,21 @@ ConfigParse::ConfigParse(
 		std::cout << "NOTE: Configuration Parsing Element '" << name << "' was given neither a new() nor a set() function.\n";
 	}
 }
+ConfigParse::ConfigParse(ConfigParse const & othr)
+{
+	this -> name = othr.name;
+	this -> arg_min = othr.arg_min;
+	this -> arg_max = othr.arg_max;
+	this -> new_func = othr.new_func;
+	this -> set_func = othr.set_func;
+	this -> sub_num = othr.sub_num;
+	this -> sub = othr.sub;
+}
 ConfigParse::~ConfigParse()
 {
 
 }
+
 
 extern StringDataTracker	*tracker;
 
@@ -64,7 +75,27 @@ void	warning_got_content(std::string type)
 		<< "type '" << type << "' got {Content} when not expected.\n";
 }
 
-void	ConfigParse::parse(void * ptr, std::string str)
+/*
+	the content of the last layer is split into elements
+		this means tooking for the next ';' or pair of '{}' and then splitting until after that
+	then each element is split into segments
+		this means they are split by ' ' except inside of "" or {}
+	then the segments are sorted into 'name' 'args' and 'content'
+		the allways the first segment
+		the content is the last segment if it starts with '{' and ends with '}'
+		everything else is args
+
+	then a search is made for name in the list of accepted subtypes
+	then a check is made for if content is required or not
+	then a check is made for if the correct number of args were given
+	then it checks which function to call
+		if new_func is given
+			args is given to the function and the pointer to the object is stored
+			then parse() is performen recursivly on the new object
+		if set_func is given
+			args is given to the function
+*/
+void	ConfigParse::parse(void * ptr, std::string str) const
 {
 	StringArr elem = StringArr::split_elements(str);
 	for (size_t i = 0; i < elem.num; i++)
@@ -131,6 +162,8 @@ void	ConfigParse::parse(void * ptr, std::string str)
 		if (found == NULL)
 		{
 			warning_unknown_subtype(this -> name, name);
+			for (int j = 0; j < sub_num; j++)
+				std::cout << "'" << name << "' != '" << sub[j].name << "'\n";
 		}
 		delete content;
 	}
