@@ -132,9 +132,9 @@ int main() {
 						const char *response = 
 							"HTTP/1.1 200 OK\r\n"
 							"Content-Type: text/html\r\n"
-							"Content-Length: 50\r\n"
+							"Content-Length: 23\r\n"
 							"\r\n"
-							"Hello World! MK here trying to send to her phone";
+							"Hello World! MK here!";
 						
 						//send a basic HTTP response with a 200 OK status and a simple message hello world
 						send(fds[i].fd, response, strlen(response), 0);
@@ -148,7 +148,6 @@ int main() {
 				}
 			}
 		}
-
 	}
 	close(server_fd);
 	return 0;

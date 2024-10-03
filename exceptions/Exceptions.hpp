@@ -78,4 +78,10 @@ class SendFailedException : public BaseException
 		explicit SendFailedException(const std::string& server_name, const int& fd);
 };
 
+class NonBlockingModeFailedException : public BaseException
+{
+	public:
+		explicit NonBlockingModeFailedException(const std::string& server_name);
+};
+
 #endif /*EXCEPTIONS_HPP*/

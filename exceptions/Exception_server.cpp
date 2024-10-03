@@ -35,3 +35,8 @@ OpenFailedException::OpenFailedException(const std::string& server_name, const s
 
 SendFailedException::SendFailedException(const std::string&server_name, const int& fd)
 	: BaseException("Server " + server_name + " sending to " + std::to_string(fd) + " failed") {}
+
+NonBlockingModeFailedException::NonBlockingModeFailedException(const std::string&server_name)
+	: BaseException("Server " + server_name + " failed to set to non-blocking mode for socket.") {}
+
+

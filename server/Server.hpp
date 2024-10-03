@@ -26,6 +26,7 @@ class Server
 		bool				file_exists(const std::string& file_path);
 		std::string			get_mime_type(const std::string& file_path);
 		std::string			read_file(const std::string& file_path);
+
 	public:
 		Server(const std::string server_name, int port, const std::string ip_address, const std::string index_file, const std::string data_dir, const std::string www_dir);
 		//use inet_pton() to convert IP address

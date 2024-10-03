@@ -1,14 +1,13 @@
 #include "Server.hpp"
 
-/* -------------------------------------------------------------------------- */
-/*                           Orthodox Canonical Form                          */
-/* -------------------------------------------------------------------------- */
-
+// parameter constructor to initialize the server, create and bind the server socket.
 Server::Server(const std::string server_name, int port, const std::string ip_address, const std::string index_file, const std::string data_dir, const std::string www_dir)
 	: _name(server_name), _index_file(index_file), _data_dir(data_dir), _www_dir(www_dir)
 {
-	std::cout << "Server Default Constructor called" << std::endl;
+	// std::cout << "Server Default Constructor called" << std::endl; //not "default" constructor. thats "parameter constructor!"
 	load_mime_types("mime_type.csv");
+
+	// 1. Create the sockets and configure some options for it:
 	_fd_server = socket(AF_INET, SOCK_STREAM, 0);
 	if (_fd_server == -1)
 		throw SocketCreationFailedException(_name);
@@ -18,18 +17,34 @@ Server::Server(const std::string server_name, int port, const std::string ip_add
 		close(_fd_server);
 		throw SetSocketOptionFailedException(_name);
 	}
-	_address.sin_family = AF_INET;
+
+	// 2. Configure server's socket's address and port:
+	_address.sin_family = AF_INET; //for IPv4
 	if (port < 0 || port > 65535)
 	{
 		close(_fd_server);
 		throw InvalidPortException(_name, port);
 	}
-	_address.sin_port = htons(port);
-	if (inet_pton(AF_INET, ip_address.c_str(), &_address.sin_addr) != 1)
+	_address.sin_port = htons(port); //specifies the port number for the server
+	//! the inet_pton is forbidden function
+	// if (inet_pton(AF_INET, ip_address.c_str(), &_address.sin_addr) != 1)
+	// {
+	// 	close(_fd_server);
+	// 	throw InvalidIPAdressException(_name, ip_address);
+	// }
+	//instead, we can just do:
+	_address.sin_addr.s_addr = INADDR_ANY;
+
+	// 3. Set the socket to NON-BLOCKING mode and protect from fd leak in case of spawning new processes:
+	if (fcntl(_fd_server, F_SETFL, O_NONBLOCK | FD_CLOEXEC) < 0)
 	{
 		close(_fd_server);
-		throw InvalidIPAdressException(_name, ip_address);
+		throw NonBlockingModeFailedException(_name);
 	}
+
+
+
+	// 3. 
 	if (bind(_fd_server, (struct sockaddr *)&_address, sizeof(_address)) != 0)
 	{
 		close(_fd_server);
@@ -138,6 +153,12 @@ std::string	Server::read_file(const std::string& file_path)
 	return (buffer.str());
 }
 
+/**
+ * @brief This function reads the file `mime_type.csv` that contains mappings 
+ * between file extensions (like .html, .jpg etc) and their corresponding MIME 
+ * types (like text/html, image/jpeg) and stores this mapping in the _mime_types
+ * unordered map of the class.
+ */
 void	Server::load_mime_types(const std::string& file_path)
 {
 	std::ifstream file(file_path);
