@@ -3,10 +3,10 @@
 
 void	ConfigData::printFuncArgs(std::string func, int argc, std::string args[])
 {
-	std::cout << func << "(";
+	std::cout << "\e[38;2;63;63;63m" << func << "(";
 	for (int i = 0; i < argc; i++)
 		std::cout << " " << args[i];
-	std::cout << " );\n";
+	std::cout << " );\e[m\n";
 }
 
 

@@ -38,7 +38,7 @@ void	parseConfig(std::string config, ConfigData::MainData * data)
 				ConfigParse("listen", 1, 1, NULL, ConfigData::ServerData::setListen, 0, NULL),
 				ConfigParse("root", 1, 1, NULL, ConfigData::ServerData::setRoot, 0, NULL),
 				ConfigParse("index", 1, 1, NULL, ConfigData::ServerData::setIndex, 0, NULL),
-				ConfigParse("location", 1, 2, ConfigData::ServerData::newLocation, NULL, 2, (ConfigParse[])
+				ConfigParse("location", 1, 1, ConfigData::ServerData::newLocation, NULL, 2, (ConfigParse[])
 				{
 					ConfigParse("root", 1, 1, NULL, ConfigData::ServerLocationData::setRoot, 0, NULL),
 					ConfigParse("allowed_methods", 1, 3, NULL, ConfigData::ServerLocationData::setAllowed, 0, NULL),

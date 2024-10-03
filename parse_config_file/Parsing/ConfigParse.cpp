@@ -117,9 +117,9 @@ void	ConfigParse::parse(void * ptr, std::string str) const
 		//if (content != NULL)
 		//	std::cout << "\e[38;2;0;255;0mcontent:" << *content << ";\e[m\n";
 
-		tracker -> update(name);
-		for (size_t j = 0; j < args.num; j++)
-			tracker -> update(args[j]);
+		//tracker -> update(name);
+		//for (size_t j = 0; j < args.num; j++)
+		//	tracker -> update(args[j]);
 
 		void *	tmp;
 		ConfigParse	* found = NULL;
@@ -162,8 +162,6 @@ void	ConfigParse::parse(void * ptr, std::string str) const
 		if (found == NULL)
 		{
 			warning_unknown_subtype(this -> name, name);
-			for (int j = 0; j < sub_num; j++)
-				std::cout << "'" << name << "' != '" << sub[j].name << "'\n";
 		}
 		delete content;
 	}

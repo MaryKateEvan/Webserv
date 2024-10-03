@@ -17,5 +17,5 @@ class	Twin
 		std::string	cut_in(std::string str) const;
 		std::string	cut_ex(std::string str) const;
 
-		static Twin	find(std::string str, size_t pos, char c, char i);
+		static Twin	find(std::string str, size_t pos, char c, char i = '\0');
 };

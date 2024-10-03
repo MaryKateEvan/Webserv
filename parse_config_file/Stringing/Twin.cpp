@@ -11,23 +11,21 @@ bool	Twin::all_good() const
 {
 	return (p1 != std::string::npos && p2 != std::string::npos);
 }
-
 bool	Twin::any_good() const
 {
 	return (p1 != std::string::npos || p2 != std::string::npos);
 }
 
-
+//	cuts the string inside the Twin including the twin characters
 std::string	Twin::cut_in(std::string str) const
 {
 	return str.substr(p1, (p2 - p1) + 1);
 }
-
+//	cuts the string inside the Twin excluding the twin characters
 std::string	Twin::cut_ex(std::string str) const
 {
 	return str.substr(p1 + 1, (p2 - p1) - 1);
 }
-
 
 /*
 	search for c and i
