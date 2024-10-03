@@ -22,6 +22,8 @@ class StringHelp
 		static std::string	cut(std::string str, size_t from, size_t to);
 		static std::string	cut(std::string str, size_t from);
 
+		static bool			has_unicode(std::string str);
+
 		static bool			is_whitespace(char c);
 		static bool			only_whitespace(std::string str);
 		static std::string	trim_whitespace(std::string str);

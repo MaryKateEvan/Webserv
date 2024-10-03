@@ -1,6 +1,8 @@
 
 #include "ConfigParse.hpp"
 
+extern StringDataTracker	tracker;
+
 ConfigParse::ConfigParse(
 	std::string name,
 	int arg_min,
@@ -40,40 +42,6 @@ ConfigParse::~ConfigParse()
 }
 
 
-extern StringDataTracker	*tracker;
-
-void	warning_args_number(std::string type, int min, int max, int num)
-{
-	std::cout
-		<< "warning: "
-		<< "line:" << tracker -> newLines << ": "
-		<< "type '" << type << "' got invalid number of arguments: "
-		<< "expected between " << min << " and " << max 
-		<< ", got " << num << ".\n";
-}
-
-void	warning_unknown_subtype(std::string type, std::string subtype)
-{
-	std::cout
-		<< "warning: "
-		<< "line:" << tracker -> newLines << ": "
-		<< "type '" << type << "' got unknown subtype '" << subtype << "'.\n";
-}
-
-void	warning_not_content(std::string type)
-{
-	std::cout
-		<< "warning: "
-		<< "line:" << tracker -> newLines << ": "
-		<< "type '" << type << "' did not get {Content} when expected.\n";
-}
-void	warning_got_content(std::string type)
-{
-	std::cout
-		<< "warning: "
-		<< "line:" << tracker -> newLines << ": "
-		<< "type '" << type << "' got {Content} when not expected.\n";
-}
 
 /*
 	the content of the last layer is split into elements
@@ -117,9 +85,9 @@ void	ConfigParse::parse(void * ptr, std::string str) const
 		//if (content != NULL)
 		//	std::cout << "\e[38;2;0;255;0mcontent:" << *content << ";\e[m\n";
 
-		//tracker -> update(name);
+		//tracker.update(name);
 		//for (size_t j = 0; j < args.num; j++)
-		//	tracker -> update(args[j]);
+		//	tracker.update(args[j]);
 
 		void *	tmp;
 		ConfigParse	* found = NULL;
@@ -130,12 +98,12 @@ void	ConfigParse::parse(void * ptr, std::string str) const
 				found = &(sub[j]);
 				if (content == NULL && found -> sub_num != 0)
 				{
-					warning_not_content(found -> name);
+					tracker.report_not_content(REPORT_WARNING | REPORT_LINE, found -> name);
 					break;
 				}
 				if (content != NULL && found -> sub_num == 0)
 				{
-					warning_got_content(found -> name);
+					tracker.report_got_content(REPORT_WARNING | REPORT_LINE, found -> name);
 					break;
 				}
 
@@ -153,7 +121,7 @@ void	ConfigParse::parse(void * ptr, std::string str) const
 				}
 				else
 				{
-					warning_args_number(found -> name, found -> arg_min, found -> arg_max, args.num);
+					tracker.report_args_number(REPORT_WARNING | REPORT_LINE, found -> name, found -> arg_min, found -> arg_max, args.num);
 				}
 				break;
 			}
@@ -161,7 +129,7 @@ void	ConfigParse::parse(void * ptr, std::string str) const
 
 		if (found == NULL)
 		{
-			warning_unknown_subtype(this -> name, name);
+			tracker.report_unknown_subtype(REPORT_WARNING | REPORT_LINE, this -> name, name);
 		}
 		delete content;
 	}

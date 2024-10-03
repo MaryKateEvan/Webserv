@@ -2,6 +2,7 @@
 #pragma once
 #include <iostream>
 #include <vector>
+#include "../Stringing/StringDataTracker.hpp"
 
 /*
 	these are for gather all the configuration data
@@ -16,25 +17,31 @@ class ConfigData
 		{
 				static const std::string	className;
 			public:
-				std::string	path;
+				const std::string	path;
 				std::string	root;
 				std::string	* allowed_methods;
 				int			allowed_methods_num;
+				bool		root_is_set;
+				bool		allowed_methods_is_set;
 
 				ServerLocationData(std::string path);
 				~ServerLocationData();
 
 				static void	setRoot(void * ptr, int argc, std::string args[]);
-				static void	setAllowed(void * ptr, int argc, std::string args[]);
+				static void	setAllowedMethods(void * ptr, int argc, std::string args[]);
 		};
 		class ServerData
 		{
 				static const std::string	className;
 			public:
-				std::string name;
-				std::string listen;
-				std::string root;
-				std::string index;
+				std::string	name;
+				std::string	listen;
+				std::string	root;
+				std::string	index;
+				bool		name_is_set;
+				bool		listen_is_set;
+				bool		root_is_set;
+				bool		index_is_set;
 				std::vector<ServerLocationData *> location;
 
 				ServerData();

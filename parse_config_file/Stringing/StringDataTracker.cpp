@@ -72,15 +72,6 @@ void	StringDataTracker::trackQuotes(std::string str, size_t from, size_t to, boo
 	}
 }
 
-void	warning_landmark_not_found(int line)
-{
-	std::cout
-		<< "warning: a problem occured with the StringDataTracker, "
-		<< "Line Numbers and Quote parsing may be inaccurate after this point"
-		<< "(line:" << line << ")."
-		<< " Someone should probably fix that\n";
-}
-
 void	StringDataTracker::update(std::string landmark)
 {
 	size_t	p = StringHelp::find_ignore(file, pos, landmark, FIND_IGNORE_COMMENT);
@@ -92,7 +83,7 @@ void	StringDataTracker::update(std::string landmark)
 	}
 	else
 	{
-		warning_landmark_not_found(newLines);
+		report_landmark_not_found(REPORT_WARNING);
 	}
 	//std::cout << "  landmark '" << landmark << "' found on line [" << newLines << "]\n";
 }
@@ -107,7 +98,82 @@ void	StringDataTracker::update(size_t move)
 	}
 	else
 	{
-		warning_landmark_not_found(newLines);
+		report_landmark_not_found(REPORT_WARNING);
 	}
 	//std::cout << "  landmark '" << landmark << "' found on line [" << newLines << "]\n";
+}
+
+
+
+
+
+void	StringDataTracker::report_start(char report)
+{
+	char	type = report & 0b11;
+	if (type == REPORT_ERROR)
+		std::cout << "error: ";
+	else if (type == REPORT_WARNING)
+		std::cout << "warning: ";
+	else if (type == REPORT_INFO)
+		std::cout << "info: ";
+	else
+		std::cout << "debug: ";
+
+	if (report & REPORT_LINE)
+		std::cout << "line:" << newLines << ": ";
+}
+
+void	StringDataTracker::report_generic(char report, std::string str)
+{
+	report_start(report);
+	std::cout
+		<< str
+		<< ".\n";
+}
+void	StringDataTracker::report_landmark_not_found(char report)
+{
+	report_start(report);
+	std::cout
+		<< "a problem occured with the StringDataTracker, "
+		<< "Line Numbers and Quote parsing may be inaccurate after this point"
+		<< "(line:" << newLines << ")."
+		<< " Someone should probably fix that"
+		<< ".\n";
+}
+void	StringDataTracker::report_args_number(char report, std::string type, int min, int max, int num)
+{
+	report_start(report);
+	std::cout
+		<< "type '" << type << "' got invalid number of arguments: "
+		<< "expected between " << min << " and " << max 
+		<< ", got " << num
+		<< ".\n";
+}
+void	StringDataTracker::report_unknown_subtype(char report, std::string type, std::string subtype)
+{
+	report_start(report);
+	std::cout
+		<< "type '" << type << "' got unknown subtype '" << subtype << "'"
+		<< ".\n";
+}
+void	StringDataTracker::report_not_content(char report, std::string type)
+{
+	report_start(report);
+	std::cout
+		<< "type '" << type << "' did not get {Content} when expected"
+		<< ".\n";
+}
+void	StringDataTracker::report_got_content(char report, std::string type)
+{
+	report_start(report);
+	std::cout
+		<< "type '" << type << "' got {Content} when not expected"
+		<< ".\n";
+}
+void	StringDataTracker::report_extra_quotes(char report)
+{
+	report_start(report);
+	std::cout
+		//<< "an argument appears to be a concatenation of quoted regions, no quotes will be removed for this argument.\n";
+		<< "Some weird quote thing appear to be happening here, no quotes removed.\n";
 }

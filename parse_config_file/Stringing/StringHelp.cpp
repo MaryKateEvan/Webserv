@@ -83,6 +83,17 @@ std::string	StringHelp::cut(std::string str, size_t from)
 
 
 
+bool	StringHelp::has_unicode(std::string str)
+{
+	for (int i = 0; i < str.length(); i++)
+	{
+		if ((str[i] & 0b10000000) != 0)
+			return (true);
+	}
+	return (false);
+}
+
+
 
 
 bool			StringHelp::is_whitespace(char c)

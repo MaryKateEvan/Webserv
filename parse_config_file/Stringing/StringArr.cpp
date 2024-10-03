@@ -41,16 +41,7 @@ std::string & StringArr::operator[](size_t idx)
 
 
 
-extern StringDataTracker	*tracker;
-
-void	warning_extra_quotes()
-{
-	std::cout
-		<< "warning: "
-		<< "line:" << tracker -> newLines << ": "
-		//<< "an argument appears to be a concatenation of quoted regions, no quotes will be removed for this argument.\n";
-		<< "Some weird quote thing appear to be happening here, no quotes removed.\n";
-}
+extern StringDataTracker	tracker;
 
 //	checks if the string starts and ends with '' or ""
 //	and if so, removes them
@@ -65,7 +56,7 @@ std::string	StringArr::remove_quotes(std::string str)
 	{
 		if (twin.p2 == l - 1)
 			return (twin.cut_ex(str));
-		warning_extra_quotes();
+		tracker.report_extra_quotes(REPORT_WARNING | REPORT_LINE);
 	}
 
 	twin = Twin::find(str, 0, '\"');
@@ -73,7 +64,7 @@ std::string	StringArr::remove_quotes(std::string str)
 	{
 		if (twin.p2 == l - 1)
 			return (twin.cut_ex(str));
-		warning_extra_quotes();
+		tracker.report_extra_quotes(REPORT_WARNING | REPORT_LINE);
 	}
 
 	return (str);
@@ -86,7 +77,7 @@ StringArr	StringArr::cut_name_args_content(std::string & name, std::string ** co
 	int n = num;
 
 	name = arr[0];
-	tracker -> update(name);
+	tracker.update(name);
 
 	*content = NULL;
 	if (num > 1)
@@ -107,7 +98,7 @@ StringArr	StringArr::cut_name_args_content(std::string & name, std::string ** co
 		temp = remove_quotes(arr[i + 1]);
 		if (!StringHelp::only_whitespace(temp))
 			vec.push_back(temp);
-		tracker -> update(temp);
+		tracker.update(temp);
 	}
 	return (vec);
 }

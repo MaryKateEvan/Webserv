@@ -41,17 +41,18 @@ void	parseConfig(std::string config, ConfigData::MainData * data)
 				ConfigParse("location", 1, 1, ConfigData::ServerData::newLocation, NULL, 2, (ConfigParse[])
 				{
 					ConfigParse("root", 1, 1, NULL, ConfigData::ServerLocationData::setRoot, 0, NULL),
-					ConfigParse("allowed_methods", 1, 3, NULL, ConfigData::ServerLocationData::setAllowed, 0, NULL),
+					ConfigParse("allowed_methods", 1, 3, NULL, ConfigData::ServerLocationData::setAllowedMethods, 0, NULL),
 				}),
 			}),
 		}),
 	});
+	std::cout << "\n";
 
 	how2parse.parse(data, config);	//	<--- config data is read here
 	std::cout << "\nfile read (past tense)\n";
 }
 
-StringDataTracker	*tracker;
+StringDataTracker	tracker;
 
 bool	read_config_file(std::string file)
 {
@@ -60,10 +61,16 @@ bool	read_config_file(std::string file)
 	std::string conf;
 	if (!file_to_string(file, conf))
 	{
-		std::cerr << "could not read config file because: '" << strerror(errno) << "'\n";
+		tracker.report_generic(REPORT_ERROR, "File could not be read");
 		return (false);
 	}
-	tracker = new StringDataTracker(conf);
+
+	tracker = StringDataTracker(conf);
+	if (StringHelp::has_unicode(conf))
+	{
+		tracker.report_generic(REPORT_ERROR, "This file appears to contain Unicode . . . which is dumb. Why would you put Unicode in a server configuration file? Idiot");
+		return (false);
+	}
 
 	conf = StringHelp::remove_comments(conf);
 	conf = StringHelp::trim_whitespace(conf);
@@ -72,7 +79,7 @@ bool	read_config_file(std::string file)
 	Pair pair = Pair::find(conf, 0, '{', '}');
 	if (!pair.all_good())
 	{
-		std::cout << "unpaired {} in config file\n";
+		tracker.report_generic(REPORT_ERROR, "There are unpaired {} in the file, not reading that");
 		return (false);
 	}
 	else
@@ -110,7 +117,6 @@ bool	read_config_file(std::string file)
 	}
 
 	std::cout << "\n";
-	delete tracker;
 	return (true);
 }
 
@@ -175,21 +181,19 @@ void	test_quote_tracking()
 //	int	step_size = 3;
 //	for (int i = 0; i < str.length(); i += step_size)
 //	{
-//		if (tracker -> isSingleQuote)
+//		if (tracker.isSingleQuote)
 //			quotes[i] = '\'';
-//		else if (tracker -> isDoubleQuote)
+//		else if (tracker.isDoubleQuote)
 //			quotes[i] = '\"';
 //		else
 //			quotes[i] = '|';
 //
-//		tracker -> update(step_size);
+//		tracker.update(step_size);
 //	}
 //
 //	std::cout << str << "\n";
-//	//std::cout << tracker -> quotes << "\n";
+//	//std::cout << tracker.quotes << "\n";
 //	std::cout << quotes << "\n";
-
-	delete tracker;
 }
 
 int main(int argc, char * argv[])
