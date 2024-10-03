@@ -8,7 +8,7 @@
 #define	REPORT_WARNING 0b001
 #define	REPORT_ERROR   0b000
 #define REPORT_LINE    0b0100
-#define REPORT_ERRNO   0b0100
+#define REPORT_ERRNO   0b1000
 
 class	StringDataTracker
 {

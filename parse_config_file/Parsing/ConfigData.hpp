@@ -2,6 +2,7 @@
 #pragma once
 #include <iostream>
 #include <vector>
+#include "../Stringing/StringArr.hpp"
 #include "../Stringing/StringDataTracker.hpp"
 
 /*
@@ -11,6 +12,19 @@
 class ConfigData
 {
 	public:
+		class	MemberData
+		{
+			public:
+				const std::string	name;
+				bool				isSet;
+				StringArr			data;
+				int					data_num;
+
+				MemberData(std::string name, int num = 1);
+
+				void	set(int argc, std::string args[], std::string funcName, std::string className);
+		};
+
 		static void	printFuncArgs(std::string func, int argc, std::string args[]);
 
 		class ServerLocationData
@@ -18,11 +32,8 @@ class ConfigData
 				static const std::string	className;
 			public:
 				const std::string	path;
-				std::string	root;
-				std::string	* allowed_methods;
-				int			allowed_methods_num;
-				bool		root_is_set;
-				bool		allowed_methods_is_set;
+				MemberData			root;
+				MemberData			allowed_methods;
 
 				ServerLocationData(std::string path);
 				~ServerLocationData();
@@ -34,14 +45,10 @@ class ConfigData
 		{
 				static const std::string	className;
 			public:
-				std::string	name;
-				std::string	listen;
-				std::string	root;
-				std::string	index;
-				bool		name_is_set;
-				bool		listen_is_set;
-				bool		root_is_set;
-				bool		index_is_set;
+				MemberData	name;
+				MemberData	listen;
+				MemberData	root;
+				MemberData	index;
 				std::vector<ServerLocationData *> location;
 
 				ServerData();

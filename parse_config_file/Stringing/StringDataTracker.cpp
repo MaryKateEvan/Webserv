@@ -34,7 +34,7 @@ int	StringDataTracker::countNewLines(std::string str, size_t from, size_t to)
 }
 //	tracks what '"quote level"' you're in
 //	isSQ and isDQ should be set to which quotes you're in at the start
-//	and will denote which you're in at the end
+//	and will denote which one you're in at the end
 void	StringDataTracker::trackQuotes(std::string str, size_t from, size_t to, bool & isSQ, bool & isDQ)
 {
 	size_t	p = from;
@@ -122,13 +122,20 @@ void	StringDataTracker::report_start(char report)
 	if (report & REPORT_LINE)
 		std::cout << "line:" << newLines << ": ";
 }
+void	StringDataTracker::report_end(char report)
+{
+	std::cout << ".";
+	if (report & REPORT_ERRNO)
+		std::cout << " errno: " << strerror(errno);
+	std::cout << "\n";
+}
 
 void	StringDataTracker::report_generic(char report, std::string str)
 {
 	report_start(report);
 	std::cout
-		<< str
-		<< ".\n";
+		<< str;
+	report_end(report);
 }
 void	StringDataTracker::report_landmark_not_found(char report)
 {
@@ -137,8 +144,8 @@ void	StringDataTracker::report_landmark_not_found(char report)
 		<< "a problem occured with the StringDataTracker, "
 		<< "Line Numbers and Quote parsing may be inaccurate after this point"
 		<< "(line:" << newLines << ")."
-		<< " Someone should probably fix that"
-		<< ".\n";
+		<< " Someone should probably fix that";
+	report_end(report);
 }
 void	StringDataTracker::report_args_number(char report, std::string type, int min, int max, int num)
 {
@@ -146,34 +153,35 @@ void	StringDataTracker::report_args_number(char report, std::string type, int mi
 	std::cout
 		<< "type '" << type << "' got invalid number of arguments: "
 		<< "expected between " << min << " and " << max 
-		<< ", got " << num
-		<< ".\n";
+		<< ", got " << num;
+	report_end(report);
 }
 void	StringDataTracker::report_unknown_subtype(char report, std::string type, std::string subtype)
 {
 	report_start(report);
 	std::cout
-		<< "type '" << type << "' got unknown subtype '" << subtype << "'"
-		<< ".\n";
+		<< "type '" << type << "' got unknown subtype '" << subtype << "'";
+	report_end(report);
 }
 void	StringDataTracker::report_not_content(char report, std::string type)
 {
 	report_start(report);
 	std::cout
-		<< "type '" << type << "' did not get {Content} when expected"
-		<< ".\n";
+		<< "type '" << type << "' did not get {Content} when expected";
+	report_end(report);
 }
 void	StringDataTracker::report_got_content(char report, std::string type)
 {
 	report_start(report);
 	std::cout
-		<< "type '" << type << "' got {Content} when not expected"
-		<< ".\n";
+		<< "type '" << type << "' got {Content} when not expected";
+	report_end(report);
 }
 void	StringDataTracker::report_extra_quotes(char report)
 {
 	report_start(report);
 	std::cout
-		//<< "an argument appears to be a concatenation of quoted regions, no quotes will be removed for this argument.\n";
-		<< "Some weird quote thing appear to be happening here, no quotes removed.\n";
+		//<< "an argument appears to be a concatenation of quoted regions, no quotes will be removed for this argument";
+		<< "Some weird quote thing appear to be happening here, no quotes removed";
+	report_end(report);
 }

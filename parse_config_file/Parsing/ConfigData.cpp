@@ -3,6 +3,32 @@
 
 extern StringDataTracker	tracker;
 
+
+
+ConfigData::MemberData::MemberData(std::string name, int num) :
+	name(name),
+	data(num)
+{
+	this -> isSet = false;
+	for (int i = 0; i < num; i++)
+		this -> data[i] = "\e[31mNOT SET\e[m";
+	data_num = 0;
+}
+void	ConfigData::MemberData::set(int argc, std::string args[], std::string funcName, std::string className)
+{
+	if (isSet)
+	{
+		tracker.report_generic(REPORT_WARNING | REPORT_LINE, className + "." + name + " is already set");
+		return;
+	}
+	printFuncArgs(className + "." + funcName, argc, args);
+	for (int i = 0; i < argc; i++)
+		data.arr[i] = args[i];
+	data_num = argc;
+}
+
+
+
 void	ConfigData::printFuncArgs(std::string func, int argc, std::string args[])
 {
 	std::cout << "\e[38;2;63;63;63m" << func << "(";
@@ -17,52 +43,25 @@ void	ConfigData::printFuncArgs(std::string func, int argc, std::string args[])
 
 const std::string ConfigData::ServerLocationData::className = "      ServerLocationData";
 ConfigData::ServerLocationData::ServerLocationData(std::string p) :
-	path(p)
+	path(p),
+	root("root"),
+	allowed_methods("allowed_methods", 3)
 {
-	root = "\e[31mNOT SET\e[m";
-	allowed_methods = new std::string[1];
-	allowed_methods[0] = "\e[31mNOT SET\e[m";
-	allowed_methods_num = 1;
 
-	root_is_set = false;
-	allowed_methods_is_set = false;
 }
 ConfigData::ServerLocationData::~ServerLocationData()
 {
-	delete [] allowed_methods;
-	allowed_methods_num = 0;
+
 }
 void	ConfigData::ServerLocationData::setRoot(void * ptr, int argc, std::string args[])
 {
 	ServerLocationData * p = (ServerLocationData *)ptr;
-	if (p -> root_is_set)
-	{
-		tracker.report_generic(REPORT_WARNING | REPORT_LINE, className + "." + "Root" + " is already set");
-		return;
-	}
-	printFuncArgs(className + "." + __FUNCTION__, argc, args);
-
-	p -> root = args[0];
-	p -> root_is_set = true;
+	p -> root.set(argc, args, __FUNCTION__, className);
 }
 void	ConfigData::ServerLocationData::setAllowedMethods(void * ptr, int argc, std::string args[])
 {
 	ServerLocationData * p = (ServerLocationData *)ptr;
-	if (p -> allowed_methods_is_set)
-	{
-		tracker.report_generic(REPORT_WARNING | REPORT_LINE, className + "." + "AllowedMethods" + " is already set");
-		return;
-	}
-	printFuncArgs(className + "." + __FUNCTION__, argc, args);
-
-	delete [] p -> allowed_methods;
-	p -> allowed_methods = new std::string[argc];
-	p -> allowed_methods_num = argc;
-	for (int i = 0; i < argc; i++)
-	{
-		p -> allowed_methods[i] = args[i];
-	}
-	p -> allowed_methods_is_set = true;
+	p -> allowed_methods.set(argc, args, __FUNCTION__, className);
 }
 
 
@@ -70,17 +69,13 @@ void	ConfigData::ServerLocationData::setAllowedMethods(void * ptr, int argc, std
 
 
 const std::string ConfigData::ServerData::className = "    ServerData";
-ConfigData::ServerData::ServerData()
+ConfigData::ServerData::ServerData() :
+	name("name"),
+	listen("listen"),
+	root("root"),
+	index("index")
 {
-	name = "\e[31mNOT SET\e[m";
-	listen = "\e[31mNOT SET\e[m";
-	root = "\e[31mNOT SET\e[m";
-	index = "\e[31mNOT SET\e[m";
 
-	name_is_set = false;
-	listen_is_set = false;
-	root_is_set = false;
-	index_is_set = false;
 }
 ConfigData::ServerData::~ServerData()
 {
@@ -90,54 +85,22 @@ ConfigData::ServerData::~ServerData()
 void	ConfigData::ServerData::setName(void *ptr, int argc, std::string args[])
 {
 	ServerData * p = (ServerData *)ptr;
-	if (p -> name_is_set)
-	{
-		tracker.report_generic(REPORT_WARNING | REPORT_LINE, className + "." + "Name" + " is already set");
-		return;
-	}
-	printFuncArgs(className + "." + __FUNCTION__, argc, args);
-
-	p -> name = args[0];
-	p -> name_is_set = true;
+	p -> name.set(argc, args, __FUNCTION__, className);
 }
 void	ConfigData::ServerData::setListen(void *ptr, int argc, std::string args[])
 {
 	ServerData * p = (ServerData *)ptr;
-	if (p -> listen_is_set)
-	{
-		tracker.report_generic(REPORT_WARNING | REPORT_LINE, className + "." + "Listen" + " is already set");
-		return;
-	}
-	printFuncArgs(className + "." + __FUNCTION__, argc, args);
-
-	p -> listen = args[0];
-	p -> listen_is_set = true;
+	p -> listen.set(argc, args, __FUNCTION__, className);
 }
 void	ConfigData::ServerData::setRoot(void *ptr, int argc, std::string args[])
 {
 	ServerData * p = (ServerData *)ptr;
-	if (p -> root_is_set)
-	{
-		tracker.report_generic(REPORT_WARNING | REPORT_LINE, className + "." + "Root" + " is already set");
-		return;
-	}
-	printFuncArgs(className + "." + __FUNCTION__, argc, args);
-
-	p -> root = args[0];
-	p -> root_is_set = true;
+	p -> root.set(argc, args, __FUNCTION__, className);
 }
 void	ConfigData::ServerData::setIndex(void *ptr, int argc, std::string args[])
 {
 	ServerData * p = (ServerData *)ptr;
-	if (p -> index_is_set)
-	{
-		tracker.report_generic(REPORT_WARNING | REPORT_LINE, className + "." + "Index" + " is already set");
-		return;
-	}
-	printFuncArgs(className + "." + __FUNCTION__, argc, args);
-
-	p -> index = args[0];
-	p -> index_is_set = true;
+	p -> index.set(argc, args, __FUNCTION__, className);
 }
 void	*ConfigData::ServerData::newLocation(void *ptr, int argc, std::string args[])
 {

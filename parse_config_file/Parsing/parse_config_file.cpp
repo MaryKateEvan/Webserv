@@ -50,7 +50,10 @@ void	parseConfig(std::string config, ConfigData::MainData * data)
 
 	how2parse.parse(data, config);	//	<--- config data is read here
 	std::cout << "\nfile read (past tense)\n";
+	//std::cout << "O:" data -> http[0] -> server[0] -> listen.data[0] << ":\n";
 }
+
+
 
 StringDataTracker	tracker;
 
@@ -61,7 +64,7 @@ bool	read_config_file(std::string file)
 	std::string conf;
 	if (!file_to_string(file, conf))
 	{
-		tracker.report_generic(REPORT_ERROR, "File could not be read");
+		tracker.report_generic(REPORT_ERROR | REPORT_ERRNO, "File could not be read");
 		return (false);
 	}
 
@@ -99,17 +102,19 @@ bool	read_config_file(std::string file)
 			{
 				ConfigData::ServerData * server = http -> server[j];
 				std::cout << "  server [" << j << "]\n";
-				std::cout << "    listen:" << server -> listen << ";\n";
-				std::cout << "    root:" << server -> root << ";\n";
+				std::cout << "    name:" << server -> name.data[0] << ";\n";
+				std::cout << "    listen:" << server -> listen.data[0] << ";\n";
+				std::cout << "    root:" << server -> root.data[0] << ";\n";
+				std::cout << "    index:" << server -> index.data[0] << ";\n";
 				for (int k = 0; k < server -> location.size(); k++)
 				{
 					ConfigData::ServerLocationData * location = server -> location[k];
 					std::cout << "    location [" << k << "]\n";
 					std::cout << "      path:" << location -> path << ";\n";
-					std::cout << "      root:" << location -> root << ";\n";
+					std::cout << "      root:" << location -> root.data[0] << ";\n";
 					std::cout << "      allowed_methods:";
-					for (int l = 0; l < location -> allowed_methods_num; l++)
-						std::cout << " " << location -> allowed_methods[l];
+					for (int l = 0; l < location -> allowed_methods.data_num; l++)
+						std::cout << " " << location -> allowed_methods.data[l];
 					std::cout << ";\n";
 				}
 			}
@@ -120,85 +125,8 @@ bool	read_config_file(std::string file)
 	return (true);
 }
 
-void	test_quote_tracking()
-{
-	std::string str = "    \' 123 456 \'  \"777 _ _ _ 8\" 9   ";
-
-	std::cout << "\n";
-	std::cout << "[" << str << "]\n";
-	str = StringHelp::trim_whitespace(str);
-	std::cout << "[" << str << "]\n";
-	std::cout << "\n";
-
-/*
-	std::string str = "0000'1111'0000\"2222'2222\"'1111''1111\"1111\"1111'0000";
-	tracker = new StringDataTracker(str);
-	std::cout << str << "\n";
-
-	Twin	s, d;
-	size_t	pos = 0;
-
-	while (pos != std::string::npos)
-	{
-		s = Twin::find(str, pos, '\'', '\"');
-		d = Twin::find(str, pos, '\"', '\'');
-
-		if (d.all_good() && s.all_good())
-		{
-			if (s.p1 < d.p1)
-			{
-				std::cout << "s[" << s.cut_in(str) << "]\n";
-				pos = s.p2 + 1;
-			}
-			if (d.p1 < s.p1)
-			{
-				std::cout << "d[" << d.cut_in(str) << "]\n";
-				pos = d.p2 + 1;
-			}
-		}
-		else if (s.all_good())
-		{
-			std::cout << "s[" << s.cut_in(str) << "]\n";
-			pos = s.p2 + 1;
-		}
-		else if (d.all_good())
-		{
-			std::cout << "d[" << d.cut_in(str) << "]\n";
-			pos = d.p2 + 1;
-		}
-		else
-		{
-			pos = std::string::npos;
-		}
-	}
-*/
-
-//	char	quotes[str.length() + 1];
-//	for (int i = 0; i < str.length(); i++)
-//		quotes[i] = ' ';
-//	quotes[str.length()] = ' ';
-//
-//	int	step_size = 3;
-//	for (int i = 0; i < str.length(); i += step_size)
-//	{
-//		if (tracker.isSingleQuote)
-//			quotes[i] = '\'';
-//		else if (tracker.isDoubleQuote)
-//			quotes[i] = '\"';
-//		else
-//			quotes[i] = '|';
-//
-//		tracker.update(step_size);
-//	}
-//
-//	std::cout << str << "\n";
-//	//std::cout << tracker.quotes << "\n";
-//	std::cout << quotes << "\n";
-}
-
 int main(int argc, char * argv[])
 {
-	//test_quote_tracking();
 	if (argc == 2)
 		read_config_file(argv[1]);
 	return (0);

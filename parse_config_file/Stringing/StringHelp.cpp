@@ -43,6 +43,7 @@ size_t		StringHelp::find_ignore(std::string str, size_t pos, char c, char ignore
 	while (p != std::string::npos);
 	return (p);
 }
+//	setting ignore means that anything found inside ignore will be ignored and the next result will be searched for
 size_t		StringHelp::find_ignore(std::string str, size_t pos, std::string s, char ignore)
 {
 	size_t p = std::string::npos;

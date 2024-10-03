@@ -105,6 +105,7 @@ StringArr	StringArr::cut_name_args_content(std::string & name, std::string ** co
 
 
 
+//	splits string by character
 StringArr	StringArr::split(std::string str, char c)
 {
 	size_t	p1, p2;
@@ -125,32 +126,9 @@ StringArr	StringArr::split(std::string str, char c)
 	return (StringArr(vec));
 }
 
-StringArr	StringArr::split(std::string str, char c1, char c2)
-{
-	size_t	p;
-	Pair pair;
-	std::vector<std::string> vec;
-
-	p = 0;
-	pair = Pair::find(str, p, c1, c2);
-	while (pair.p1 != -1)
-	{
-		if (p != pair.p1)
-			vec.push_back(StringHelp::cut(str, p, pair.p1));
-		vec.push_back(pair.cut_ex(str));
-		p = pair.p2 + 1;
-		pair = Pair::find(str, p, c1, c2);
-	}
-	vec.push_back(str.substr(p));
-
-	return (StringArr(vec));
-}
 
 
-
-/*
-	split string into segments seperated by ';' or the end of a '{}' pair
-*/
+//	splits string into segments seperated by ';' or the end of a '{}' pair
 StringArr	StringArr::split_elements(std::string str)
 {
 	size_t	pos;
@@ -183,9 +161,7 @@ StringArr	StringArr::split_elements(std::string str)
 	return (StringArr(vec));
 }
 
-/*
-	splits an elements by ' ' or content of '{}'
-*/
+//	splits an elements by ' ' or content of '{}'
 StringArr	StringArr::split_segments(std::string str)
 {
 	size_t	pos;

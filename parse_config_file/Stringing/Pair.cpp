@@ -6,6 +6,7 @@ Pair::Pair()
 	p1 = std::string::npos;
 	p2 = std::string::npos;
 }
+
 //	checks if both pair characters were found
 bool	Pair::all_good() const
 {
@@ -20,12 +21,12 @@ bool	Pair::any_good() const
 //	cuts the string inside the Pair including the pair characters
 std::string	Pair::cut_in(std::string str) const
 {
-	return str.substr(p1, (p2 - p1) + 1);
+	return (StringHelp::cut(str, p1, p2 + 1));
 }
 //	cuts the string inside the Pair excluding the pair characters
 std::string	Pair::cut_ex(std::string str) const
 {
-	return str.substr(p1 + 1, (p2 - p1) - 1);
+	return (StringHelp::cut(str, p1 + 1, p2));
 }
 
 //	looks for the outer most pair of characters denoted by c1 and c2
