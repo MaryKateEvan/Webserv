@@ -26,7 +26,7 @@ Server::Server(const std::string server_name, int port, const std::string ip_add
 		throw InvalidPortException(_name, port);
 	}
 	_address.sin_port = htons(port); //specifies the port number for the server
-	//! the inet_pton is forbidden function
+	// ! the inet_pton is forbidden function
 	// if (inet_pton(AF_INET, ip_address.c_str(), &_address.sin_addr) != 1)
 	// {
 	// 	close(_fd_server);
@@ -42,51 +42,52 @@ Server::Server(const std::string server_name, int port, const std::string ip_add
 		throw NonBlockingModeFailedException(_name);
 	}
 
-
-
-	// 3. 
-	if (bind(_fd_server, (struct sockaddr *)&_address, sizeof(_address)) != 0)
+	// 4. Bind the socket to the specified address and port:
+	if (bind(_fd_server, (struct sockaddr *)&_address, sizeof(_address)) < 0)
 	{
 		close(_fd_server);
 		throw BindFailedException(_name, ip_address);
 	}
-	if (listen(_fd_server ,SOMAXCONN) != 0)
+
+	// 5. Tell the server to "listen"/wait for incoming connections, with a maximum queue of pending connections set to 128.
+	if (listen(_fd_server, SOMAXCONN) < 0)
 	{
 		close(_fd_server);
 		throw ListenFailedException(_name);
 	}
-	std::cout << "Server is now listening on port " << port << std::endl;
+	std::cout << GREEN("Server " << "\"" << _name << "\"" << " is now listening on port " << UNDERLINE(port) << ".") << std::endl;
 }
 
 Server::~Server()
 {
-	std::cout << "Server Default Destructor called" << std::endl;
+	std::cout << RED("💥 Server Destructor called 🔚") << std::endl;
 	close(_fd_server);
 }
 
-Server::Server(const Server& copy)
-{
-	std::cout << "Server Copy Constructor called" << std::endl;
-	if (this != &copy)
-	{
-		// this->_fd_server = copy._fd_server;
-		// this->_address = copy._address;
-		// this->_name = copy._name;
-	}
-}
+// no point for these currently...
+// Server::Server(const Server& copy)
+// {
+// 	std::cout << "Server Copy Constructor called" << std::endl;
+// 	if (this != &copy)
+// 	{
+// 		// this->_fd_server = copy._fd_server;
+// 		// this->_address = copy._address;
+// 		// this->_name = copy._name;
+// 	}
+// }
 
-Server&	Server::operator=(const Server &copy)
-{
-	std::cout << "Server Copy Assignment called" << std::endl;
-	if (this != &copy)
-	{
-		// close(this->_fd_server);
-		// this->_fd_server = copy._fd_server;
-		// this->_address = copy._address;
-		// this->_name = copy._name;
-	}
-	return (*this);
-}
+// Server&	Server::operator=(const Server &copy)
+// {
+// 	std::cout << "Server Copy Assignment called" << std::endl;
+// 	if (this != &copy)
+// 	{
+// 		// close(this->_fd_server);
+// 		// this->_fd_server = copy._fd_server;
+// 		// this->_address = copy._address;
+// 		// this->_name = copy._name;
+// 	}
+// 	return (*this);
+// }
 
 /* -------------------------------------------------------------------------- */
 /*                                  Functions                                 */

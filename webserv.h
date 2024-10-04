@@ -37,4 +37,12 @@
 #  define MAX_CLIENTS 8080
 # endif 
 
+# define BOLD(text) "\033[1m" << text << "\033[0m"
+# define UNDERLINE(text) "\033[4m" << text << "\033[0m"
+# define BOLD_UNDERLINE(text) "\033[1;4m" << text << "\033[0m"
+# define GRAY(text) "\033[90m" << text << "\033[0m"
+# define RED(text) "\033[31m" << text << "\033[0m"
+# define CYAN(text) "\033[1;96m" << text << "\033[0m"
+# define GREEN(text) "\033[1;92m" << text << "\033[0m"
+
 #endif /*WEBSERV_H*/

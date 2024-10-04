@@ -31,8 +31,8 @@ class Server
 		Server(const std::string server_name, int port, const std::string ip_address, const std::string index_file, const std::string data_dir, const std::string www_dir);
 		//use inet_pton() to convert IP address
 		~Server();
-		Server(const Server& copy);
-		Server& operator=(const Server& copy);
+		// Server(const Server& copy);
+		// Server& operator=(const Server& copy);
 
 		int					getServerFD(void) const;
 		struct sockaddr_in	getAddress(void) const;

@@ -17,8 +17,8 @@ int main()
 	try
 	{
 		std::signal(SIGINT, signal_handler);
-		// Server	server1("A little webserver", PORT, "0.0.0.0", "index.html", "usrimg", "www");
-		Server	server1("A Instagram Knockoff", PORT, "0.0.0.0", "index.html", "images", "image_website");
+		Server	server1("A little webserver", PORT, "0.0.0.0", "index.html", "usrimg", "www");
+		// Server	server1("A Instagram Knockoff", PORT, "0.0.0.0", "index.html", "images", "image_website");
 		// Set response Method is outdated since the server is using the file system in dir /www/
 		server1.setResponse("HTTP/1.1 200 OK\nContent-Type: text/html\n\nA surprise to be sure, but a welcome one!\n");
 
@@ -69,7 +69,7 @@ int main()
 			//sends data do available clients
 			for (int i = 1; i < nfds; i++)
 			{
-				if (fds[i].fd != -1 && (fds[i].revents & POLLIN))
+				if (fds[i].fd != -1 && (fds[i].revents & (POLLIN | POLLOUT)))
 				{
 					std::vector<char>	accumulated_request;
 					std::vector<char>	buffer(4096);
@@ -135,7 +135,13 @@ int main()
 					accumulated_request.clear();
 					close(fds[i].fd);
 					fds[i].fd = -1;
+
+					fds[i].events = POLLOUT;
 				}
+				// else if (fds[i].fd != -1 && (fds[i].revents & POLLOUT))
+				// {
+					
+				// }
 			}
 		}
 	}
