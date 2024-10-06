@@ -28,6 +28,16 @@
 # include "./Exceptions.hpp"
 # include "./utils.h"
 
+//Headers form Dustin:
+# include "./parsing_config/ConfigData.hpp"
+# include "./parsing_config/ConfigParse.hpp"
+# include "./parsing_config/parse_config_file.hpp"
+# include "./stringing_from_config/Pair.hpp"
+# include "./stringing_from_config/StringArr.hpp"
+# include "./stringing_from_config/StringDataTracker.hpp"
+# include "./stringing_from_config/StringHelp.hpp"
+# include "./stringing_from_config/Twin.hpp"
+
 # ifndef PORT
 #  define PORT 8080
 # endif 
