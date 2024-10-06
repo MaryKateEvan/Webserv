@@ -17,7 +17,7 @@ int main(int argc, char **argv)
 	try
 	{
 		if (argc == 2)
-			read_config_file(argv[1]); //calls Dustin's part
+			read_config_file(argv[1]); //calls the parsing part
 		
 		std::signal(SIGINT, signal_handler);
 		Server	server1("A little webserver", PORT, "127.0.0.1", "index.html", "usrimg", "www");
