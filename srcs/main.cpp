@@ -107,7 +107,7 @@ int main(int argc, char **argv)
 								header_parsed = true;
 								std::string	headers = temp_request.substr(0, header_end + 4);
 								size_t content_len_pos = headers.find("Content-Length: ");
-								std::cout << "Headers:\n" << headers << std::endl;
+								// std::cout << "Headers:\n" << headers << std::endl;
 								if (content_len_pos != std::string::npos)
 								{
 									size_t content_length_start = content_len_pos + 16;

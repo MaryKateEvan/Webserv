@@ -6,7 +6,7 @@
 
 Request::Request(const std::string& request, int fd)
 {
-	std::cout << "Request Default Constructor called" << std::endl;
+	// std::cout << "Request Default Constructor called" << std::endl;
 	_fd = fd;
 	std::string::size_type	method;
 	if (request.compare(0, 3, "GET") == 0)
@@ -37,12 +37,12 @@ Request::Request(const std::string& request, int fd)
 
 Request::~Request()
 {
-	std::cout << "Request Default Destructor called" << std::endl;
+	// std::cout << "Request Default Destructor called" << std::endl;
 }
 
 Request::Request(const Request& copy)
 {
-	std::cout << "Request Copy Constructor called" << std::endl;
+	// std::cout << "Request Copy Constructor called" << std::endl;
 	if (this != &copy)
 	{
 	}
@@ -50,7 +50,7 @@ Request::Request(const Request& copy)
 
 Request&	Request::operator=(const Request &copy)
 {
-	std::cout << "Request Copy Assignment called" << std::endl;
+	// std::cout << "Request Copy Assignment called" << std::endl;
 	if (this != &copy)
 	{
 	}

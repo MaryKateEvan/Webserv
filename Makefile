@@ -17,7 +17,7 @@ SRCS 	:= $(wildcard srcs/*.cpp \
 					srcs/parsing_config/*.cpp \
 					srcs/stringing_from_config/*.cpp)
 
-OBJS	:= $(patsubst src/%.c,$(OBJ_DIR)src/%.o,$(SRCS))
+OBJS	:= $(patsubst srcs/%.cpp,$(OBJ_DIR)%.o,$(SRCS))
 
 # ---------------------------------------------------------------------------- #
 #                                     Rules                                    #
@@ -29,9 +29,9 @@ $(NAME): $(OBJS)
 	$(CPP) $(CPPFLAGS) $(OBJS) -o $(NAME)
 	@echo $(GREEN)"Linking $(NAME)!"$(DEFAULT);
 
-$(OBJ_DIR)src/%.o: src/%.c
+$(OBJ_DIR)%.o: srcs/%.cpp
 	@mkdir -p $(dir $@)
-	@$(CPP) $(CFLAGS) -o $@ -c $<
+	@$(CPP) $(CPPFLAGS) -o $@ -c $<
 
 debug: CPPFLAGS += -g
 debug: re

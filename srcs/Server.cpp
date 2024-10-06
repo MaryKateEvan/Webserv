@@ -7,7 +7,7 @@
 Server::Server(const std::string server_name, int port, const std::string ip_address, const std::string index_file, const std::string data_dir, const std::string www_dir)
 	: _name(server_name), _index_file(index_file), _data_dir(data_dir), _www_dir(www_dir)
 {
-	std::cout << "Server Default Constructor called" << std::endl;
+	// std::cout << "Server Default Constructor called" << std::endl;
 	load_mime_types("mime_type.csv");
 	_fd_server = socket(AF_INET, SOCK_STREAM, 0);
 	if (_fd_server == -1)
@@ -45,13 +45,13 @@ Server::Server(const std::string server_name, int port, const std::string ip_add
 
 Server::~Server()
 {
-	std::cout << "Server Default Destructor called" << std::endl;
+	// std::cout << "Server Default Destructor called" << std::endl;
 	close(_fd_server);
 }
 
 Server::Server(const Server& copy)
 {
-	std::cout << "Server Copy Constructor called" << std::endl;
+	// std::cout << "Server Copy Constructor called" << std::endl;
 	if (this != &copy)
 	{
 		// this->_fd_server = copy._fd_server;
@@ -62,7 +62,7 @@ Server::Server(const Server& copy)
 
 Server&	Server::operator=(const Server &copy)
 {
-	std::cout << "Server Copy Assignment called" << std::endl;
+	// std::cout << "Server Copy Assignment called" << std::endl;
 	if (this != &copy)
 	{
 		// close(this->_fd_server);
