@@ -1,9 +1,7 @@
 #ifndef STRUCTS_HPP
 # define STRUCTS_HPP
 
-# include <string>
-# include <vector>
-# include <iostream>
+# include "./webserv.h"
 
 struct LocationData
 {
