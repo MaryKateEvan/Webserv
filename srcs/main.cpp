@@ -26,12 +26,16 @@ int main(int argc, char **argv)
 	std::vector<ServerData> servers;
 	fill_server_data(servers);
 	print_server_data(servers);
+
+	//so that then the SocketsControl receives the vector servers:
+	SocketsControl controller(servers);
+
 	return 0;
-	
+
 	try
 	{
-		if (argc == 2)
-			read_config_file(argv[1]); //calls the parsing part
+		// if (argc == 2)
+		// 	read_config_file(argv[1]); //calls the parsing part
 		std::signal(SIGINT, signal_handler);
 		Server	server1("A little webserver", PORT, "127.0.0.1", "index.html", "usrimg", "www");
 		// Server	server1("A Instagram Knockoff", PORT, "0.0.0.0", "index.html", "images", "image_website");

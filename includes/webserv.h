@@ -28,6 +28,7 @@
 # include <map>
 
 # include "./Server.hpp"
+# include "./SocketsControl.hpp"
 # include "./Request.hpp"
 # include "./Exceptions.hpp"
 # include "./utils.h"
