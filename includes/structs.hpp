@@ -3,20 +3,14 @@
 
 # include <string>
 # include <vector>
-
-enum Methods
-{
-	GET,
-	POST,
-	DELETE,
-};
+# include <iostream>
 
 struct LocationData
 {
-	std::string				path;
-	std::vector<Methods> 	allowed_methods;
-	bool					redirection;
-	std::string				path_to_redirect;
+	std::string					path;
+	std::vector<std::string> 	allowed_methods;
+	bool						redirection;
+	std::string					path_to_redirect;
 };
 
 struct ServerData 
