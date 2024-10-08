@@ -1,0 +1,25 @@
+
+# every 'entry' needs to end with eighter a pair of {} of ;
+# entrys are split into segments
+#  the first segment is the 'name'
+#  if the {} are used the stuff inside is the 'content block'
+#  everything else is the 'args'
+#
+# every entry eighter must or musn't have content block
+# also every entry needs args in a certain range
+#  the exact range is in parse_config_file.cpp:parseConfig()
+
+http
+{
+	server
+	{
+		server_names webserv.test;
+		listen 80;
+		root /test/;
+		index index.html;
+		location / {
+			root /img/;
+			allowed_methods GET;
+		}
+	}
+}

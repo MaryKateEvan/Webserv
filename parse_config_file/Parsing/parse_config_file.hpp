@@ -1,4 +1,9 @@
 
+#pragma once
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <vector>
 #include "../Stringing/StringHelp.hpp"
 #include "../Stringing/StringArr.hpp"
 #include "../Stringing/Pair.hpp"

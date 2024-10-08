@@ -1,6 +1,7 @@
 
 #pragma once
 #include <iostream>
+#include <cstring>
 #include "StringHelp.hpp"
 
 #define	REPORT_DEBUG   0b011

@@ -1,14 +1,10 @@
 
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <vector>
 #include "parse_config_file.hpp"
 
 bool	file_to_string(std::string name, std::string & text)
 {
 	std::ifstream file;
-	file.open(name);
+	file.open(name.c_str());
 
 	if (!file.is_open())
 		return (false);
