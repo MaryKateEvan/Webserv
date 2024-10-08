@@ -11,9 +11,9 @@ ConfigParse::ConfigParse(
 	void (*set_func)(void *, int, std::string[]),
 	int sub_num,
 	ConfigParse *sub
-)
+) :
+	name(name)
 {
-	this -> name = name;
 	this -> arg_min = arg_min;
 	this -> arg_max = arg_max;
 	this -> new_func = new_func;
@@ -25,16 +25,26 @@ ConfigParse::ConfigParse(
 	{
 		std::cout << "NOTE: Configuration Parsing Element '" << name << "' was given neither a new() nor a set() function.\n";
 	}
+
+	//std::cout << "++++ ConfigParse '" << this -> name << "'\n";
+	//for (int j = 0; j < sub_num; j++)
+	//	std::cout << "  " << sub[j].name << "\n";
+	//std::cout << ";\n";
 }
-ConfigParse::ConfigParse(ConfigParse const & othr)
+ConfigParse::ConfigParse(ConfigParse const & othr) :
+	name(othr.name)
 {
-	this -> name = othr.name;
 	this -> arg_min = othr.arg_min;
 	this -> arg_max = othr.arg_max;
 	this -> new_func = othr.new_func;
 	this -> set_func = othr.set_func;
 	this -> sub_num = othr.sub_num;
 	this -> sub = othr.sub;
+
+	//std::cout << "==== ConfigParse '" << this -> name << "'\n";
+	//for (int j = 0; j < sub_num; j++)
+	//	std::cout << "  " << sub[j].name << "\n";
+	//std::cout << ";\n";
 }
 ConfigParse::~ConfigParse()
 {
@@ -65,6 +75,11 @@ ConfigParse::~ConfigParse()
 */
 void	ConfigParse::parse(void * ptr, std::string str) const
 {
+//	std::cout << "'" << name << "' has sub\n";
+//	for (int j = 0; j < sub_num; j++)
+//		std::cout << "  " << sub[j].name << "\n";
+//	std::cout << ";\n";
+
 	StringArr elem = StringArr::split_elements(str);
 	for (size_t i = 0; i < elem.num; i++)
 	{
@@ -130,7 +145,23 @@ void	ConfigParse::parse(void * ptr, std::string str) const
 		if (found == NULL)
 		{
 			tracker.report_unknown_subtype(REPORT_WARNING | REPORT_LINE, this -> name, name);
+			std::cout << "none of:\n";
+			for (int j = 0; j < sub_num; j++)
+				std::cout << "  " << sub[j].name << "\n";
+			std::cout << ";\n";
 		}
 		delete content;
+	}
+}
+void	ConfigParse::print(std::string tab) const
+{
+	std::cout << tab << "Name: '" << name << "'\n";
+	//std::cout << tab << "[min:max] [" << arg_min << ":" << arg_max << "]\n";
+	//std::cout << tab << "[new:set] [" << new_func << ":" << set_func << "]\n";
+	//std::cout << tab << "Sub: [" << sub_num << "]\n";
+	for (int i = 0; i < sub_num; i++)
+	{
+		//std::cout << tab << "[" << i << "]\n";
+		sub[i].print(tab + "  ");
 	}
 }

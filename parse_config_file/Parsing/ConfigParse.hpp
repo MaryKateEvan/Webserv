@@ -8,7 +8,7 @@
 class ConfigParse
 {
 	private:
-		std::string			name;
+		const std::string	name;
 		int					arg_min;
 		int					arg_max;
 		void				*(*new_func)(void *, int, std::string[]);
@@ -18,16 +18,17 @@ class ConfigParse
 
 	public:
 		ConfigParse(
-			std::string name,
+			const std::string name,
 			int arg_min,
 			int arg_max,
 			void * (*new_func)(void *, int, std::string[]),
 			void (*set_func)(void *, int, std::string[]),
-			int sub_num,
-			ConfigParse *sub
+			int sub_num = 0,
+			ConfigParse *sub = NULL
 		);
 		ConfigParse(ConfigParse const & othr);
 		~ConfigParse();
 
 		void	parse(void * ptr, std::string str) const;
+		void	print(std::string tab = "") const;
 };

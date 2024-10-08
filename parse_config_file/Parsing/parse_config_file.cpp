@@ -26,26 +26,39 @@ void	parseConfig(std::string config, ConfigData::MainData * data)
 {
 	ConfigParse how2parse = ConfigParse("file", 0, 0, NULL, NULL, 1, (ConfigParse[])
 	{
-		ConfigParse("http", 0, 0, ConfigData::MainData::newHttp, NULL, 1, (ConfigParse[])
+		ConfigParse("http", 0, 0, ConfigData::MainData::newHttp, NULL, 2, (ConfigParse[])
 		{
-			ConfigParse("server", 0, 0, ConfigData::HttpData::newServer, NULL, 5, (ConfigParse[])
+			ConfigParse("server", 0, 0, ConfigData::HttpData::newServer, NULL, 10, (ConfigParse[])
 			{
-				ConfigParse("server_names", 1, 1, NULL, ConfigData::ServerData::setName, 0, NULL),
-				ConfigParse("listen", 1, 1, NULL, ConfigData::ServerData::setListen, 0, NULL),
-				ConfigParse("root", 1, 1, NULL, ConfigData::ServerData::setRoot, 0, NULL),
-				ConfigParse("index", 1, 1, NULL, ConfigData::ServerData::setIndex, 0, NULL),
-				ConfigParse("location", 1, 1, ConfigData::ServerData::newLocation, NULL, 2, (ConfigParse[])
+				ConfigParse("server_names", 1, 1, NULL, ConfigData::ServerData::setName),
+				ConfigParse("server_name", 1, 1, NULL, ConfigData::ServerData::setName),
+				ConfigParse("listen", 1, 1, NULL, ConfigData::ServerData::setListen),
+				ConfigParse("root", 1, 1, NULL, ConfigData::ServerData::setRoot),
+				ConfigParse("index", 1, 1, NULL, ConfigData::ServerData::setIndex),
+				ConfigParse("keepalive_timeout", 1, 1, NULL, ConfigData::ServerData::setKeepAlive),
+				ConfigParse("send_timeout", 1, 1, NULL, ConfigData::ServerData::setSendTimeout),
+				ConfigParse("max_body_size", 1, 1, NULL, ConfigData::ServerData::setMaxBodySize),
+				ConfigParse("directory_listing", 1, 1, NULL, ConfigData::ServerData::setDirectoryListing),
+				ConfigParse("location", 1, 1, ConfigData::ServerData::newLocation, NULL, 4, (ConfigParse[])
 				{
-					ConfigParse("root", 1, 1, NULL, ConfigData::ServerLocationData::setRoot, 0, NULL),
-					ConfigParse("allowed_methods", 1, 3, NULL, ConfigData::ServerLocationData::setAllowedMethods, 0, NULL),
+					ConfigParse("root", 1, 1, NULL, ConfigData::ServerLocationData::setRoot),
+					ConfigParse("allowed_methods", 1, 3, NULL, ConfigData::ServerLocationData::setAllowedMethods),
+					ConfigParse("redirection", 1, 1, NULL, ConfigData::ServerLocationData::setRedirection),
+					ConfigParse("request_types", 1, 3, NULL, ConfigData::ServerLocationData::setRequest_types),
 				}),
 			}),
+			ConfigParse("server_timeout_time", 1, 1, NULL, ConfigData::HttpData::setServer_timeout_time),
 		}),
 	});
+	std::cout << "================================\n";
+	how2parse.print();
+	std::cout << "================================\n";
 	std::cout << "\n";
-
 	how2parse.parse(data, config);	//	<--- config data is read here
 	std::cout << "\nfile read (past tense)\n";
+	std::cout << "================================\n";
+	how2parse.print();
+	std::cout << "================================\n";
 	//std::cout << "O:" data -> http[0] -> server[0] -> listen.data[0] << ":\n";
 }
 
@@ -102,6 +115,10 @@ bool	read_config_file(std::string file)
 				std::cout << "    listen:" << server -> listen.data[0] << ";\n";
 				std::cout << "    root:" << server -> root.data[0] << ";\n";
 				std::cout << "    index:" << server -> index.data[0] << ";\n";
+				std::cout << "    keepAlive:" << server -> keepAlive.data[0] << ";\n";
+				std::cout << "    sendTimeout:" << server -> sendTimeout.data[0] << ";\n";
+				std::cout << "    maxBodySize:" << server -> maxBodySize.data[0] << ";\n";
+				std::cout << "    directoryListing:" << server -> directoryListing.data[0] << ";\n";
 				for (int k = 0; k < server -> location.size(); k++)
 				{
 					ConfigData::ServerLocationData * location = server -> location[k];
@@ -112,8 +129,14 @@ bool	read_config_file(std::string file)
 					for (int l = 0; l < location -> allowed_methods.data_num; l++)
 						std::cout << " " << location -> allowed_methods.data[l];
 					std::cout << ";\n";
+					std::cout << "      redirection:" << location -> redirection.data[0] << ";\n";
+					std::cout << "      request_types:";
+					for (int l = 0; l < location -> request_types.data_num; l++)
+						std::cout << " " << location -> request_types.data[l];
+					std::cout << ";\n";
 				}
 			}
+			std::cout << "server_timeout_time:" << http -> server_timeout_time.data[0] << ";\n";
 		}
 	}
 

@@ -45,7 +45,9 @@ const std::string ConfigData::ServerLocationData::className = "      ServerLocat
 ConfigData::ServerLocationData::ServerLocationData(std::string p) :
 	path(p),
 	root("root"),
-	allowed_methods("allowed_methods", 3)
+	allowed_methods("allowed_methods", 3),
+	redirection("redirection"),
+	request_types("request_types", 3)
 {
 
 }
@@ -63,7 +65,16 @@ void	ConfigData::ServerLocationData::setAllowedMethods(void * ptr, int argc, std
 	ServerLocationData * p = (ServerLocationData *)ptr;
 	p -> allowed_methods.set(argc, args, __FUNCTION__, className);
 }
-
+void	ConfigData::ServerLocationData::setRedirection(void * ptr, int argc, std::string args[])
+{
+	ServerLocationData * p = (ServerLocationData *)ptr;
+	p -> redirection.set(argc, args, __FUNCTION__, className);
+}
+void	ConfigData::ServerLocationData::setRequest_types(void * ptr, int argc, std::string args[])
+{
+	ServerLocationData * p = (ServerLocationData *)ptr;
+	p -> request_types.set(argc, args, __FUNCTION__, className);
+}
 
 
 
@@ -73,7 +84,11 @@ ConfigData::ServerData::ServerData() :
 	name("name"),
 	listen("listen"),
 	root("root"),
-	index("index")
+	index("index"),
+	keepAlive("keepalive_timeout"),
+	sendTimeout("sendTimeout"),
+	maxBodySize("maxBodySize"),
+	directoryListing("directory_listing")
 {
 
 }
@@ -102,6 +117,26 @@ void	ConfigData::ServerData::setIndex(void *ptr, int argc, std::string args[])
 	ServerData * p = (ServerData *)ptr;
 	p -> index.set(argc, args, __FUNCTION__, className);
 }
+void	ConfigData::ServerData::setKeepAlive(void *ptr, int argc, std::string args[])
+{
+	ServerData * p = (ServerData *)ptr;
+	p -> keepAlive.set(argc, args, __FUNCTION__, className);
+}
+void	ConfigData::ServerData::setSendTimeout(void *ptr, int argc, std::string args[])
+{
+	ServerData * p = (ServerData *)ptr;
+	p -> sendTimeout.set(argc, args, __FUNCTION__, className);
+}
+void	ConfigData::ServerData::setMaxBodySize(void *ptr, int argc, std::string args[])
+{
+	ServerData * p = (ServerData *)ptr;
+	p -> maxBodySize.set(argc, args, __FUNCTION__, className);
+}
+void	ConfigData::ServerData::setDirectoryListing(void *ptr, int argc, std::string args[])
+{
+	ServerData * p = (ServerData *)ptr;
+	p -> directoryListing.set(argc, args, __FUNCTION__, className);
+}
 void	*ConfigData::ServerData::newLocation(void *ptr, int argc, std::string args[])
 {
 	ServerData * p = (ServerData *)ptr;
@@ -117,7 +152,8 @@ void	*ConfigData::ServerData::newLocation(void *ptr, int argc, std::string args[
 
 
 const std::string ConfigData::HttpData::className = "  HttpData";
-ConfigData::HttpData::HttpData()
+ConfigData::HttpData::HttpData() :
+	server_timeout_time("server_timeout_time")
 {
 
 }
@@ -135,7 +171,11 @@ void	*ConfigData::HttpData::newServer(void *ptr, int argc, std::string args[])
 	p -> server.push_back(server);
 	return server;
 }
-
+void	ConfigData::HttpData::setServer_timeout_time(void *ptr, int argc, std::string args[])
+{
+	HttpData * p = (HttpData *)ptr;
+	p -> server_timeout_time.set(argc, args, __FUNCTION__, className);
+}
 
 
 

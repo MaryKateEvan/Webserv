@@ -34,12 +34,16 @@ class ConfigData
 				const std::string	path;
 				MemberData			root;
 				MemberData			allowed_methods;
+				MemberData			redirection;
+				MemberData			request_types;
 
 				ServerLocationData(std::string path);
 				~ServerLocationData();
 
 				static void	setRoot(void * ptr, int argc, std::string args[]);
 				static void	setAllowedMethods(void * ptr, int argc, std::string args[]);
+				static void	setRedirection(void * ptr, int argc, std::string args[]);
+				static void	setRequest_types(void * ptr, int argc, std::string args[]);
 		};
 		class ServerData
 		{
@@ -49,6 +53,10 @@ class ConfigData
 				MemberData	listen;
 				MemberData	root;
 				MemberData	index;
+				MemberData	keepAlive;
+				MemberData	sendTimeout;
+				MemberData	maxBodySize;
+				MemberData	directoryListing;
 				std::vector<ServerLocationData *> location;
 
 				ServerData();
@@ -58,6 +66,10 @@ class ConfigData
 				static void	setListen(void * ptr, int argc, std::string args[]);
 				static void	setRoot(void * ptr, int argc, std::string args[]);
 				static void	setIndex(void * ptr, int argc, std::string args[]);
+				static void	setKeepAlive(void * ptr, int argc, std::string args[]);
+				static void	setSendTimeout(void * ptr, int argc, std::string args[]);
+				static void	setMaxBodySize(void * ptr, int argc, std::string args[]);
+				static void	setDirectoryListing(void * ptr, int argc, std::string args[]);
 				static void	*newLocation(void * ptr, int argc, std::string args[]);
 		};
 		class HttpData
@@ -65,11 +77,13 @@ class ConfigData
 				static const std::string	className;
 			public:
 				std::vector<ServerData *> server;
+				MemberData	server_timeout_time;
 
 				HttpData();
 				~HttpData();
 
 				static void	*newServer(void * ptr, int argc, std::string args[]);
+				static void	setServer_timeout_time(void * ptr, int argc, std::string args[]);
 		};
 		class MainData
 		{
