@@ -38,6 +38,7 @@ class	StringDataTracker
 	public:
 		void	report_landmark_not_found(char report);
 		void	report_generic(char report, std::string str);
+		void	report_already_set(char report, int line, std::string className, std::string memberName);
 		void	report_args_number(char report, std::string type, int min, int max, int num);
 		void	report_unknown_subtype(char report, std::string type, std::string subtype);
 		void	report_not_content(char report, std::string type);

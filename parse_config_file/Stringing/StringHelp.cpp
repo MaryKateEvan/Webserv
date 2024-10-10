@@ -7,7 +7,7 @@
 bool		StringHelp::is_comment(std::string str, size_t pos)
 {
 	size_t hash = str.rfind('#', pos);
-	if (hash != -1)
+	if (hash != std::string::npos)
 	{
 		size_t newl = str.find('\n', hash);
 		if (pos < newl)
@@ -52,8 +52,10 @@ size_t		StringHelp::find_ignore(std::string str, size_t pos, std::string s, char
 	{
 		p = str.find(s, pos);
 		if ((ignore & FIND_IGNORE_COMMENT) && is_comment(str, p))
+		{
 			pos = p + 1;
-		else if (ignore & FIND_IGNORE_QUOTE)
+		}
+		else if (ignore & (FIND_IGNORE_QUOTE))
 		{
 			StringDataTracker::trackQuotes(str, pos, p, isSQ, isDQ);
 			if ((ignore & FIND_IGNORE_SINGLE_QUOTE) && isSQ)
@@ -86,7 +88,7 @@ std::string	StringHelp::cut(std::string str, size_t from)
 
 bool	StringHelp::has_unicode(std::string str)
 {
-	for (int i = 0; i < str.length(); i++)
+	for (size_t i = 0; i < str.length(); i++)
 	{
 		if ((str[i] & 0b10000000) != 0)
 			return (true);
@@ -103,7 +105,7 @@ bool			StringHelp::is_whitespace(char c)
 }
 bool			StringHelp::only_whitespace(std::string str)
 {
-	for (int i = 0; i < str.length(); i++)
+	for (size_t i = 0; i < str.length(); i++)
 	{
 		if (!is_whitespace(str[i]))
 			return (false);
@@ -122,7 +124,7 @@ std::string		StringHelp::trim_whitespace(std::string str)
 
 	std::string trim = "";
 	bool last_was_white = false;
-	for (int i = 0; i < str.length(); i++)
+	for (size_t i = 0; i < str.length(); i++)
 	{
 		if (next.all_good() && i >= next.p1)
 		{

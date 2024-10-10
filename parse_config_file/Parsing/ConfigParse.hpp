@@ -7,28 +7,29 @@
 
 class ConfigParse
 {
-	private:
+	//private:
+	public:
 		const std::string	name;
-		int					arg_min;
-		int					arg_max;
-		void				*(*new_func)(void *, int, std::string[]);
-		void				(*set_func)(void *, int, std::string[]);
-		int					sub_num;
-		ConfigParse			*sub;
+		size_t				arg_min;
+		size_t				arg_max;
+		void				*(*new_func)(void *, int, int, std::string[]);
+		void				(*set_func)(void *, int, int, std::string[]);
+		const size_t		sub_num;
+		const ConfigParse	*sub;
 
 	public:
 		ConfigParse(
 			const std::string name,
-			int arg_min,
-			int arg_max,
-			void * (*new_func)(void *, int, std::string[]),
-			void (*set_func)(void *, int, std::string[]),
-			int sub_num = 0,
-			ConfigParse *sub = NULL
+			size_t arg_min,
+			size_t arg_max,
+			void * (*new_func)(void *, int, int, std::string[]),
+			void (*set_func)(void *, int, int, std::string[]),
+			const size_t sub_num = 0,
+			const ConfigParse * sub = NULL
 		);
 		ConfigParse(ConfigParse const & othr);
 		~ConfigParse();
 
-		void	parse(void * ptr, std::string str) const;
+		void	parse(void * ptr, std::string str, std::string tab) const;
 		void	print(std::string tab = "") const;
 };

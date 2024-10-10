@@ -15,14 +15,16 @@ class ConfigData
 		class	MemberData
 		{
 			public:
-				const std::string	name;
+				const char *		name;
+				int					setAtLine;
 				bool				isSet;
-				StringArr			data;
-				int					data_num;
+				StringArr			*data;
 
-				MemberData(std::string name, int num = 1);
+				MemberData(const char * name);
+				~MemberData();
 
-				void	set(int argc, std::string args[], std::string funcName, std::string className);
+				void	set(int argc, std::string args[], int line, std::string funcName, std::string className);
+				void	print(std::string tab);
 		};
 
 		static void	printFuncArgs(std::string func, int argc, std::string args[]);
@@ -31,46 +33,50 @@ class ConfigData
 		{
 				static const std::string	className;
 			public:
-				const std::string	path;
 				MemberData			root;
 				MemberData			allowed_methods;
 				MemberData			redirection;
 				MemberData			request_types;
+				const std::string	path;
 
 				ServerLocationData(std::string path);
 				~ServerLocationData();
 
-				static void	setRoot(void * ptr, int argc, std::string args[]);
-				static void	setAllowedMethods(void * ptr, int argc, std::string args[]);
-				static void	setRedirection(void * ptr, int argc, std::string args[]);
-				static void	setRequest_types(void * ptr, int argc, std::string args[]);
+				static void	set_root(void * ptr, int line, int argc, std::string args[]);
+				static void	set_allowed_methods(void * ptr, int line, int argc, std::string args[]);
+				static void	set_redirection(void * ptr, int line, int argc, std::string args[]);
+				static void	set_request_types(void * ptr, int line, int argc, std::string args[]);
+
+				void	print();
 		};
 		class ServerData
 		{
 				static const std::string	className;
 			public:
-				MemberData	name;
+				MemberData	server_name;
 				MemberData	listen;
 				MemberData	root;
 				MemberData	index;
-				MemberData	keepAlive;
-				MemberData	sendTimeout;
-				MemberData	maxBodySize;
-				MemberData	directoryListing;
+				MemberData	keepalive_timeout;
+				MemberData	send_timeout;
+				MemberData	max_body_size;
+				MemberData	directory_listing;
 				std::vector<ServerLocationData *> location;
 
 				ServerData();
 				~ServerData();
 
-				static void	setName(void * ptr, int argc, std::string args[]);
-				static void	setListen(void * ptr, int argc, std::string args[]);
-				static void	setRoot(void * ptr, int argc, std::string args[]);
-				static void	setIndex(void * ptr, int argc, std::string args[]);
-				static void	setKeepAlive(void * ptr, int argc, std::string args[]);
-				static void	setSendTimeout(void * ptr, int argc, std::string args[]);
-				static void	setMaxBodySize(void * ptr, int argc, std::string args[]);
-				static void	setDirectoryListing(void * ptr, int argc, std::string args[]);
-				static void	*newLocation(void * ptr, int argc, std::string args[]);
+				static void	set_server_name(void * ptr, int line, int argc, std::string args[]);
+				static void	set_listen(void * ptr, int line, int argc, std::string args[]);
+				static void	set_root(void * ptr, int line, int argc, std::string args[]);
+				static void	set_index(void * ptr, int line, int argc, std::string args[]);
+				static void	set_keepalive_timeout(void * ptr, int line, int argc, std::string args[]);
+				static void	set_send_timeout(void * ptr, int line, int argc, std::string args[]);
+				static void	set_max_body_size(void * ptr, int line, int argc, std::string args[]);
+				static void	set_directory_listing(void * ptr, int line, int argc, std::string args[]);
+				static void	*newLocation(void * ptr, int line, int argc, std::string args[]);
+
+				void	print();
 		};
 		class HttpData
 		{
@@ -82,8 +88,10 @@ class ConfigData
 				HttpData();
 				~HttpData();
 
-				static void	*newServer(void * ptr, int argc, std::string args[]);
-				static void	setServer_timeout_time(void * ptr, int argc, std::string args[]);
+				static void	*newServer(void * ptr, int line, int argc, std::string args[]);
+				static void	set_server_timeout_time(void * ptr, int line, int argc, std::string args[]);
+
+				void	print();
 		};
 		class MainData
 		{
@@ -94,7 +102,9 @@ class ConfigData
 				MainData();
 				~MainData();
 
-				static void	*newHttp(void * ptr, int argc, std::string args[]);
+				static void	*newHttp(void * ptr, int line, int argc, std::string args[]);
+
+				void	print();
 		};
 };
 

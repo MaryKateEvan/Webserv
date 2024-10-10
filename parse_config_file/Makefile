@@ -11,8 +11,8 @@ File_C = \
 		Parsing/parse_config_file.cpp
 File_O = $(File_C:.cpp=.o)
 
-#Flags = -Wall -Wextra -Werror
-Flags += -std=c++98
+Flags = -Wall -Wextra -Werror
+//Flags += -std=c++98
 
 
 $(Name) : $(File_O)

@@ -16,7 +16,14 @@ StringArr::StringArr(std::vector<std::string> vec) : num(vec.size())
 	//std::cout << "++++ String Arr <" << num << ">\n";
 	arr = new std::string[num];
 	for (size_t i = 0; i < num; i++)
+	{
 		arr[i] = vec[i];
+		//std::cout << "  [" << i << "] "
+		//	<< "|" << arr[i] << "| "
+		//	<< "[" << ((void *)vec[i].c_str()) << " " << ((void *)(&vec[i].c_str()[vec[i].size()])) << "]"
+		//	<< "[" << ((void *)arr[i].c_str()) << " " << ((void *)(&arr[i].c_str()[vec[i].size()])) << "]"
+		//	<< "\n";
+	}
 }
 StringArr::StringArr(StringArr const & othr) : num(othr.num)
 {
@@ -48,7 +55,6 @@ extern StringDataTracker	tracker;
 std::string	StringArr::remove_quotes(std::string str)
 {
 	size_t	l = str.length();
-	size_t	q;
 	Twin	twin;
 
 	twin = Twin::find(str, 0, '\'');
@@ -72,12 +78,13 @@ std::string	StringArr::remove_quotes(std::string str)
 //	the first element in StringArr will be considered the {name}
 //	if the last element starts with '{' and ends with '}', is is considered {content}
 //	everything else will be returned as {args}
-StringArr	StringArr::cut_name_args_content(std::string & name, std::string ** content)
+StringArr	StringArr::cut_name_args_content(std::string & name, std::string ** content, int & line)
 {
-	int n = num;
+	size_t n = num;
 
 	name = arr[0];
 	tracker.update(name);
+	line = tracker.newLines;
 
 	*content = NULL;
 	if (num > 1)

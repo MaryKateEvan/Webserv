@@ -137,6 +137,14 @@ void	StringDataTracker::report_generic(char report, std::string str)
 		<< str;
 	report_end(report);
 }
+void	StringDataTracker::report_already_set(char report, int line, std::string className, std::string memberName)
+{
+	report_start(report);
+	std::cout
+		<< className << "." << memberName
+		<< " was already set at line:" << line;
+	report_end(report);
+}
 void	StringDataTracker::report_landmark_not_found(char report)
 {
 	report_start(report);

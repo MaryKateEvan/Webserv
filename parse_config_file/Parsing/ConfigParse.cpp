@@ -3,52 +3,50 @@
 
 extern StringDataTracker	tracker;
 
+
+
 ConfigParse::ConfigParse(
-	std::string name,
-	int arg_min,
-	int arg_max,
-	void * (*new_func)(void *, int, std::string[]),
-	void (*set_func)(void *, int, std::string[]),
-	int sub_num,
-	ConfigParse *sub
+	const std::string name,
+	size_t arg_min,
+	size_t arg_max,
+	void * (*new_func)(void *, int, int, std::string[]),
+	void (*set_func)(void *, int, int, std::string[]),
+	const size_t sub_num,
+	const ConfigParse * sub
 ) :
-	name(name)
+	name(name),
+	sub_num(sub_num),
+	sub(sub)
 {
+	//std::cout << "++++ ConfigParse '" << this->name << "'\n";
+
 	this -> arg_min = arg_min;
 	this -> arg_max = arg_max;
 	this -> new_func = new_func;
 	this -> set_func = set_func;
-	this -> sub_num = sub_num;
-	this -> sub = sub;
 
 	if (new_func == NULL && set_func == NULL)
 	{
 		std::cout << "NOTE: Configuration Parsing Element '" << name << "' was given neither a new() nor a set() function.\n";
 	}
-
-	//std::cout << "++++ ConfigParse '" << this -> name << "'\n";
-	//for (int j = 0; j < sub_num; j++)
-	//	std::cout << "  " << sub[j].name << "\n";
-	//std::cout << ";\n";
 }
 ConfigParse::ConfigParse(ConfigParse const & othr) :
-	name(othr.name)
+	name(othr.name),
+	sub_num(othr.sub_num),
+	sub(othr.sub)
 {
+	//std::cout << "==== ConfigParse '" << this->name << "'\n";
+
 	this -> arg_min = othr.arg_min;
 	this -> arg_max = othr.arg_max;
 	this -> new_func = othr.new_func;
 	this -> set_func = othr.set_func;
-	this -> sub_num = othr.sub_num;
-	this -> sub = othr.sub;
-
-	//std::cout << "==== ConfigParse '" << this -> name << "'\n";
-	//for (int j = 0; j < sub_num; j++)
-	//	std::cout << "  " << sub[j].name << "\n";
-	//std::cout << ";\n";
 }
 ConfigParse::~ConfigParse()
 {
+	//std::cout << "---- ConfigParse '" << this->name << "'\n";
 
+	delete [] sub;
 }
 
 
@@ -73,20 +71,16 @@ ConfigParse::~ConfigParse()
 		if set_func is given
 			args is given to the function
 */
-void	ConfigParse::parse(void * ptr, std::string str) const
+void	ConfigParse::parse(void * ptr, std::string str, std::string tab) const
 {
-//	std::cout << "'" << name << "' has sub\n";
-//	for (int j = 0; j < sub_num; j++)
-//		std::cout << "  " << sub[j].name << "\n";
-//	std::cout << ";\n";
-
 	StringArr elem = StringArr::split_elements(str);
 	for (size_t i = 0; i < elem.num; i++)
 	{
 		StringArr seg = StringArr::split_segments(elem[i]);
-		std::string name;
+		int line;
+		std::string ent_name;
 		std::string * content;
-		StringArr args = seg.cut_name_args_content(name, &content);
+		StringArr args = seg.cut_name_args_content(ent_name, &content, line);
 
 		//std::cout << "\e[38;2;255;0;0melement\e[m\n";
 		//std::cout << "\e[38;2;255;0;0m[" << i << "]" << elem[i] << "\e[m\n";
@@ -100,15 +94,11 @@ void	ConfigParse::parse(void * ptr, std::string str) const
 		//if (content != NULL)
 		//	std::cout << "\e[38;2;0;255;0mcontent:" << *content << ";\e[m\n";
 
-		//tracker.update(name);
-		//for (size_t j = 0; j < args.num; j++)
-		//	tracker.update(args[j]);
-
 		void *	tmp;
-		ConfigParse	* found = NULL;
+		ConfigParse const * found = NULL;
 		for (size_t j = 0; j < sub_num; j++)
 		{
-			if (name == sub[j].name)
+			if (ent_name == sub[j].name)
 			{
 				found = &(sub[j]);
 				if (content == NULL && found -> sub_num != 0)
@@ -121,17 +111,16 @@ void	ConfigParse::parse(void * ptr, std::string str) const
 					tracker.report_got_content(REPORT_WARNING | REPORT_LINE, found -> name);
 					break;
 				}
-
 				if (found -> arg_min <= args.num && args.num <= found -> arg_max)
 				{
 					if (found -> new_func != NULL)
 					{
-						tmp = found -> new_func(ptr, args.num, args.arr);
-						found -> parse(tmp, *content);
+						tmp = found -> new_func(ptr, line, args.num, args.arr);
+						found -> parse(tmp, *content, tab + "  ");
 					}
 					else if (found -> set_func != NULL)
 					{
-						found -> set_func(ptr, args.num, args.arr);
+						found -> set_func(ptr, line, args.num, args.arr);
 					}
 				}
 				else
@@ -144,9 +133,9 @@ void	ConfigParse::parse(void * ptr, std::string str) const
 
 		if (found == NULL)
 		{
-			tracker.report_unknown_subtype(REPORT_WARNING | REPORT_LINE, this -> name, name);
+			tracker.report_unknown_subtype(REPORT_WARNING | REPORT_LINE, name, ent_name);
 			std::cout << "none of:\n";
-			for (int j = 0; j < sub_num; j++)
+			for (size_t j = 0; j < sub_num; j++)
 				std::cout << "  " << sub[j].name << "\n";
 			std::cout << ";\n";
 		}
@@ -159,7 +148,7 @@ void	ConfigParse::print(std::string tab) const
 	//std::cout << tab << "[min:max] [" << arg_min << ":" << arg_max << "]\n";
 	//std::cout << tab << "[new:set] [" << new_func << ":" << set_func << "]\n";
 	//std::cout << tab << "Sub: [" << sub_num << "]\n";
-	for (int i = 0; i < sub_num; i++)
+	for (size_t i = 0; i < sub_num; i++)
 	{
 		//std::cout << tab << "[" << i << "]\n";
 		sub[i].print(tab + "  ");
