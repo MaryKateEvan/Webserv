@@ -109,12 +109,12 @@ std::string	Server::map_to_directory(const std::string& file_path)
 		return (_www_dir + file_path);
 }
 
-bool	Server::file_exists(const std::string& file_path)
+/* bool	Server::file_exists(const std::string& file_path)
 {
 	std::ifstream file(file_path.c_str());
 
 	return (file.is_open());
-}
+} */
 
 std::string	Server::get_mime_type(const std::string& file_path)
 {
