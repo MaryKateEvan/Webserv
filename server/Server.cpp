@@ -179,7 +179,12 @@ int	Server::process_get(const Request& req)
 {
 	std::string	url = req.get_file_path();
 	std::string	file_path = map_to_directory(url);
-	if (file_exists(file_path))
+
+	if (std::filesystem::is_directory(file_path))
+	{
+		send_error_message(200, req);
+	}
+	else if (std::filesystem::exists(file_path))
 	{
 		std::string	file_content = read_file(file_path);
 		std::string	mime_type = get_mime_type(file_path);
