@@ -183,8 +183,10 @@ int	Server::process_get(const Request& req)
 
 	if (std::filesystem::is_directory(file_path))
 	{
-		if (file_path != map_to_directory("/" + _data_dir))
+		if (file_path != map_to_directory("/" + _data_dir + "/"))
 		{
+			// std::cout << "File Path: " << file_path << std::endl;
+			// std::cout << "Data Path: " <<  map_to_directory("/" + _data_dir) << std::endl;
 			send_error_message(403, req);
 			return (0);
 		}
