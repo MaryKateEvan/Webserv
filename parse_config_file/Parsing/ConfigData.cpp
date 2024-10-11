@@ -24,13 +24,27 @@ void	ConfigData::MemberData::set(int argc, std::string args[], int line, std::st
 		return;
 	}
 	printFuncArgs(className + "." + funcName, argc, args);
+
 	isSet = true;
 	setAtLine = line;
-
 	data = new StringArr(argc);
 	for (int i = 0; i < argc; i++)
 		data -> arr[i] = args[i];
 }
+/*int		ConfigData::MemberData::get(size_t idx, int def) const
+{
+	if (!isSet)
+		return (def);
+	if (idx >= data -> num)
+		return (def);
+	try
+	{
+		std::stringstream ss;
+		int	Temp;
+	}
+	catch(const std::exception& e) { }
+	return (def);
+}*/
 void	ConfigData::MemberData::print(std::string tab)
 {
 	std::cout << tab << name << " { ";
@@ -61,23 +75,16 @@ void	ConfigData::printFuncArgs(std::string func, int argc, std::string args[])
 
 
 const std::string ConfigData::ServerLocationData::className = "      ServerLocationData";
-ConfigData::ServerLocationData::ServerLocationData(std::string p) :
-	path(p),
-	root("root"),
+ConfigData::ServerLocationData::ServerLocationData(std::string path) :
+	path(path),
 	allowed_methods("allowed_methods"),
-	redirection("redirection"),
-	request_types("request_types")
+	redirection("redirection")
 {
 
 }
 ConfigData::ServerLocationData::~ServerLocationData()
 {
 
-}
-void	ConfigData::ServerLocationData::set_root(void * ptr, int line, int argc, std::string args[])
-{
-	ServerLocationData * p = (ServerLocationData *)ptr;
-	p -> root.set(argc, args, line, __FUNCTION__, className);
 }
 void	ConfigData::ServerLocationData::set_allowed_methods(void * ptr, int line, int argc, std::string args[])
 {
@@ -89,19 +96,12 @@ void	ConfigData::ServerLocationData::set_redirection(void * ptr, int line, int a
 	ServerLocationData * p = (ServerLocationData *)ptr;
 	p -> redirection.set(argc, args, line, __FUNCTION__, className);
 }
-void	ConfigData::ServerLocationData::set_request_types(void * ptr, int line, int argc, std::string args[])
-{
-	ServerLocationData * p = (ServerLocationData *)ptr;
-	p -> request_types.set(argc, args, line, __FUNCTION__, className);
-}
 void	ConfigData::ServerLocationData::print()
 {
 	std::string	tab = "    ";
 
-	root.print(tab);
 	allowed_methods.print(tab);
 	redirection.print(tab);
-	request_types.print(tab);
 }
 
 

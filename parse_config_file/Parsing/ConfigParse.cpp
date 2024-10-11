@@ -134,10 +134,10 @@ void	ConfigParse::parse(void * ptr, std::string str, std::string tab) const
 		if (found == NULL)
 		{
 			tracker.report_unknown_subtype(REPORT_WARNING | REPORT_LINE, name, ent_name);
-			std::cout << "none of:\n";
-			for (size_t j = 0; j < sub_num; j++)
-				std::cout << "  " << sub[j].name << "\n";
-			std::cout << ";\n";
+			//std::cout << "none of:\n";
+			//for (size_t j = 0; j < sub_num; j++)
+			//	std::cout << "  " << sub[j].name << "\n";
+			//std::cout << ";\n";
 		}
 		delete content;
 	}

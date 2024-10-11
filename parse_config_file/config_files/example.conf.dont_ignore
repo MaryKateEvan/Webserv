@@ -1,25 +1,50 @@
 
-# every 'entry' needs to end with eighter a pair of {} of ;
-# entrys are split into segments
-#  the first segment is the 'name'
-#  if the {} are used the stuff inside is the 'content block'
-#  everything else is the 'args'
-#
-# every entry eighter must or musn't have content block
-# also every entry needs args in a certain range
-#  the exact range is in parse_config_file.cpp:parseConfig()
-
-http
-{
-	server
-	{
-		server_names webserv.test;
-		listen 80;
-		root /test/;
-		index index.html;
+http {
+	server_timeout_time       10000;
+	server {
+		index                   index.html;
+		server_name             localhost;
+		listen                  8080;
+		root                    www;
+		keepalive_timeout		31;
+		send_timeout			11;
+		max_body_size           100000000;
+		directory_listing       true;
 		location / {
-			root /img/;
-			allowed_methods GET;
+			request_types       GET POST;
+		}
+		location /42heilbronn {
+			request_types       GET;
+			redirection			https://www.42heilbronn.de/;
+		}
+		location /google {
+			redirection			www.google.com;
+		}
+		location /uploads {
+			request_types       GET POST DELETE;
+		}
+	}
+	server {
+		index                   index.html;
+		server_name             127.0.0.1;
+		listen                  8081;
+		root                    www;
+		keepalive_timeout		61;
+		send_timeout			31;
+		max_body_size           200;
+		directory_listing       false;
+		location / {
+			request_types       GET POST;
+		}
+		location /google {
+			request_types       GET;
+			redirection			www.google.com;
+		}
+		location /uploads {
+			request_types       GET POST;
+		}
+		location /surprise {
+			redirection			https://www.youtube.com/watch?v=aAkMkVFwAoo/;
 		}
 	}
 }

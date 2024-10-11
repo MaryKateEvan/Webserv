@@ -34,4 +34,10 @@ struct ServerData
 	std::vector<LocationData> locations;	// contains the info of the different `location` blocks
 };
 
-bool	read_config_file(std::string file);
+std::vector<ServerData>	read_config_file(std::string file);
+
+class	ConfigErrorException : public std::exception
+{
+	public:
+		const char * what() const throw();
+};

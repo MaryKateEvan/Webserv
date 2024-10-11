@@ -1,6 +1,7 @@
 
 #pragma once
 #include <iostream>
+#include <sstream>
 #include <vector>
 #include "../Stringing/StringArr.hpp"
 #include "../Stringing/StringDataTracker.hpp"
@@ -24,6 +25,30 @@ class ConfigData
 				~MemberData();
 
 				void	set(int argc, std::string args[], int line, std::string funcName, std::string className);
+				template<typename T>
+				T		get(T def, size_t idx = 0) const
+				{
+					if (!isSet)
+						return (def);
+
+					if (idx >= data -> num)
+						return (def);
+
+					try
+					{
+						T temp;
+						std::stringstream ss;
+						ss << (data -> arr[idx]);
+						ss >> temp;
+						return (temp);
+					}
+					catch(const std::exception& e)
+					{
+						return (def);
+					}
+
+					return (def);
+				};
 				void	print(std::string tab);
 		};
 
@@ -33,19 +58,15 @@ class ConfigData
 		{
 				static const std::string	className;
 			public:
-				MemberData			root;
+				const std::string	path;
 				MemberData			allowed_methods;
 				MemberData			redirection;
-				MemberData			request_types;
-				const std::string	path;
 
 				ServerLocationData(std::string path);
 				~ServerLocationData();
 
-				static void	set_root(void * ptr, int line, int argc, std::string args[]);
 				static void	set_allowed_methods(void * ptr, int line, int argc, std::string args[]);
 				static void	set_redirection(void * ptr, int line, int argc, std::string args[]);
-				static void	set_request_types(void * ptr, int line, int argc, std::string args[]);
 
 				void	print();
 		};
