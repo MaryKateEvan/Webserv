@@ -1,7 +1,7 @@
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
-# include "./webserv.h"
+# include "../webserv.h"
 
 class Request;
 

@@ -1,7 +1,7 @@
 #ifndef EXCEPTIONS_HPP
 # define EXCEPTIONS_HPP
 
-# include "./webserv.h"
+# include "../webserv.h"
 
 # ifdef __APPLE__
 #  define NOEXCEPT_SPEC _NOEXCEPT

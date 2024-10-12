@@ -1,7 +1,7 @@
 #ifndef REQUEST_HPP
 # define REQUEST_HPP
 
-# include "./webserv.h"
+# include "../webserv.h"
 
 # ifndef GET
 #  define GET 0
