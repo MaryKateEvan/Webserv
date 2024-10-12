@@ -1,0 +1,3 @@
+[submodule "www_image_webpage"]
+	path = www_image_webpage
+	url = https://github.com/itseugen/image_website
