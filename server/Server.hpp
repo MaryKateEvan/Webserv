@@ -11,7 +11,6 @@ class Server
 		int					_fd_server;
 		struct sockaddr_in	_address;
 		const std::string	_name;
-		std::string			_response;
 		const std::string	_index_file;
 		const std::string	_data_dir;
 		const std::string	_www_dir;
@@ -23,7 +22,6 @@ class Server
 		int					process_post(const Request& req);
 		std::string			extract_get_request(const std::string& request);
 		std::string			map_to_directory(const std::string& file_path);
-		// bool				file_exists(const std::string& file_path);
 		std::string			get_mime_type(const std::string& file_path);
 		std::string			read_file(const std::string& file_path);
 	public:
@@ -37,8 +35,6 @@ class Server
 		struct sockaddr_in	getAddress(void) const;
 		const std::string	getName(void) const;
 		int					acceptConnection(void);
-		std::string			getResponse(void) const;
-		void				setResponse(std::string response);
 		int					process_request(const Request& req);
 		int					send_error_message(int error_code, const Request& req);
 };
