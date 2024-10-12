@@ -109,12 +109,12 @@ std::string	Server::map_to_directory(const std::string& file_path)
 		return (_www_dir + file_path);
 }
 
-bool	Server::file_exists(const std::string& file_path)
+/* bool	Server::file_exists(const std::string& file_path)
 {
 	std::ifstream file(file_path.c_str());
 
 	return (file.is_open());
-}
+} */
 
 std::string	Server::get_mime_type(const std::string& file_path)
 {
@@ -179,11 +179,37 @@ int	Server::process_get(const Request& req)
 {
 	std::string	url = req.get_file_path();
 	std::string	file_path = map_to_directory(url);
-	if (file_exists(file_path))
+	std::string	response = "HTTP/1.1 200 OK\r\n";
+
+	if (std::filesystem::is_directory(file_path))
+	{
+		if (file_path != map_to_directory("/" + _data_dir + "/") && file_path != map_to_directory("/" + _data_dir))
+		{
+			// std::cout << "File Path: " << file_path << std::endl;
+			// std::cout << "Data Path: " <<  map_to_directory("/" + _data_dir) << std::endl;
+			send_error_message(403, req);
+			return (0);
+		}
+		response += "Content-Type: text/html\r\n";
+		std::string	response_body = "<!DOCTYPE html>\n<html>\n<head><title>Index of " + req.get_file_path() + "</title></head>\n";
+		response_body += "<body>\n<hr>\n<ul>\n";
+		response_body += "    <li><a href=\"../\">Parent Directory</a></li>\n";
+		for (const auto& entry : std::filesystem::directory_iterator(file_path))
+		{
+			// std::cout << entry.path().filename().string() << std::endl;
+			response_body += "    <li><a href=\"" + _data_dir + "/" + entry.path().filename().string() + "\">" + entry.path().filename().string() + "</a></li>\n";
+		}
+		response_body += "</ul>\n<hr>\n</body>\n</html>\n";
+		response += "Content-Length: " + std::to_string(response_body.size()) + "\r\n";
+		response += "\r\n";
+		response += response_body;
+		if (send(req.get_fd(), response.c_str(), response.size(), 0) == -1)
+				throw SendFailedException(_name, req.get_fd());
+	}
+	else if (std::filesystem::exists(file_path))
 	{
 		std::string	file_content = read_file(file_path);
 		std::string	mime_type = get_mime_type(file_path);
-		std::string	response = "HTTP/1.1 200 OK\r\n";
 		response += "Content-Type: " + mime_type + "\r\n";
 		response += "Content-Length: " + std::to_string(file_content.size()) + "\r\n";
 		response += "\r\n";
@@ -196,11 +222,32 @@ int	Server::process_get(const Request& req)
 	return (0);
 }
 
+/*
+HTTP/1.1 200 OK
+Content-Type: text/html
+
+<!DOCTYPE html>
+<html>
+<head><title>Index of /usrimg/</title></head>
+<body>
+<h1>Index of /usrimg/</h1>
+<hr>
+<ul>
+    <li><a href="image1.jpg">image1.jpg</a></li>
+    <li><a href="image2.png">image2.png</a></li>
+    <li><a href="image3.gif">image3.gif</a></li>
+    <!-- Add other image files in the directory -->
+</ul>
+<hr>
+</body>
+</html>
+*/
+
 int	Server::process_delete(const Request& req)
 {
 	std::string	url = req.get_file_path();
 	std::string	file_path = _www_dir + "/" + _data_dir + "/" + url;
-	if (file_exists(file_path))
+	if (std::filesystem::exists(file_path))
 	{
 		if (std::remove(file_path.c_str()) == 0)
 		{
@@ -246,7 +293,7 @@ int	Server::send_error_message(int error_code, const Request& req)
 {
 	std::string	url = std::to_string(error_code);
 	std::string	file_path = "error_pages/" + url + ".jpg";
-	if (file_exists(file_path))
+	if (std::filesystem::exists(file_path))
 	{
 		std::string	file_content = read_file(file_path);
 		std::string	mime_type = get_mime_type(file_path);
