@@ -1,23 +1,32 @@
+# --------------------------------- MAKEFILE --------------------------------- #
+
 # ---------------------------------------------------------------------------- #
 #                                    Config                                    #
 # ---------------------------------------------------------------------------- #
 
 NAME			:= webserv
 CPP				:= c++
-CPPFLAGS		:= -std=c++17 #-Werror -Wall -Wextra
+CPPFLAGS		:= -Wall -Wextra -Werror -std=c++17
 
 # ---------------------------------------------------------------------------- #
 #                                     Files                                    #
 # ---------------------------------------------------------------------------- #
 
-OBJ_DIR			:= ./objs/
-# HEADERS			:= -I ./includes
+OBJ_DIR			:= ./objs
 
-SRCS 	:= $(wildcard srcs/*.cpp \
-					srcs/parsing_config/*.cpp \
-					srcs/stringing_from_config/*.cpp)
+VPATH			:= ./utils/ ./server/ ./exceptions/
 
-OBJS	:= $(patsubst srcs/%.cpp,$(OBJ_DIR)%.o,$(SRCS))
+SRC				:= main.cpp
+
+UTILS_SRC		:= utils1.cpp
+
+SERVER_SRC		:= Server.cpp Request.cpp
+
+EXCEPTIONS_SRC	:= Exception_server.cpp Exception_request.cpp
+
+SRCS			:= $(SRC) $(UTILS_SRC) $(SERVER_SRC) $(EXCEPTIONS_SRC)
+
+OBJS			:= $(addprefix $(OBJ_DIR)/, $(SRCS:%.cpp=%.o))
 
 # ---------------------------------------------------------------------------- #
 #                                     Rules                                    #
@@ -32,9 +41,9 @@ $(NAME): $(OBJS)
 	$(CPP) $(CPPFLAGS) $(OBJS) -o $(NAME)
 	@echo $(GREEN)"Linking $(NAME)!"$(DEFAULT);
 
-$(OBJ_DIR)%.o: srcs/%.cpp
-	@mkdir -p $(dir $@)
-	@$(CPP) $(CPPFLAGS) -o $@ -c $<
+$(OBJ_DIR)/%.o: %.cpp
+	mkdir -p $(dir $@)
+	$(CPP) $(CPPFLAGS) -c $< -o $@
 
 debug: CPPFLAGS += -g
 debug: re
@@ -43,10 +52,10 @@ nflag: CPPFLAGS =
 nflag: all
 
 clean:
-	@rm -rf $(OBJ_DIR)
+	rm -rf $(OBJS)
 
 fclean: clean
-	@rm -f $(NAME)
+	rm -f $(NAME)
 
 re: fclean all
 
