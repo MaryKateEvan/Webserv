@@ -222,27 +222,6 @@ int	Server::process_get(const Request& req)
 	return (0);
 }
 
-/*
-HTTP/1.1 200 OK
-Content-Type: text/html
-
-<!DOCTYPE html>
-<html>
-<head><title>Index of /usrimg/</title></head>
-<body>
-<h1>Index of /usrimg/</h1>
-<hr>
-<ul>
-    <li><a href="image1.jpg">image1.jpg</a></li>
-    <li><a href="image2.png">image2.png</a></li>
-    <li><a href="image3.gif">image3.gif</a></li>
-    <!-- Add other image files in the directory -->
-</ul>
-<hr>
-</body>
-</html>
-*/
-
 int	Server::process_delete(const Request& req)
 {
 	std::string	url = req.get_file_path();
@@ -335,14 +314,4 @@ struct sockaddr_in	Server::getAddress(void) const
 const std::string	Server::getName(void) const
 {
 	return (_name);
-}
-
-std::string	Server::getResponse(void) const
-{
-	return (_response);
-}
-
-void		Server::setResponse(std::string response)
-{
-	_response = response;
 }

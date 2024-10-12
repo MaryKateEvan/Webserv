@@ -11,7 +11,6 @@ class Server
 		int					_fd_server;
 		struct sockaddr_in	_address;
 		const std::string	_name;
-		std::string			_response;
 		const std::string	_index_file;
 		const std::string	_data_dir;
 		const std::string	_www_dir;
@@ -37,8 +36,6 @@ class Server
 		struct sockaddr_in	getAddress(void) const;
 		const std::string	getName(void) const;
 		int					acceptConnection(void);
-		std::string			getResponse(void) const;
-		void				setResponse(std::string response);
 		int					process_request(const Request& req);
 		int					send_error_message(int error_code, const Request& req);
 };
