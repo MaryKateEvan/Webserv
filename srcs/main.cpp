@@ -37,10 +37,8 @@ int main(int argc, char **argv)
 		// if (argc == 2)
 		// 	read_config_file(argv[1]); //calls the parsing part
 		std::signal(SIGINT, signal_handler);
-		Server	server1("A little webserver", PORT, "127.0.0.1", "index.html", "usrimg", "www");
-		// Server	server1("A Instagram Knockoff", PORT, "0.0.0.0", "index.html", "images", "image_website");
-		// Set response Method is outdated since the server is using the file system in dir /www/
-		server1.setResponse("HTTP/1.1 200 OK\nContent-Type: text/html\n\nA surprise to be sure, but a welcome one!\n");
+		// Server	server1("A little webserver", PORT, "0.0.0.0", "index.html", "usrimg", "www");
+		Server	server1("An Instagram Knockoff", PORT, "0.0.0.0", "index.html", "usrimg", "www_image_webpage");
 
 		struct pollfd	fds[MAX_CLIENTS];
 		int				nfds = 1;

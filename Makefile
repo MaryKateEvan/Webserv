@@ -23,7 +23,10 @@ OBJS	:= $(patsubst srcs/%.cpp,$(OBJ_DIR)%.o,$(SRCS))
 #                                     Rules                                    #
 # ---------------------------------------------------------------------------- #
 
-all: $(NAME)
+all: submodule $(NAME)
+
+submodule:
+	git submodule update --init --recursive
 
 $(NAME): $(OBJS)
 	$(CPP) $(CPPFLAGS) $(OBJS) -o $(NAME)
