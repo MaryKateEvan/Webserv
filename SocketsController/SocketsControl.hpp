@@ -1,7 +1,9 @@
 #ifndef SOCKETS_CONTROL_HPP
 # define SOCKETS_CONTROL_HPP
 
-# include "./webserv.h"
+# include "../webserv.h"
+
+struct ServerData;
 
 class SocketsControl
 {

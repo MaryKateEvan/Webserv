@@ -1,7 +1,7 @@
 #ifndef STRUCTS_HPP
 # define STRUCTS_HPP
 
-# include "./webserv.h"
+# include "../webserv.h"
 
 struct LocationData
 {

@@ -1,4 +1,4 @@
-#include "../includes/webserv.h"
+#include "../webserv.h"
 
 // this file fills all the struct data according to the example1.config
 

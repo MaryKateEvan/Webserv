@@ -1,5 +1,5 @@
-#include "../includes/webserv.h"
-#include "../includes/utils.h"
+#include "../webserv.h"
+#include "../utils.h"
 
 /*
 * Use curl localhost:PORT (replace port with actual value) to test responses

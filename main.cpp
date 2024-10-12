@@ -12,8 +12,27 @@ void signal_handler(int signum);
 
 int fd_server;
 
-int main()
+int main(int argc, char **argv)
 {
+	std::cout << GREEN("🚀 Launching Webserv ... 🚀") << std::endl;
+	if (argc > 2)
+	{
+		std::cout << ERROR("Expected usage: ") << UNDERLINE("./webserv") << " or " << UNDERLINE("./webserv <path_to_config_file>") << std::endl;
+		return 0;
+	}
+
+	//receiving values from the `example1.config`:
+	std::vector<ServerData> servers;
+	fill_server_data(servers);
+	print_server_data(servers);
+
+	//so that then the SocketsControl receives the vector servers:
+	SocketsControl controller(servers);
+
+	(void)argv;
+
+	return 0;
+
 	try
 	{
 		std::signal(SIGINT, signal_handler);

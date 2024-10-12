@@ -1,4 +1,4 @@
-#include "../includes/SocketsControl.hpp"
+#include "SocketsControl.hpp"
 
 SocketsControl::SocketsControl(const std::vector<ServerData> & serversData)
 	: _servers(serversData) {}
