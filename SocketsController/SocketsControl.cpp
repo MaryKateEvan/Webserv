@@ -185,7 +185,77 @@ void SocketsControl::accept_new_client_connection(int server_fd)
 	_client_fds.push_back(new_socket);
 	//! maybe initialize here any other data of client structure, if i decide to make one
 
-	std::cout << GREEN(" ✅ 👨‍💻 New client connected on socket :" << BOLD(new_socket));
+	std::cout << GREEN(" ✅ 👨‍💻 New client connected on socket: " << BOLD(new_socket)) << std::endl; 
+}
+
+void SocketsControl::read_client_request(pollfd & client)
+{
+	std::vector<char>	accumulated_request;
+	std::vector<char>	buffer(4096);
+	size_t				content_len = 0;
+	bool				header_parsed = false;
+	size_t				body_bytes_read = 0;
+
+	while (true)
+	{
+		int bytes_read = read(client.fd, buffer.data(), buffer.size());
+
+		if (bytes_read < 0)
+		{
+			std::cerr << RED("Error reading from fd " << client.fd) << std::endl;
+			close(client.fd);
+			_client_fds.erase(std::find(_client_fds.begin(), _client_fds.end(), client.fd));
+			break;
+		}
+		if (bytes_read == 0)
+		{
+			std::cout << YELLOW("🔓 🙅 Client on fd " << client.fd << " disconnected") << std::endl;
+			close(client.fd);
+			_client_fds.erase(std::find(_client_fds.begin(), _client_fds.end(), client.fd));
+			break;
+		}
+		accumulated_request.insert(accumulated_request.end(), buffer.begin(), buffer.begin() + bytes_read);
+		std::string temp_request(accumulated_request.begin(), accumulated_request.end());
+		if (!header_parsed)
+		{
+			size_t	header_end = temp_request.find("\r\n\r\n");
+			if (header_end != std::string::npos)
+			{
+				header_parsed = true;
+				std::string	headers = temp_request.substr(0, header_end + 4);
+				size_t content_len_pos = headers.find("Content-Length: ");
+				std::cout << "Headers:\n" << headers << std::endl;
+				if (content_len_pos != std::string::npos)
+				{
+					size_t content_length_start = content_len_pos + 16;
+					size_t content_length_end = headers.find("\r\n", content_length_start);
+					std::string content_length_str = headers.substr(content_length_start, content_length_end - content_length_start);
+					content_len = std::stoul(content_length_str);
+					// std::cout << "|TEMPREQUESTBEGIN:\n\n\n|" << temp_request << "|TEMPREQUESTEND\n\n\n|" << std::endl;
+				}
+				body_bytes_read = temp_request.size() - (header_end + 4);
+			}
+		}
+		// std::cout << "Body Bytes Read: " << body_bytes_read << std::endl;
+		if (header_parsed && content_len > 0)
+		{
+			if (body_bytes_read >= content_len)
+				break ;
+		}
+		if (header_parsed && content_len == 0)
+				break ;
+		if (header_parsed)
+			body_bytes_read += bytes_read;
+	}
+	if (header_parsed && (content_len == 0 || body_bytes_read >= content_len))
+	{
+		Request req(std::string(accumulated_request.begin(), accumulated_request.end()), client.fd);
+		Response response("client socket", "index.html", "usrimg", "www_image_webpage");
+		response.process_request(req);
+	}
+	accumulated_request.clear();
+	close(client.fd);
+	client.fd = -1;
 }
 
 void SocketsControl::close_server_sockets()
@@ -196,7 +266,7 @@ void SocketsControl::close_server_sockets()
 // the function given as second argument to the `signal` in order to exit the program
 void signal_handler(int signum)
 {
-	std::cerr << RED("🛑 Signal " << signum << " received, closing server... 🔚") << std::endl;
+	std::cerr << RED(" 🛑 Signal " << signum << " received, closing server... 🔚") << std::endl;
 	//! proper cleanup later
 	exit(0);
 }

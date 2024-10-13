@@ -25,7 +25,8 @@
 # include <cstdio>
 # include <filesystem>
 
-# include "server/Server.hpp"
+// # include "server/Server.hpp"
+# include "server/Response.hpp"
 # include "server/Request.hpp"
 # include "exceptions/Exceptions.hpp"
 # include "SocketsController/SocketsControl.hpp"
@@ -40,6 +41,8 @@
 # define RED(text) "\033[31m" << text << "\033[0m"
 # define CYAN(text) "\033[1;96m" << text << "\033[0m"
 # define GREEN(text) "\033[32m" << text << "\033[0m"
+# define YELLOW(text) "\033[33m" << text << "\033[0m"
+# define ORANGE(text) "\033[38;5;214m" << text << "\033[0m"
 # define ERROR(text) "\033[31mError: \033[0m" << text
 
 

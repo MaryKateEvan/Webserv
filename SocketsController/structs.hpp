@@ -15,7 +15,7 @@ struct ServerData
 {
 	std::string		index_file;				// the "default file" to serve the client
 	std::string		server_name;			// the hostname of the server
-	short			port_to_listen;			// the port on which the server listens for incoming connections
+	int				port_to_listen;			// the port on which the server listens for incoming connections
 	std::string		root;					// the directory where the server looks for files to serve the client (in our case it's always the `www`)
 	bool			directory_listing;		// flag to be set to true or false. (whether to allow directory listing when no index file is present)
 	size_t 			max_request_size;		// limitation of the request that the client can send
