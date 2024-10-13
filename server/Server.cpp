@@ -9,21 +9,21 @@ Server::Server(const std::string server_name, int port, const std::string ip_add
 {
 	std::cout << "Server Default Constructor called" << std::endl;
 	load_mime_types("mime_type.csv"); //! only this i have to add more!
-	_fd_server = socket(AF_INET, SOCK_STREAM, 0);
-	if (_fd_server == -1)
-		throw SocketCreationFailedException(_name);
-	int opt = 1;
-	if (setsockopt(_fd_server, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
-	{
-		close(_fd_server);
-		throw SetSocketOptionFailedException(_name);
-	}
+	// _fd_server = socket(AF_INET, SOCK_STREAM, 0);
+	// if (_fd_server == -1)
+	// 	throw SocketCreationFailedException(_name);
+	// int opt = 1;
+	// if (setsockopt(_fd_server, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
+	// {
+	// 	close(_fd_server);
+	// 	throw SetSocketOptionFailedException(_name);
+	// }
 	_address.sin_family = AF_INET;
-	if (port < 0 || port > 65535)
-	{
-		close(_fd_server);
-		throw InvalidPortException(_name, port);
-	}
+	// if (port < 0 || port > 65535)
+	// {
+	// 	close(_fd_server);
+	// 	throw InvalidPortException(_name, port);
+	// }
 	_address.sin_port = htons(port);
 	if (inet_pton(AF_INET, ip_address.c_str(), &_address.sin_addr) != 1)
 	{

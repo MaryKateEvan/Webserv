@@ -28,6 +28,10 @@ void SocketsControl::initServerSockets()
 	std::vector<ServerData>::iterator it;
 	for (it = _servers.begin(); it != _servers.end(); ++it)
 	{
+		// check for valid port:
+		if (it->port_to_listen < 0 || it->port_to_listen > 65535)
+			throw InvalidPortException(it->server_name, it->port_to_listen);
+
 		// a port can be bound to one socket at a time, so if this port is already bound, we skip this socket creation
 		if (std::find(_used_ports.begin(), _used_ports.end(), it->port_to_listen) != _used_ports.end())
 			continue ;
