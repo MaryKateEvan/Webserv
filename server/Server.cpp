@@ -8,7 +8,7 @@ Server::Server(const std::string server_name, int port, const std::string ip_add
 	: _name(server_name), _index_file(index_file), _data_dir(data_dir), _www_dir(www_dir)
 {
 	std::cout << "Server Default Constructor called" << std::endl;
-	load_mime_types("mime_type.csv");
+	load_mime_types("mime_type.csv"); //! only this i have to add more!
 	_fd_server = socket(AF_INET, SOCK_STREAM, 0);
 	if (_fd_server == -1)
 		throw SocketCreationFailedException(_name);

@@ -8,14 +8,22 @@ struct ServerData;
 class SocketsControl
 {
 	private:
-		std::vector<ServerData> _servers;
+		std::vector<ServerData> 	_servers;
+		std::vector<int>			_server_fds;
+		std::vector<struct pollfd>	_poll_fds;
+		std::vector<int>			_used_ports;
+
+		SocketsControl(); //only instantiated with the vector of ServerData passed
 
 	public:
-		SocketsControl();
 		SocketsControl(const std::vector<ServerData> & serversData);
 		~SocketsControl();
 
-		void init_server_sockets();
+		void initServerSockets();
+		void bound_socket_to_port(std::vector<ServerData>::iterator server);
+
+
+		void close_server_sockets();
 
 	
 };

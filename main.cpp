@@ -23,8 +23,8 @@ int main(int argc, char **argv)
 
 	//receiving values from the `example1.config`:
 	std::vector<ServerData> servers;
-	fill_server_data(servers);
-	print_server_data(servers);
+	fill_server_data(servers); //what the parser from the config will fill out
+	print_server_data(servers); // for verification
 
 	//so that then the SocketsControl receives the vector servers:
 	SocketsControl controller(servers);

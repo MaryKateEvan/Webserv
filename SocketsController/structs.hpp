@@ -23,6 +23,9 @@ struct ServerData
 	size_t			send_timeout;			// the time to wait a response to be sent to the client
 
 	std::vector<LocationData> locations;	// contains the info of the different `location` blocks
+
+	//the only attribute to be added after parser, in SocketsControl:
+	int				server_socket;
 };
 
 

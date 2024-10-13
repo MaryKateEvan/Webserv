@@ -16,7 +16,10 @@ SocketCreationFailedException::SocketCreationFailedException(const std::string& 
 	: BaseException("Socket Creation for " + server_name + " failed") {}
 
 SetSocketOptionFailedException::SetSocketOptionFailedException(const std::string& server_name)
-	: BaseException("Set Socker option for " + server_name + " failed") {}
+	: BaseException("Set Socket option for " + server_name + " failed") {}
+
+SetSocketNonBLockingModeException::SetSocketNonBLockingModeException(const std::string& server_name)
+	: BaseException("Setting of non-blocking mode for Socket of " + server_name + " failed") {}
 
 InvalidPortException::InvalidPortException(const std::string& server_name, int port)
 	: BaseException("The port " + std::to_string(port) + " for server " + server_name + " is invalid") {}
