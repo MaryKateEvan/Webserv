@@ -25,16 +25,14 @@ int main(int argc, char **argv)
 	std::vector<ServerData> servers;
 	fill_server_data(servers); //what the parser from the config will fill out
 	print_server_data(servers); // for verification
-
-	//so that then the SocketsControl receives the vector servers:
-	SocketsControl controller(servers);
-
 	(void)argv;
-
-	return 0;
 
 	try
 	{
+		//so that then the SocketsControl receives the vector servers:
+		SocketsControl controller(servers);
+
+
 		std::signal(SIGINT, signal_handler);
 		// Server	server1("A little webserver", PORT, "0.0.0.0", "index.html", "usrimg", "www");
 		Server	server1("An Instagram Knockoff", PORT, "0.0.0.0", "index.html", "usrimg", "www_image_webpage");
@@ -163,9 +161,4 @@ int main(int argc, char **argv)
 	return (0);
 }
 
-//Closes FD to make sure proper cleanup happens
-void signal_handler(int signum)
-{
-	std::cerr << "Signal " << signum << " received, closing server..." << std::endl;
-	exit(0);
-}
+

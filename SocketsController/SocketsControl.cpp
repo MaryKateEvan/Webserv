@@ -16,7 +16,7 @@ SocketsControl::SocketsControl(const std::vector<ServerData> & serversData)
 {
 	initServerSockets();
 	if (_poll_fds.size() > 0) //there has to be at least on server socket active to continue with polling
-		check_for_connections();
+		loop_for_connections();
 
 }
 
@@ -101,13 +101,32 @@ void SocketsControl::server_poll_data(std::vector<ServerData>::iterator server)
 
 }
 
-void SocketsControl::check_for_connections()
+void SocketsControl::loop_for_connections()
 {
-	
+	signal(SIGINT, signal_handler);
+
+	while (true)
+	{
+		if (poll(&_poll_fds[0], _poll_fds.size(), 0) < 0) //third argument as 0, cause we want non-blocking behavior of poll, meaning to return immediately after checking the file descriptors and not to wait
+		{
+			std::cerr << RED("❗ poll() failed: ") << std::string(strerror(errno)) << std::endl;
+			continue ;
+		}
+
+	}
+
 }
 
 
 void SocketsControl::close_server_sockets()
 {
 
+}
+
+// the function given as second argument to the `signal` in order to exit the program
+void signal_handler(int signum)
+{
+	std::cerr << RED("🛑 Signal " << signum << " received, closing server... 🔚") << std::endl;
+	//! proper cleanup later
+	exit(0);
 }

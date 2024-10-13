@@ -22,14 +22,14 @@ class SocketsControl
 		void initServerSockets();
 		void bind_socket_and_listen_to_port(std::vector<ServerData>::iterator server);
 		void server_poll_data(std::vector<ServerData>::iterator server);
-		void check_for_connections();
+		void loop_for_connections();
 
-		void close_server_sockets();
+		void close_server_sockets();//not used yet
 
 	
 };
 
-
+void signal_handler(int signum);
 
 
 
