@@ -20,7 +20,7 @@ class SocketsControl
 		~SocketsControl();
 
 		void initServerSockets();
-		void bound_socket_to_port(std::vector<ServerData>::iterator server);
+		void bind_socket_and_listen_to_port(std::vector<ServerData>::iterator server);
 
 
 		void close_server_sockets();

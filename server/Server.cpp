@@ -18,29 +18,29 @@ Server::Server(const std::string server_name, int port, const std::string ip_add
 	// 	close(_fd_server);
 	// 	throw SetSocketOptionFailedException(_name);
 	// }
-	_address.sin_family = AF_INET;
+	// _address.sin_family = AF_INET;
 	// if (port < 0 || port > 65535)
 	// {
 	// 	close(_fd_server);
 	// 	throw InvalidPortException(_name, port);
 	// }
-	_address.sin_port = htons(port);
+	// _address.sin_port = htons(port);
 	if (inet_pton(AF_INET, ip_address.c_str(), &_address.sin_addr) != 1)
 	{
 		close(_fd_server);
 		throw InvalidIPAdressException(_name, ip_address);
 	}
-	if (bind(_fd_server, (struct sockaddr *)&_address, sizeof(_address)) != 0)
-	{
-		close(_fd_server);
-		throw BindFailedException(_name, ip_address);
-	}
-	if (listen(_fd_server ,SOMAXCONN) != 0)
-	{
-		close(_fd_server);
-		throw ListenFailedException(_name);
-	}
-	std::cout << "Server is now listening on port " << port << std::endl;
+	// if (bind(_fd_server, (struct sockaddr *)&_address, sizeof(_address)) != 0)
+	// {
+	// 	close(_fd_server);
+	// 	throw BindFailedException(_name, ip_address);
+	// }
+	// if (listen(_fd_server ,SOMAXCONN) != 0)
+	// {
+	// 	close(_fd_server);
+	// 	throw ListenFailedException(_name);
+	// }
+	// std::cout << "Server is now listening on port " << port << std::endl;
 }
 
 Server::~Server()

@@ -60,6 +60,12 @@ class BindFailedException : public BaseException
 		explicit BindFailedException(const std::string& server_name, const std::string& ip_address);
 };
 
+class FailedToBindSocketException : public BaseException
+{
+	public:
+		explicit FailedToBindSocketException(const std::string& server_name);
+};
+
 class ListenFailedException : public BaseException
 {
 	public:

@@ -30,6 +30,9 @@ InvalidIPAdressException::InvalidIPAdressException(const std::string& server_nam
 BindFailedException::BindFailedException(const std::string& server_name, const std::string& ip_address)
 	: BaseException("Bindin IP " + ip_address + " to socket for server " + server_name + " failed") {}
 
+FailedToBindSocketException::FailedToBindSocketException(const std::string& server_name)
+	: BaseException("Failed to bind socket for server " + server_name) {}
+
 ListenFailedException::ListenFailedException(const std::string& server_name)
 	: BaseException("Setting server " + server_name + " to listen failed") {}
 

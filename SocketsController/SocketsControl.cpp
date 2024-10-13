@@ -50,13 +50,33 @@ void SocketsControl::initServerSockets()
 			close(it->server_socket);
 			throw SetSocketNonBLockingModeException(it->server_name);
 		}
-		bound_socket_to_port(it);
+		bind_socket_and_listen_to_port(it);
 	}
 }
 
-void SocketsControl::bound_socket_to_port(std::vector<ServerData>::iterator server)
+void SocketsControl::bind_socket_and_listen_to_port(std::vector<ServerData>::iterator server)
 {
-	
+	struct sockaddr_in address; // this struct is necessary when binding the socket to an IP address and port
+	address.sin_family = AF_INET; // for IPv4 addresses
+	address.sin_addr.s_addr = INADDR_ANY; // to listen in all available interfaces: localhost, ethernet etc...
+	address.sin_port = htons(server->port_to_listen); //specifies the port number to listen to
+
+	//and then i bind the socket to the specified address and port:
+	if (bind(server->server_socket, (struct sockaddr*)&address, sizeof(address)) < 0)
+	{
+		close(server->server_socket);
+		throw FailedToBindSocketException(server->server_name);
+	}
+
+	//listen to the specified, above, port:
+	if (listen(server->server_socket, SOMAXCONN) < 0)
+	{
+		close(server->server_socket);
+		throw ListenFailedException(server->server_name);
+	}
+
+	std::cout << "Server socket " << UNDERLINE(server->server_socket) 
+			<< " is now listening on port: " << BOLD(server->port_to_listen) << std::endl;
 }
 
 void SocketsControl::close_server_sockets()
