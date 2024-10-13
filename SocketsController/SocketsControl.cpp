@@ -112,6 +112,16 @@ void SocketsControl::loop_for_connections()
 			std::cerr << RED("❗ poll() failed: ") << std::string(strerror(errno)) << std::endl;
 			continue ;
 		}
+		// loop through all active file descriptors:
+		for (size_t i = 0; i < _poll_fds.size(); i++)
+		{
+			// 1. check for errors first:
+			if (_poll_fds[i].revents & (POLLERR | POLLHUP | POLLNVAL))
+			{
+
+				continue ; //skips further steps for this fd that had the problem
+			}
+		}
 
 	}
 
