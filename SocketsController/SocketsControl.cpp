@@ -115,11 +115,39 @@ void SocketsControl::loop_for_connections()
 		// loop through all active file descriptors:
 		for (size_t i = 0; i < _poll_fds.size(); i++)
 		{
+			bool is_server_fd = std::find(_server_fds.begin(), _server_fds.end(), _poll_fds[i].fd) != _server_fds.end();
 			// 1. check for errors first:
 			if (_poll_fds[i].revents & (POLLERR | POLLHUP | POLLNVAL))
 			{
+				std::cerr << RED("❗ Error on file descriptor: ") << _poll_fds[i].fd 
+						<< " - " << strerror(errno) << std::endl;
+				// we close the socket and remove it from the tracking structures:
+				close(_poll_fds[i].fd);
+				_poll_fds.erase(_poll_fds.begin() + i); // removes it from the _poll_fds vector of active fds
+				--i; // we decrement the index to account for the erased element
 
+				// we also delete it from server_fds vector, if it is a server socket:
+				if (is_server_fd)
+					_server_fds.erase(std::find(_server_fds.begin(), _server_fds.end(), _poll_fds[i].fd));
+				// std::vector<int>::iterator search = std::find(_server_fds.begin(), _server_fds.end(), _poll_fds[i].fd);
+				// if (search != _server_fds.end())
+				// 	_server_fds.erase(search);
+
+				//! i will also need to delete it after from the clients container
 				continue ; //skips further steps for this fd that had the problem
+			}
+			// 2. check for POLLIN events in both server and client sockets:
+			if (_poll_fds[i].revents & POLLIN)
+			{
+				if (is_server_fd)
+					accept_client_connection(_poll_fds[i].fd);
+				else
+					read_client_request(_poll_fds[i]);
+			}
+			// 3. check for POLLOUT events which are spicific for client sockets:
+			if (is_server_fd && (_poll_fds[i].revents & POLLOUT))
+			{
+				
 			}
 		}
 
@@ -127,6 +155,10 @@ void SocketsControl::loop_for_connections()
 
 }
 
+void SocketsControl::accept_client_connection(int server_fd)
+{
+
+}
 
 void SocketsControl::close_server_sockets()
 {

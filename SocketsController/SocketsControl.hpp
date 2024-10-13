@@ -23,6 +23,8 @@ class SocketsControl
 		void bind_socket_and_listen_to_port(std::vector<ServerData>::iterator server);
 		void server_poll_data(std::vector<ServerData>::iterator server);
 		void loop_for_connections();
+		void accept_client_connection(int server_fd);
+		void read_client_request(pollfd & client_poll_fd);
 
 		void close_server_sockets();//not used yet
 
