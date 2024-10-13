@@ -140,14 +140,14 @@ void SocketsControl::loop_for_connections()
 			if (_poll_fds[i].revents & POLLIN)
 			{
 				if (is_server_fd)
-					accept_client_connection(_poll_fds[i].fd);
+					accept_new_client_connection(_poll_fds[i].fd);
 				else
 					read_client_request(_poll_fds[i]);
 			}
 			// 3. check for POLLOUT events which are spicific for client sockets:
 			if (is_server_fd && (_poll_fds[i].revents & POLLOUT))
 			{
-				
+
 			}
 		}
 
@@ -155,9 +155,37 @@ void SocketsControl::loop_for_connections()
 
 }
 
-void SocketsControl::accept_client_connection(int server_fd)
+void SocketsControl::accept_new_client_connection(int server_fd)
 {
+	struct sockaddr_in client_addr; //struct to hold client's IP address, port, and other info
+	socklen_t client_len = sizeof(client_addr); //necessary for the accept, to know how much space it has to store the client's address
+	
+	//system call to accept a new connection from a client:
+	int new_socket = accept(server_fd, (struct sockaddr*)&client_addr, &client_len);
+	//created a file descriptor for the newly accepted connection
+	if (new_socket < 0)
+	{
+		std::cerr << RED("❗ Failed to accept connection in socket: ") << server_fd 
+				<< " - " << strerror(errno) << std::endl;
+		return ;
+	}
+	if (fcntl(new_socket, F_SETFL, O_NONBLOCK) < 0) //for non-blocking mode of the client socket
+	{
+		close(new_socket);
+		throw SetSocketNonBLockingModeException("client");
+	}
 
+	//add the poll_fd of the client in the _poll_fds vector:
+	struct pollfd client_poll_fd;
+	client_poll_fd.fd = new_socket;
+	client_poll_fd.events = POLLIN;
+	_poll_fds.push_back(client_poll_fd);
+
+	//add the client fd to the _client_fds vector:
+	_client_fds.push_back(new_socket);
+	//! maybe initialize here any other data of client structure, if i decide to make one
+
+	std::cout << GREEN(" ✅ 👨‍💻 New client connected on socket :" << BOLD(new_socket));
 }
 
 void SocketsControl::close_server_sockets()
