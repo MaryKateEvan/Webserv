@@ -9,7 +9,7 @@ class SocketsControl
 {
 	private:
 		std::vector<ServerData> 	_servers;
-		std::vector<int>			_server_fds;
+		std::vector<int>			_server_fds; //to keep track of the active server sockets
 		std::vector<struct pollfd>	_poll_fds;
 		std::vector<int>			_used_ports;
 
@@ -21,6 +21,7 @@ class SocketsControl
 
 		void initServerSockets();
 		void bind_socket_and_listen_to_port(std::vector<ServerData>::iterator server);
+		void server_poll_data(std::vector<ServerData>::iterator server);
 
 
 		void close_server_sockets();

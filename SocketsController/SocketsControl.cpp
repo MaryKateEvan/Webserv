@@ -51,6 +51,7 @@ void SocketsControl::initServerSockets()
 			throw SetSocketNonBLockingModeException(it->server_name);
 		}
 		bind_socket_and_listen_to_port(it);
+		server_poll_data(it);
 	}
 }
 
@@ -75,9 +76,23 @@ void SocketsControl::bind_socket_and_listen_to_port(std::vector<ServerData>::ite
 		throw ListenFailedException(server->server_name);
 	}
 
+	//save the port to the "occupied ports" vector:
+	_used_ports.push_back(server->port_to_listen);
+
+	//keep the server's fd on the "Active server sockets" vector:
+	_server_fds.push_back(server->server_socket);
+
+
 	std::cout << "Server socket " << UNDERLINE(server->server_socket) 
 			<< " is now listening on port: " << BOLD(server->port_to_listen) << std::endl;
 }
+
+void SocketsControl::server_poll_data(std::vector<ServerData>::iterator server)
+{
+	//we need one `struct pollfd` for every server socket
+	
+}
+
 
 void SocketsControl::close_server_sockets()
 {
