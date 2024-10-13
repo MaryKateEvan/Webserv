@@ -15,6 +15,8 @@ SocketsControl::SocketsControl(const std::vector<ServerData> & serversData)
 	: _servers(serversData)
 {
 	initServerSockets();
+	if (_poll_fds.size() > 0) //there has to be at least on server socket active to continue with polling
+		check_for_connections();
 
 }
 
@@ -79,10 +81,6 @@ void SocketsControl::bind_socket_and_listen_to_port(std::vector<ServerData>::ite
 	//save the port to the "occupied ports" vector:
 	_used_ports.push_back(server->port_to_listen);
 
-	//keep the server's fd on the "Active server sockets" vector:
-	_server_fds.push_back(server->server_socket);
-
-
 	std::cout << "Server socket " << UNDERLINE(server->server_socket) 
 			<< " is now listening on port: " << BOLD(server->port_to_listen) << std::endl;
 }
@@ -90,6 +88,21 @@ void SocketsControl::bind_socket_and_listen_to_port(std::vector<ServerData>::ite
 void SocketsControl::server_poll_data(std::vector<ServerData>::iterator server)
 {
 	//we need one `struct pollfd` for every server socket
+	struct pollfd tmp;
+
+	tmp.fd = server->server_socket; //tells the poll to monitor this server's socket
+	tmp.events = POLLIN; //only pollin because the server socket is waiting to "receive", "read", new client connections
+
+	//we add this struct to the vector of the poll_fds:
+	_poll_fds.push_back(tmp);
+
+	//keep the server's fd on the "Active server sockets" vector:
+	_server_fds.push_back(server->server_socket); // ->the size() of this becomes the `nfds`
+
+}
+
+void SocketsControl::check_for_connections()
+{
 	
 }
 
