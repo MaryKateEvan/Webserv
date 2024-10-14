@@ -110,7 +110,8 @@ void SocketsControl::loop_for_connections()
 		if (poll(&_poll_fds[0], _poll_fds.size(), 0) < 0) //third argument as 0, cause we want non-blocking behavior of poll, meaning to return immediately after checking the file descriptors and not to wait
 		{
 			std::cerr << RED("❗ poll() failed: ") << std::string(strerror(errno)) << std::endl;
-			continue ;
+			// continue ;
+			break ;
 		}
 		// loop through all active file descriptors:
 		for (size_t i = 0; i < _poll_fds.size(); i++)
@@ -191,10 +192,13 @@ void SocketsControl::accept_new_client_connection(int server_fd)
 void SocketsControl::read_client_request(pollfd & client)
 {
 	std::vector<char>	accumulated_request;
-	std::vector<char>	buffer(4096);
+	std::vector<char>	buffer(4096 * 4);
 	size_t				content_len = 0;
 	bool				header_parsed = false;
 	size_t				body_bytes_read = 0;
+
+	Response response("client socket", "index.html", "usrimg", "www_image_webpage");
+
 
 	while (true)
 	{
@@ -250,12 +254,21 @@ void SocketsControl::read_client_request(pollfd & client)
 	if (header_parsed && (content_len == 0 || body_bytes_read >= content_len))
 	{
 		Request req(std::string(accumulated_request.begin(), accumulated_request.end()), client.fd);
-		Response response("client socket", "index.html", "usrimg", "www_image_webpage");
+		// Response response("client socket", "index.html", "usrimg", "www_image_webpage");
 		response.process_request(req);
 	}
 	accumulated_request.clear();
-	close(client.fd);
-	client.fd = -1;
+
+	client.events |= POLLOUT;
+	// close(client.fd);
+	// client.fd = -1;
+
+	// //in order to delete this client form the _poll_fds array:
+	// std::vector<struct pollfd>::iterator search_client = std::find_if(_poll_fds.begin(), _poll_fds.end(),
+	// [&client](const struct pollfd& pfd) { return pfd.fd == client.fd; });
+	// if (search_client != _poll_fds.end()) {
+	// 	_poll_fds.erase(search_client);
+	// }
 }
 
 void SocketsControl::close_server_sockets()
