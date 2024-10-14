@@ -4,8 +4,25 @@
 /*                           Orthodox Canonical Form                          */
 /* -------------------------------------------------------------------------- */
 
-Server::Server(const std::string server_name, int port, const std::string ip_address, const std::string index_file, const std::string data_dir, const std::string www_dir)
-	: _name(server_name), _index_file(index_file), _data_dir(data_dir), _www_dir(www_dir)
+/**
+ * @brief Creates a webserver
+ * @param server_name The name of the server
+ * @param port The port the server should listen to
+ * @param ip_address the IP adress of the server
+ * @param index_file the index file of the server (relative to the www_dir)
+ * @param data_dir the directory to POST/DELETE from (might be replaced by a redirect map in the future)
+ * @param www_dir the location of the webpage files 
+ * @param directory_listing_enabled true or false if the directory listing should be enabled
+ * @param keepalive_timeput 
+ * @param send_timeout 
+ * @param max_body_size 
+ */
+Server::Server(const std::string server_name, int port, const std::string ip_address, const std::string index_file,
+		const std::string data_dir, const std::string www_dir, bool directory_listing_enabled, size_t keepalive_timeput,
+		size_t send_timeout, size_t max_body_size)
+	: _name(server_name), _index_file(index_file), _data_dir(data_dir), _www_dir(www_dir),
+	_directory_listing_enabled(directory_listing_enabled), _keepalive_timeout(keepalive_timeput),
+	_send_timeout(send_timeout), _max_body_size(max_body_size)
 {
 	std::cout << "Server Default Constructor called" << std::endl;
 	load_mime_types("mime_type.csv");
@@ -40,6 +57,8 @@ Server::Server(const std::string server_name, int port, const std::string ip_add
 		close(_fd_server);
 		throw ListenFailedException(_name);
 	}
+	int temp = _send_timeout + _keepalive_timeout + _directory_listing_enabled + _max_body_size;
+	std::cout << temp << std::endl;
 	std::cout << "Server is now listening on port " << port << std::endl;
 }
 
@@ -307,4 +326,9 @@ struct sockaddr_in	Server::getAddress(void) const
 const std::string	Server::getName(void) const
 {
 	return (_name);
+}
+
+size_t	Server::getMaxBodySize(void) const
+{
+	return (_max_body_size);
 }
