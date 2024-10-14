@@ -35,6 +35,7 @@ int main(int argc, char **argv)
 
 		// std::signal(SIGINT, signal_handler);
 		// Server	server1("A little webserver", PORT, "0.0.0.0", "index.html", "usrimg", "www");
+		Server	server1("Instalight", PORT, "0.0.0.0", "index.html", "usrimg", "www_image_webpage", true, 0, 0, 0);
 		// Server	server1("An Instagram Knockoff", PORT, "0.0.0.0", "index.html", "usrimg", "www_image_webpage");
 
 		// struct pollfd	fds[MAX_CLIENTS];

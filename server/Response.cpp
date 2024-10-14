@@ -1,13 +1,75 @@
 #include "Response.hpp"
 
-// parameter constructor
-Response::Response(const std::string server_name, const std::string index_file, const std::string data_dir, const std::string www_dir)
-	: _name(server_name), _index_file(index_file), _data_dir(data_dir), _www_dir(www_dir)
+/* -------------------------------------------------------------------------- */
+/*                           Orthodox Canonical Form                          */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * @brief Creates a webserver
+ * @param server_name The name of the server
+ * @param port The port the server should listen to
+ * @param ip_address the IP adress of the server
+ * @param index_file the index file of the server (relative to the www_dir)
+ * @param data_dir the directory to POST/DELETE from (might be replaced by a redirect map in the future)
+ * @param www_dir the location of the webpage files 
+ * @param directory_listing_enabled true or false if the directory listing should be enabled
+ * @param keepalive_timeout 
+ * @param send_timeout 
+ * @param max_body_size 
+ */
+Server::Server(const std::string server_name, int port, const std::string ip_address, const std::string index_file,
+		const std::string data_dir, const std::string www_dir, bool directory_listing_enabled, size_t keepalive_timeout,
+		size_t send_timeout, size_t max_body_size)
+	: _name(server_name), _index_file(index_file), _data_dir(data_dir), _www_dir(www_dir),
+	_directory_listing_enabled(directory_listing_enabled), _keepalive_timeout(keepalive_timeout),
+	_send_timeout(send_timeout), _max_body_size(max_body_size)
 {
 	load_mime_types("mime_type.csv");
+	_fd_server = socket(AF_INET, SOCK_STREAM, 0);
+	if (_fd_server == -1)
+		throw SocketCreationFailedException(_name);
+	int opt = 1;
+	// Add keepalive here, not changed inside this branch since MK has to most current standart
+	// Add send_out here
+	if (setsockopt(_fd_server, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
+	{
+		close(_fd_server);
+		throw SetSocketOptionFailedException(_name);
+	}
+	_address.sin_family = AF_INET;
+	if (port < 0 || port > 65535)
+	{
+		close(_fd_server);
+		throw InvalidPortException(_name, port);
+	}
+	_address.sin_port = htons(port);
+	// replace forbidden function, not done now since MKs branch has it
+	if (inet_pton(AF_INET, ip_address.c_str(), &_address.sin_addr) != 1)
+	{
+		close(_fd_server);
+		throw InvalidIPAdressException(_name, ip_address);
+	}
+	if (bind(_fd_server, (struct sockaddr *)&_address, sizeof(_address)) != 0)
+	{
+		close(_fd_server);
+		throw BindFailedException(_name, ip_address);
+	}
+	if (listen(_fd_server ,SOMAXCONN) != 0)
+	{
+		close(_fd_server);
+		throw ListenFailedException(_name);
+	}
+	// temp to prevent -Werror complaints
+	int temp = _send_timeout + _keepalive_timeout + _directory_listing_enabled + _max_body_size;
+	std::cout << temp << std::endl;
+	std::cout << "Server is now listening on port " << port << std::endl;
 }
 
-Response::~Response() {}
+Server::~Server()
+{
+	std::cout << "Server Default Destructor called" << std::endl;
+	close(_fd_server);
+}
 
 /* -------------------------------------------------------------------------- */
 /*                                  Functions                                 */
@@ -104,12 +166,10 @@ int	Response::process_get(const Request& req)
 	std::string	file_path = map_to_directory(url);
 	std::string	response = "HTTP/1.1 200 OK\r\n";
 
-	if (std::filesystem::is_directory(file_path))
+	if (_directory_listing_enabled == true && std::filesystem::is_directory(file_path))
 	{
 		if (file_path != map_to_directory("/" + _data_dir + "/") && file_path != map_to_directory("/" + _data_dir))
 		{
-			// std::cout << "File Path: " << file_path << std::endl;
-			// std::cout << "Data Path: " <<  map_to_directory("/" + _data_dir) << std::endl;
 			send_error_message(403, req);
 			return (0);
 		}
@@ -119,7 +179,6 @@ int	Response::process_get(const Request& req)
 		response_body += "    <li><a href=\"../\">Parent Directory</a></li>\n";
 		for (const auto& entry : std::filesystem::directory_iterator(file_path))
 		{
-			// std::cout << entry.path().filename().string() << std::endl;
 			response_body += "    <li><a href=\"" + _data_dir + "/" + entry.path().filename().string() + "\">" + entry.path().filename().string() + "</a></li>\n";
 		}
 		response_body += "</ul>\n<hr>\n</body>\n</html>\n";
@@ -128,6 +187,10 @@ int	Response::process_get(const Request& req)
 		response += response_body;
 		if (send(req.get_fd(), response.c_str(), response.size(), 0) == -1)
 				throw SendFailedException(_name, req.get_fd());
+	}
+	else if (_directory_listing_enabled == false && std::filesystem::is_directory(file_path))
+	{
+		send_error_message(403, req);
 	}
 	else if (std::filesystem::exists(file_path))
 	{
@@ -218,4 +281,28 @@ int	Response::send_error_message(int error_code, const Request& req)
 			throw SendFailedException(_name, req.get_fd());
 	}
 	return (0);
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                Getter/Setter                               */
+/* -------------------------------------------------------------------------- */
+
+int		Server::getServerFD(void) const
+{
+	return (_fd_server);
+}
+
+struct sockaddr_in	Server::getAddress(void) const
+{
+	return (_address);
+}
+
+const std::string	Server::getName(void) const
+{
+	return (_name);
+}
+
+size_t	Server::getMaxBodySize(void) const
+{
+	return (_max_body_size);
 }
