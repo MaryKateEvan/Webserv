@@ -14,13 +14,13 @@ CPPFLAGS		:= -Wall -Wextra -Werror -std=c++17
 
 OBJ_DIR			:= ./objs
 
-VPATH			:= ./utils/ ./server/ ./exceptions/ ./SocketsController
+VPATH			:= ./utils/ ./server/ ./exceptions/
 
 SRC				:= main.cpp
 
 UTILS_SRC		:= utils1.cpp
 
-SERVER_SRC		:= Server.cpp Request.cpp SocketsControl.cpp hard_assign_values.cpp
+SERVER_SRC		:= Server.cpp Request.cpp Polling.cpp
 
 EXCEPTIONS_SRC	:= Exception_server.cpp Exception_request.cpp
 

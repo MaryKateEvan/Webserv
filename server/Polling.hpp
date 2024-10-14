@@ -3,7 +3,7 @@
 
 # include "../webserv.h"
 
-// struct ServerData;
+class Server;
 
 class Polling
 {
