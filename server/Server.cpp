@@ -13,15 +13,15 @@
  * @param data_dir the directory to POST/DELETE from (might be replaced by a redirect map in the future)
  * @param www_dir the location of the webpage files 
  * @param directory_listing_enabled true or false if the directory listing should be enabled
- * @param keepalive_timeput 
+ * @param keepalive_timeout 
  * @param send_timeout 
  * @param max_body_size 
  */
 Server::Server(const std::string server_name, int port, const std::string ip_address, const std::string index_file,
-		const std::string data_dir, const std::string www_dir, bool directory_listing_enabled, size_t keepalive_timeput,
+		const std::string data_dir, const std::string www_dir, bool directory_listing_enabled, size_t keepalive_timeout,
 		size_t send_timeout, size_t max_body_size)
 	: _name(server_name), _index_file(index_file), _data_dir(data_dir), _www_dir(www_dir),
-	_directory_listing_enabled(directory_listing_enabled), _keepalive_timeout(keepalive_timeput),
+	_directory_listing_enabled(directory_listing_enabled), _keepalive_timeout(keepalive_timeout),
 	_send_timeout(send_timeout), _max_body_size(max_body_size)
 {
 	std::cout << "Server Default Constructor called" << std::endl;
@@ -30,6 +30,8 @@ Server::Server(const std::string server_name, int port, const std::string ip_add
 	if (_fd_server == -1)
 		throw SocketCreationFailedException(_name);
 	int opt = 1;
+	// Add keepalive here, not changed inside this branch since MK has to most current standart
+	// Add send_out here
 	if (setsockopt(_fd_server, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
 	{
 		close(_fd_server);
@@ -42,6 +44,7 @@ Server::Server(const std::string server_name, int port, const std::string ip_add
 		throw InvalidPortException(_name, port);
 	}
 	_address.sin_port = htons(port);
+	// replace forbidden function, not done now since MKs branch has it
 	if (inet_pton(AF_INET, ip_address.c_str(), &_address.sin_addr) != 1)
 	{
 		close(_fd_server);
@@ -57,6 +60,7 @@ Server::Server(const std::string server_name, int port, const std::string ip_add
 		close(_fd_server);
 		throw ListenFailedException(_name);
 	}
+	// temp to prevent -Werror complaints
 	int temp = _send_timeout + _keepalive_timeout + _directory_listing_enabled + _max_body_size;
 	std::cout << temp << std::endl;
 	std::cout << "Server is now listening on port " << port << std::endl;
@@ -66,30 +70,6 @@ Server::~Server()
 {
 	std::cout << "Server Default Destructor called" << std::endl;
 	close(_fd_server);
-}
-
-Server::Server(const Server& copy)
-{
-	std::cout << "Server Copy Constructor called" << std::endl;
-	if (this != &copy)
-	{
-		// this->_fd_server = copy._fd_server;
-		// this->_address = copy._address;
-		// this->_name = copy._name;
-	}
-}
-
-Server&	Server::operator=(const Server &copy)
-{
-	std::cout << "Server Copy Assignment called" << std::endl;
-	if (this != &copy)
-	{
-		// close(this->_fd_server);
-		// this->_fd_server = copy._fd_server;
-		// this->_address = copy._address;
-		// this->_name = copy._name;
-	}
-	return (*this);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -193,12 +173,10 @@ int	Server::process_get(const Request& req)
 	std::string	file_path = map_to_directory(url);
 	std::string	response = "HTTP/1.1 200 OK\r\n";
 
-	if (std::filesystem::is_directory(file_path))
+	if (_directory_listing_enabled == true && std::filesystem::is_directory(file_path))
 	{
 		if (file_path != map_to_directory("/" + _data_dir + "/") && file_path != map_to_directory("/" + _data_dir))
 		{
-			// std::cout << "File Path: " << file_path << std::endl;
-			// std::cout << "Data Path: " <<  map_to_directory("/" + _data_dir) << std::endl;
 			send_error_message(403, req);
 			return (0);
 		}
@@ -208,7 +186,6 @@ int	Server::process_get(const Request& req)
 		response_body += "    <li><a href=\"../\">Parent Directory</a></li>\n";
 		for (const auto& entry : std::filesystem::directory_iterator(file_path))
 		{
-			// std::cout << entry.path().filename().string() << std::endl;
 			response_body += "    <li><a href=\"" + _data_dir + "/" + entry.path().filename().string() + "\">" + entry.path().filename().string() + "</a></li>\n";
 		}
 		response_body += "</ul>\n<hr>\n</body>\n</html>\n";
@@ -217,6 +194,10 @@ int	Server::process_get(const Request& req)
 		response += response_body;
 		if (send(req.get_fd(), response.c_str(), response.size(), 0) == -1)
 				throw SendFailedException(_name, req.get_fd());
+	}
+	else if (_directory_listing_enabled == false && std::filesystem::is_directory(file_path))
+	{
+		send_error_message(403, req);
 	}
 	else if (std::filesystem::exists(file_path))
 	{
