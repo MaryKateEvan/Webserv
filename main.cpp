@@ -18,7 +18,7 @@ int main()
 	{
 		std::signal(SIGINT, signal_handler);
 		// Server	server1("A little webserver", PORT, "0.0.0.0", "index.html", "usrimg", "www");
-		Server	server1("An Instagram Knockoff", PORT, "0.0.0.0", "index.html", "usrimg", "www_image_webpage");
+		Server	server1("Instalight", PORT, "0.0.0.0", "index.html", "usrimg", "www_image_webpage", true, 0, 0, 0);
 
 		struct pollfd	fds[MAX_CLIENTS];
 		int				nfds = 1;
