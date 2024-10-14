@@ -5,9 +5,11 @@
 
 class Request;
 
-class Response
+class Server
 {
 	private:
+		int					_fd_server;
+		struct sockaddr_in	_address;
 		const std::string	_name;
 		const std::string	_index_file;
 		const std::string	_data_dir;
@@ -37,7 +39,7 @@ class Response
 		struct sockaddr_in	getAddress(void) const;
 		const std::string	getName(void) const;
 		size_t				getMaxBodySize(void) const;
-		int					acceptConnection(void);
+		// int					acceptConnection(void);
 		int					process_request(const Request& req);
 		int					send_error_message(int error_code, const Request& req);
 };

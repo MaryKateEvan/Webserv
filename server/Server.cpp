@@ -75,7 +75,7 @@ Server::~Server()
 /*                                  Functions                                 */
 /* -------------------------------------------------------------------------- */
 
-void	Response::load_mime_types(const std::string& file_path)
+void	Server::load_mime_types(const std::string& file_path)
 {
 	std::ifstream file(file_path);
 	if (!file.is_open())
@@ -96,7 +96,7 @@ void	Response::load_mime_types(const std::string& file_path)
 /// @brief Takes the http request and extracts the requested resource
 /// @param request Takes the request sent by the client
 /// @return String of the requested resource
-std::string	Response::extract_get_request(const std::string& request)
+std::string	Server::extract_get_request(const std::string& request)
 {
 	std::string::size_type	get = request.find("GET ") + 4;
 	std::string::size_type	http = request.find(" HTTP/");
@@ -109,7 +109,7 @@ std::string	Response::extract_get_request(const std::string& request)
 /// @brief Takes the string from extract request and maps it to the directoy (currently www)
 /// @param file_path the return value from extract_request
 /// @return The path to the requested resource in our directory
-std::string	Response::map_to_directory(const std::string& file_path)
+std::string	Server::map_to_directory(const std::string& file_path)
 {
 	if (file_path == "/")
 		return (_www_dir + "/" + _index_file);
@@ -117,7 +117,7 @@ std::string	Response::map_to_directory(const std::string& file_path)
 		return (_www_dir + file_path);
 }
 
-std::string	Response::get_mime_type(const std::string& file_path)
+std::string	Server::get_mime_type(const std::string& file_path)
 {
 	std::string	file_extension = file_path.substr(file_path.find_last_of('.'));
 	try
@@ -130,7 +130,7 @@ std::string	Response::get_mime_type(const std::string& file_path)
 	}
 }
 
-std::string	Response::read_file(const std::string& file_path)
+std::string	Server::read_file(const std::string& file_path)
 {
 	std::ifstream		file(file_path);
 	std::stringstream	buffer;
@@ -141,7 +141,7 @@ std::string	Response::read_file(const std::string& file_path)
 
 
 
-int	Response::process_request(const Request& req)
+int	Server::process_request(const Request& req)
 {
 	int	method = req.get_method();
 
@@ -160,7 +160,7 @@ int	Response::process_request(const Request& req)
 	return (1);
 }
 
-int	Response::process_get(const Request& req)
+int	Server::process_get(const Request& req)
 {
 	std::string	url = req.get_file_path();
 	std::string	file_path = map_to_directory(url);
@@ -208,7 +208,7 @@ int	Response::process_get(const Request& req)
 	return (0);
 }
 
-int	Response::process_delete(const Request& req)
+int	Server::process_delete(const Request& req)
 {
 	std::string	url = req.get_file_path();
 	std::string	file_path = _www_dir + "/" + _data_dir + "/" + url;
@@ -228,7 +228,7 @@ int	Response::process_delete(const Request& req)
 	return (0);
 }
 
-int	Response::process_post(const Request& req)
+int	Server::process_post(const Request& req)
 {
 	long unsigned int	failed = 0;
 	for (const auto& entry : req._post_files)
@@ -254,7 +254,7 @@ int	Response::process_post(const Request& req)
 }
 
 
-int	Response::send_error_message(int error_code, const Request& req)
+int	Server::send_error_message(int error_code, const Request& req)
 {
 	std::string	url = std::to_string(error_code);
 	std::string	file_path = "error_pages/" + url + ".jpg";
