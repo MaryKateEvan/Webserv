@@ -16,17 +16,17 @@ class ConfigData
 		class	MemberData
 		{
 			public:
-				const char *		name;
+				const std::string	name;
 				int					setAtLine;
 				bool				isSet;
 				StringArr			*data;
 
-				MemberData(const char * name);
+				MemberData(const std::string name);
 				~MemberData();
 
 				void	set(int argc, std::string args[], int line, std::string funcName, std::string className);
-				template<typename T>
-				T		get(T def, size_t idx = 0) const
+				//	generic function to parse data string at index to a template value or return default
+				template<typename T> T get(T def, size_t idx = 0) const
 				{
 					if (!isSet)
 						return (def);
@@ -49,6 +49,57 @@ class ConfigData
 
 					return (def);
 				};
+				//	function to parse data string at index to a bool or return default
+				bool	get(bool def, size_t idx = 0) const;
+				//	generic function to parse data string at index to a template value or return default as well as set got to indicate successful data retrival
+				template<typename T> T get(T def, bool & got, size_t idx = 0) const
+				{
+					got = false;
+
+					if (!isSet)
+						return (def);
+
+					if (idx >= data -> num)
+						return (def);
+
+					try
+					{
+						T temp;
+						std::stringstream ss;
+						ss << (data -> arr[idx]);
+						ss >> temp;
+						got = true;
+						return (temp);
+					}
+					catch(const std::exception& e)
+					{
+						return (def);
+					}
+
+					return (def);
+				};
+				//	generic function to parse all data strings to template values and put them in a vector
+				template<typename T> void get(std::vector<T> & vec) const
+				{
+					if (!isSet)
+						return;
+
+					for (size_t i = 0; i < data -> num; i++)
+					{
+						try
+						{
+							T temp;
+							std::stringstream ss;
+							ss << (data -> arr[i]);
+							ss >> temp;
+							vec.push_back(temp);
+						}
+						catch(const std::exception& e)
+						{
+							std::cout << "name:" << name << " idx:" << i << "data:" << data -> arr[i] << "\n";
+						}
+					}
+				}
 				void	print(std::string tab);
 		};
 

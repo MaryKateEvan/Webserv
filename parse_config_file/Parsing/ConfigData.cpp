@@ -5,7 +5,7 @@ extern StringDataTracker	tracker;
 
 
 
-ConfigData::MemberData::MemberData(const char * name) :
+ConfigData::MemberData::MemberData(const std::string name) :
 	name(name)
 {
 	isSet = false;
@@ -31,20 +31,19 @@ void	ConfigData::MemberData::set(int argc, std::string args[], int line, std::st
 	for (int i = 0; i < argc; i++)
 		data -> arr[i] = args[i];
 }
-/*int		ConfigData::MemberData::get(size_t idx, int def) const
+bool	ConfigData::MemberData::get(bool def, size_t idx) const
 {
 	if (!isSet)
 		return (def);
+
 	if (idx >= data -> num)
 		return (def);
-	try
-	{
-		std::stringstream ss;
-		int	Temp;
-	}
-	catch(const std::exception& e) { }
+
+	if (data -> arr[idx] == "true")
+		return (true);
+
 	return (def);
-}*/
+}
 void	ConfigData::MemberData::print(std::string tab)
 {
 	std::cout << tab << name << " { ";
@@ -64,10 +63,13 @@ void	ConfigData::MemberData::print(std::string tab)
 
 void	ConfigData::printFuncArgs(std::string func, int argc, std::string args[])
 {
-	std::cout << "\e[38;2;63;63;63m" << func << "(";
-	for (int i = 0; i < argc; i++)
-		std::cout << " " << args[i];
-	std::cout << " );\e[m\n";
+	//std::cout << "\e[38;2;63;63;63m" << func << "(";
+	//for (int i = 0; i < argc; i++)
+	//	std::cout << " " << args[i];
+	//std::cout << " );\e[m\n";
+	(void) func;
+	(void) argc;
+	(void) args;
 }
 
 

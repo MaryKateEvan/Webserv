@@ -11,17 +11,17 @@ http {
 		max_body_size           100000000;
 		directory_listing       true;
 		location / {
-			request_types       GET POST;
+			allowed_methods       GET POST;
 		}
 		location /42heilbronn {
-			request_types       GET;
+			allowed_methods       GET;
 			redirection			https://www.42heilbronn.de/;
 		}
 		location /google {
 			redirection			www.google.com;
 		}
 		location /uploads {
-			request_types       GET POST DELETE;
+			allowed_methods       GET POST DELETE;
 		}
 	}
 	server {
@@ -34,14 +34,14 @@ http {
 		max_body_size           200;
 		directory_listing       false;
 		location / {
-			request_types       GET POST;
+			allowed_methods       GET POST;
 		}
 		location /google {
-			request_types       GET;
+			allowed_methods       GET;
 			redirection			www.google.com;
 		}
 		location /uploads {
-			request_types       GET POST;
+			allowed_methods       GET POST;
 		}
 		location /surprise {
 			redirection			https://www.youtube.com/watch?v=aAkMkVFwAoo/;

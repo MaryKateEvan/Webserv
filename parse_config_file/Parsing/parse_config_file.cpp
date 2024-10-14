@@ -47,9 +47,8 @@ void	parseConfig(std::string config, ConfigData::MainData * data)
 			ConfigParse("server_timeout_time", 1, 1, NULL, ConfigData::HttpData::set_server_timeout_time),
 		}),
 	});
-	std::cout << "\n";
+	//std::cout << "\n";
 	how2parse.parse(data, config, "");	//	<--- config data is read here
-	std::cout << "\nfile reading done\n";
 }
 
 
@@ -77,7 +76,7 @@ std::vector<ServerData>	read_config_file(std::string file)
 	conf = StringHelp::remove_comments(conf);
 	conf = StringHelp::trim_whitespace(conf);
 
-	std::cout << "\n";
+	//std::cout << "\n";
 	Pair pair = Pair::find(conf, 0, '{', '}');
 	if (!pair.all_good())
 	{
@@ -87,9 +86,10 @@ std::vector<ServerData>	read_config_file(std::string file)
 
 	ConfigData::MainData data;
 	parseConfig(conf, &data);
-	std::cout << "\n";
-	data.print();
-	std::cout << "\n";
+	std::cout << "INFO: config file reading done\n";
+	//std::cout << "\n";
+	//data.print();
+	//std::cout << "\n";
 
 	if (data.http.size() == 0)
 	{
@@ -100,7 +100,7 @@ std::vector<ServerData>	read_config_file(std::string file)
 	{
 		tracker.report_generic(REPORT_WARNING, "Multiple http blocks given. Only the first one will be used");
 	}
-	std::cout << "\n";
+	//std::cout << "\n";
 
 	std::vector<ServerData>	server_vec;
 	{
@@ -119,7 +119,7 @@ std::vector<ServerData>	read_config_file(std::string file)
 			server.max_request_size = server_ptr -> max_body_size.get<size_t>(0);
 			server.send_timeout = server_ptr -> send_timeout.get<size_t>(0);
 
-			server.directory_listing = server_ptr -> directory_listing.get<bool>(false);
+			server.directory_listing = server_ptr -> directory_listing.get(false);
 			for (size_t l = 0; l < server_ptr -> location.size(); l++)
 			{
 				ConfigData::ServerLocationData * location_ptr = server_ptr -> location[l];
@@ -127,15 +127,8 @@ std::vector<ServerData>	read_config_file(std::string file)
 
 				location.path = location_ptr -> path;
 				location.redirection = location_ptr -> redirection.isSet;
-				if (location_ptr -> redirection.isSet)
-				{
-					location.path_to_redirect = location_ptr -> redirection.data -> arr[0];
-				}
-				if (location_ptr -> allowed_methods.isSet)
-				{
-					for (size_t m = 0; m < location_ptr -> allowed_methods.data -> num; m++)
-						location.allowed_methods.push_back(location_ptr -> allowed_methods.data -> arr[m]);
-				}
+				location.path_to_redirect = location_ptr -> redirection.get<std::string>("", location.redirection);
+				location_ptr -> allowed_methods.get<std::string>(location.allowed_methods);
 
 				server.locations.push_back(location);
 			}
@@ -144,7 +137,7 @@ std::vector<ServerData>	read_config_file(std::string file)
 		}
 	}
 
-	std::cout << "\nparsing done\n";
+	std::cout << "INFO: config data interpreting done\n";
 
 	return (server_vec);
 }
@@ -179,8 +172,8 @@ int main(int argc, char * argv[])
 			{
 				LocationData const & location = server.locations[l];
 				std::cout << "  location [" << l << "]\n";
-				std::cout << "    redirection:" << location.redirection << "\n";
 				std::cout << "    path:" << location.path << "\n";
+				std::cout << "    redirection:" << location.redirection << "\n";
 				std::cout << "    path_to_redirect:" << location.path_to_redirect << "\n";
 				std::cout << "    allowed_methods(";
 				for (size_t m = 0; m < location.allowed_methods.size(); m++)
