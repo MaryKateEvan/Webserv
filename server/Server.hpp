@@ -1,5 +1,5 @@
-#ifndef RESPONSE_HPP
-# define RESPONSE_HPP
+#ifndef SERVER_HPP
+# define SERVER_HPP
 
 # include "../webserv.h"
 
@@ -42,4 +42,4 @@ class Response
 		int					send_error_message(int error_code, const Request& req);
 };
 
-#endif /*RESPONSE_HPP*/
+#endif /*SERVER_HPP*/
