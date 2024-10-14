@@ -81,8 +81,8 @@ void SocketsControl::bind_socket_and_listen_to_port(std::vector<ServerData>::ite
 	//save the port to the "occupied ports" vector:
 	_used_ports.push_back(server->port_to_listen);
 
-	std::cout << "Server socket " << UNDERLINE(server->server_socket) 
-			<< " is now listening on port: " << BOLD(server->port_to_listen) << std::endl;
+	std::cout << CYAN("🔉 Server socket " << UNDERLINE(server->server_socket) 
+			<< CYAN(" is now listening on port: " << BOLD(server->port_to_listen))) << std::endl;
 }
 
 void SocketsControl::server_poll_data(std::vector<ServerData>::iterator server)
