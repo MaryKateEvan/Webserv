@@ -35,9 +35,9 @@ class Request
 		bool				_header_parsed;
 		bool				_finished_reading;
 
+		int			fill_in_request(void);
 
-
-		int			process_post(const std::string& request);
+		int			process_post(void);
 		void		fill_string_to_map(std::string input);
 	public:
 		std::unordered_map<std::string, std::string> _post_files;

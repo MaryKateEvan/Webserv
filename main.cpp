@@ -88,8 +88,8 @@ int main()
 					}
 					if (ret == 0)
 					{
-					// server1.process_request(req);
-					std::cout << "The requested host is: " << req.get_host() << std::endl;
+					server1.process_request(req);
+					// std::cout << "The requested host is: " << req.get_host() << std::endl;
 					close(fds[i].fd);
 					fds[i].fd = -1;
 					}

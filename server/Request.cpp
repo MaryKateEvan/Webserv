@@ -4,37 +4,6 @@
 /*                           Orthodox Canonical Form                          */
 /* -------------------------------------------------------------------------- */
 
-// Request::Request(const std::string& request, int fd)
-// {
-// 	std::cout << "Request Default Constructor called" << std::endl;
-// 	_fd = fd;
-// 	std::string::size_type	method;
-// 	if (request.compare(0, 3, "GET") == 0)
-// 	{
-// 		_method = GET;
-// 		method = request.find("GET ") + 4;
-// 	}
-// 	else if (request.compare(0, 4, "POST") == 0)
-// 	{
-// 		_method = POST;
-// 		if (process_post(request) == 1)
-// 			std::cout << "RETURNED 1\n";
-// 		method = request.find("POST ") + 5;
-// 	}
-// 	else if (request.compare(0, 6, "DELETE") == 0)
-// 	{
-// 		_method = DELETE;
-// 		method = request.find("DELETE ") + 7;
-// 	}
-// 	else
-// 		throw NoMethodFoundException(request);
-// 	std::string::size_type	http = request.find(" HTTP/");
-// 	//replace exception
-// 	if (method == std::string::npos || http == std::string::npos)
-// 		throw NoMethodFoundException(request);
-// 	_file_path = request.substr(method, http - method);
-// }
-
 Request::Request(size_t fd)
 {
 	_fd = fd;
@@ -132,87 +101,121 @@ int		Request::read_chunk(std::vector<char> buffer, int bytes_read)
 	{
 		if (_body_bytes_read >= _content_len)
 		{
-			_finished_reading = true;
+			if (fill_in_request() == 1)
+				return (1);
 			return (0);
 		}
 	}
 	if (_header_parsed && _content_len == 0)
 	{
-			std::cout << "HEADER:\n" << _header << std::endl;
+		// std::cout << "HEADER:\n" << _header << std::endl;
+		if (fill_in_request() == 1)
+			return (1);
 		_finished_reading = true;
 		return (0);
 	}
 	return (1);
 }
 
-void	Request::fill_string_to_map(std::string input)
+int	Request::fill_in_request(void)
 {
-			std::istringstream	ss(input);
-			std::string			line;
-			size_t				line_count = 0;
-			std::string			file_name;
-			std::string			file_content;
-			size_t				pos;
-
-			while (std::getline(ss, line))
-			{
-				if (line_count == 0)
-				{
-					line_count++;
-					continue;
-				}
-				if (line_count == 1)
-				{
-					pos = line.find("filename=\"");
-					if (pos == std::string::npos)
-						file_name = "unknown";
-					else
-						file_name = line.substr(pos + 10, line.length() - (pos + 10) - 2);
-					line_count++;
-					continue;
-				}
-				if (line_count == 2 || line_count == 3)
-				{
-					line_count++;
-					continue;
-				}
-				file_content += line + "\n";
-			}
-			_post_files[file_name] = file_content;
+	std::string::size_type	method;
+	if (_header.compare(0, 3, "GET") == 0)
+	{
+		_method = GET;
+		method = _header.find("GET ") + 4;
+	}
+	else if (_header.compare(0, 4, "POST") == 0)
+	{
+		_method = POST;
+		if (process_post() == 1)
+			return (1);
+		method = _header.find("POST ") + 5;
+	}
+	else if (_header.compare(0, 6, "DELETE") == 0)
+	{
+		_method = DELETE;
+		method = _header.find("DELETE ") + 7;
+	}
+	else
+		throw NoMethodFoundException(_header);
+	std::string::size_type	http = _header.find(" HTTP/");
+	//replace exception
+	if (method == std::string::npos || http == std::string::npos)
+		throw NoMethodFoundException(_header);
+	_file_path = _header.substr(method, http - method);
+	return (0);
 }
 
-int	Request::process_post(const std::string& request)
-{
-	std::istringstream	stream(request);
-	std::string			line;
-	std::string			last_line;
-	size_t				pos;
 
-	while (std::getline(stream, line))
-	{
-		// std::cout << "LINE: " + line << std::endl;
-		pos = line.find("Content-Type: ");
-		if (pos != std::string::npos)
-			break ;
-	}
-	if (line.empty() || !std::getline(stream, last_line))
+int	Request::process_post(void)
+{
+	size_t	con_type_begin = _header.find("Content-Type: ");
+	if (con_type_begin == std::string::npos)
 		return (1);
-	size_t	end = line.find(';');
-	if (end == std::string::npos)
+	con_type_begin += 14;
+	std::string	temp = _header.substr(con_type_begin);
+	size_t	semicolon_pos = temp.find(';');
+	if (semicolon_pos == std::string::npos)
 		return (1);
-	pos += 14;
-	std::string	con_type = line.substr(pos, end - pos);
+	std::string con_type= temp.substr(0, semicolon_pos);
 	_content_type = con_type;
 	if (con_type == "multipart/form-data")
 	{
-		std::string	boundary = "--" + line.substr(end + 12);
-		std::vector<std::string>	temp = tokenize(request, boundary);
+		size_t	boundary_pos = temp.find("boundary=");
+		if (boundary_pos == std::string::npos)
+			return (1);
+		std::string	boundary = "--" + temp.substr(boundary_pos + 9);
+		std::string body_str(_accumulated_request.begin(), _accumulated_request.end());
+		std::vector<std::string>	temp = tokenize(body_str, boundary);
 		for (size_t i = 1; i < temp.size(); ++i)
 		{
 			fill_string_to_map(temp[i]);
 		}
 	}
+	else
+	{
+		//! Replace the unknown filename with something like unknow.fileending or random.fileending, getting the ending from the mimetype map that is currently in the server class
+		std::string body_str(_accumulated_request.begin(), _accumulated_request.end());
+		_post_files["unknown"] = body_str;
+	}
 	return (0);
+}
+
+void	Request::fill_string_to_map(std::string input)
+{
+	std::istringstream	ss(input);
+	std::string			line;
+	size_t				line_count = 0;
+	std::string			file_name;
+	std::string			file_content;
+	size_t				pos;
+
+	while (std::getline(ss, line))
+	{
+		if (line_count == 0)
+		{
+			line_count++;
+			continue;
+		}
+		if (line_count == 1)
+		{
+			pos = line.find("filename=\"");
+			if (pos == std::string::npos)
+				file_name = "unknown";
+			else
+				file_name = line.substr(pos + 10, line.length() - (pos + 10) - 2);
+			line_count++;
+			continue;
+		}
+		if (line_count == 2 || line_count == 3)
+		{
+			line_count++;
+			continue;
+		}
+		file_content += line + "\n";
+	}
+	_post_files[file_name] = file_content;
 }
 
 /* -------------------------------------------------------------------------- */
