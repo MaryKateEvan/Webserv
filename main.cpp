@@ -69,70 +69,97 @@ int main()
 			{
 				if (fds[i].fd != -1 && (fds[i].revents & POLLIN))
 				{
-					std::vector<char>	accumulated_request;
+					Request	req(fds[i].fd);
 					std::vector<char>	buffer(4096);
-					size_t				content_len = 0;
-					bool				header_parsed = false;
-					size_t				body_bytes_read = 0;
+					int	ret;
 					while (true)
 					{
 						int bytes_read = read(fds[i].fd, buffer.data(), buffer.size());
-
-						if (bytes_read < 0)
+						ret = req.read_chunk(buffer, bytes_read);
+						if (ret < 0)
 						{
-							std::cerr << "Error reading from fd " << fds[i].fd << std::endl;
-							close(fds[i].fd);
-							fds[i].fd = -1;
-							break;
+							std::cout << "NEGATIVE RETURN ABORTING" << std::endl;
+							break ;
 						}
-						if (bytes_read == 0)
-						{
-							std::cout << "Client on fd " << fds[i].fd << " disconnected" << std::endl;
-							close(fds[i].fd);
-							fds[i].fd = -1;
-							break;
-						}
-						accumulated_request.insert(accumulated_request.end(), buffer.begin(), buffer.begin() + bytes_read);
-						std::string temp_request(accumulated_request.begin(), accumulated_request.end());
-						if (!header_parsed)
-						{
-							size_t	header_end = temp_request.find("\r\n\r\n");
-							if (header_end != std::string::npos)
-							{
-								header_parsed = true;
-								std::string	headers = temp_request.substr(0, header_end + 4);
-								size_t content_len_pos = headers.find("Content-Length: ");
-								std::cout << "Headers:\n" << headers << std::endl;
-								if (content_len_pos != std::string::npos)
-								{
-									size_t content_length_start = content_len_pos + 16;
-									size_t content_length_end = headers.find("\r\n", content_length_start);
-									std::string content_length_str = headers.substr(content_length_start, content_length_end - content_length_start);
-									content_len = std::stoul(content_length_str);
-									// std::cout << "|TEMPREQUESTBEGIN:\n\n\n|" << temp_request << "|TEMPREQUESTEND\n\n\n|" << std::endl;
-								}
-								body_bytes_read = temp_request.size() - (header_end + 4);
-							}
-						}
-						// std::cout << "Body Bytes Read: " << body_bytes_read << std::endl;
-						if (header_parsed && content_len > 0)
-						{
-							if (body_bytes_read >= content_len)
-								break ;
-						}
-						if (header_parsed && content_len == 0)
-								break ;
-						if (header_parsed)
-							body_bytes_read += bytes_read;
+						if (ret == 1)
+							continue;
+						if (ret == 0)
+							break ;
 					}
-					if (header_parsed && (content_len == 0 || body_bytes_read >= content_len))
+					if (ret == 0)
 					{
-						Request req(std::string(accumulated_request.begin(), accumulated_request.end()), fds[i].fd);
- 						server1.process_request(req);
-					}
-					accumulated_request.clear();
+					// server1.process_request(req);
+					std::cout << "The requested host is: " << req.get_host() << std::endl;
 					close(fds[i].fd);
 					fds[i].fd = -1;
+					}
+					// }
+
+
+					// std::vector<char>	accumulated_request;
+					// std::vector<char>	buffer(4096);
+					// size_t				content_len = 0;
+					// bool				header_parsed = false;
+					// size_t				body_bytes_read = 0;
+					// while (true)
+					// {
+					// 	int bytes_read = read(fds[i].fd, buffer.data(), buffer.size());
+
+					// 	if (bytes_read < 0)
+					// 	{
+					// 		std::cerr << "Error reading from fd " << fds[i].fd << std::endl;
+					// 		close(fds[i].fd);
+					// 		fds[i].fd = -1;
+					// 		break;
+					// 	}
+					// 	if (bytes_read == 0)
+					// 	{
+					// 		std::cout << "Client on fd " << fds[i].fd << " disconnected" << std::endl;
+					// 		close(fds[i].fd);
+					// 		fds[i].fd = -1;
+					// 		break;
+					// 	}
+					// 	accumulated_request.insert(accumulated_request.end(), buffer.begin(), buffer.begin() + bytes_read);
+					// 	std::string temp_request(accumulated_request.begin(), accumulated_request.end());
+					// 	if (!header_parsed)
+					// 	{
+					// 		size_t	header_end = temp_request.find("\r\n\r\n");
+					// 		if (header_end != std::string::npos)
+					// 		{
+					// 			header_parsed = true;
+					// 			std::string	headers = temp_request.substr(0, header_end + 4);
+					// 			size_t content_len_pos = headers.find("Content-Length: ");
+					// 			std::cout << "Headers:\n" << headers << std::endl;
+					// 			if (content_len_pos != std::string::npos)
+					// 			{
+					// 				size_t content_length_start = content_len_pos + 16;
+					// 				size_t content_length_end = headers.find("\r\n", content_length_start);
+					// 				std::string content_length_str = headers.substr(content_length_start, content_length_end - content_length_start);
+					// 				content_len = std::stoul(content_length_str);
+					// 				// std::cout << "|TEMPREQUESTBEGIN:\n\n\n|" << temp_request << "|TEMPREQUESTEND\n\n\n|" << std::endl;
+					// 			}
+					// 			body_bytes_read = temp_request.size() - (header_end + 4);
+					// 		}
+					// 	}
+					// 	// std::cout << "Body Bytes Read: " << body_bytes_read << std::endl;
+					// 	if (header_parsed && content_len > 0)
+					// 	{
+					// 		if (body_bytes_read >= content_len)
+					// 			break ;
+					// 	}
+					// 	if (header_parsed && content_len == 0)
+					// 			break ;
+					// 	if (header_parsed)
+					// 		body_bytes_read += bytes_read;
+					// }
+					// if (header_parsed && (content_len == 0 || body_bytes_read >= content_len))
+					// {
+					// 	Request req(std::string(accumulated_request.begin(), accumulated_request.end()), fds[i].fd);
+ 					// 	server1.process_request(req);
+					// }
+					// accumulated_request.clear();
+					// close(fds[i].fd);
+					// fds[i].fd = -1;
 				}
 			}
 		}
