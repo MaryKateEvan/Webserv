@@ -18,7 +18,7 @@ int main()
 	{
 		std::signal(SIGINT, signal_handler);
 		// Server	server1("A little webserver", PORT, "0.0.0.0", "index.html", "usrimg", "www");
-		Server	server1("Instalight", PORT, "0.0.0.0", "index.html", "usrimg", "www_image_webpage", true, 0, 0, 0);
+		Server	server1("Instalight", PORT, "0.0.0.0", "index.html", "usrimg", "www_image_webpage", true, 0, 0, 3000000);
 
 		struct pollfd	fds[MAX_CLIENTS];
 		int				nfds = 1;
@@ -82,20 +82,11 @@ int main()
 						int bytes_read = read(fds[i].fd, buffer.data(), buffer.size());
 						ret = req.read_chunk(buffer, bytes_read);
 						if (ret < 0)
-						{
-							std::cout << "NEGATIVE RETURN ABORTING" << std::endl;
 							break ;
-						}
 						if (ret == 1)
 							continue;
 						if (ret == 0)
 							break ;
-					}
-					if (ret < 0)
-					{
-						std::cout << "Negative Return" << std::endl;
-						close(fds[i].fd);
-						fds[i].fd = -1;
 					}
 					if (ret == 0)
 					{
@@ -109,6 +100,13 @@ int main()
 					{
 						std::string response = server1.send_error_message(413);
 						send(req.get_fd(), response.c_str(), response.size(), 0);
+					}
+					else if (ret < 0)
+					{
+						std::string response = server1.send_error_message(400);
+						send(req.get_fd(), response.c_str(), response.size(), 0);
+						close(fds[i].fd);
+						fds[i].fd = -1;
 					}
 				}
 			}

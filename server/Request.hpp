@@ -47,6 +47,7 @@ class Request
 		Request& operator=(const Request& copy);
 
 		int			read_chunk(std::vector<char> buffer, int bytes_read);
+		bool		correct_body_size(size_t max_size);
 
 		int			get_method(void) const;
 		int			get_fd(void) const;

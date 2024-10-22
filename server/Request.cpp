@@ -102,8 +102,6 @@ int		Request::read_chunk(std::vector<char> buffer, int bytes_read)
 		if (_body_bytes_read >= _content_len)
 		{
 			std::cout << "HEADER:\n" << _header << std::endl;
-			// std::string body_str(_accumulated_request.end() - 100, _accumulated_request.end());
-			// std::cout << "BODY:\n" << body_str << std::endl  << std::endl  << std::endl  << std::endl;
 			if (fill_in_request() == 1)
 				return (1);
 			return (0);
@@ -220,6 +218,16 @@ void	Request::fill_string_to_map(std::string input)
 	}
 	_post_files[file_name] = file_content;
 }
+
+bool	Request::correct_body_size(size_t max_size)
+{
+	if (_header_parsed == false || max_size == 0)
+		return (true);
+	if (max_size < _content_len)
+		return (false);
+	return (true);
+}
+
 
 /* -------------------------------------------------------------------------- */
 /*                                Getter/Setter                               */
