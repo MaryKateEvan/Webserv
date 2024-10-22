@@ -243,9 +243,11 @@ int	Server::process_post(const Request& req)
 		const std::string&	file_name = entry.first;
 		const std::string&	content = entry.second;
 		std::string			full_path = _www_dir + "/" + _data_dir + "/" +file_name;
+
 		std::ofstream out_file(full_path, std::ios::binary);
 		if (!out_file)
 		{
+			std::cout << "Failed" << std::endl;
 			failed++;
 			continue;
 		}
@@ -254,9 +256,10 @@ int	Server::process_post(const Request& req)
 	}
 	if (failed == req._post_files.size())
 		send_error_message(500, req);
-	if (failed > 0)
+	else if (failed > 0)
 		send_error_message(207, req);
-	send_error_message(200, req);
+	else
+		send_error_message(200, req);
 	return (0);
 }
 

@@ -101,6 +101,9 @@ int		Request::read_chunk(std::vector<char> buffer, int bytes_read)
 	{
 		if (_body_bytes_read >= _content_len)
 		{
+			std::cout << "HEADER:\n" << _header << std::endl;
+			// std::string body_str(_accumulated_request.end() - 100, _accumulated_request.end());
+			// std::cout << "BODY:\n" << body_str << std::endl  << std::endl  << std::endl  << std::endl;
 			if (fill_in_request() == 1)
 				return (1);
 			return (0);
@@ -108,7 +111,7 @@ int		Request::read_chunk(std::vector<char> buffer, int bytes_read)
 	}
 	if (_header_parsed && _content_len == 0)
 	{
-		// std::cout << "HEADER:\n" << _header << std::endl;
+		std::cout << "HEADER:\n" << _header << std::endl;
 		if (fill_in_request() == 1)
 			return (1);
 		_finished_reading = true;
@@ -168,7 +171,7 @@ int	Request::process_post(void)
 		std::string	boundary = "--" + temp.substr(boundary_pos + 9);
 		std::string body_str(_accumulated_request.begin(), _accumulated_request.end());
 		std::vector<std::string>	temp = tokenize(body_str, boundary);
-		for (size_t i = 1; i < temp.size(); ++i)
+		for (size_t i = 0; i < temp.size(); ++i)
 		{
 			fill_string_to_map(temp[i]);
 		}
