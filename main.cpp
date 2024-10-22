@@ -74,6 +74,11 @@ int main()
 					int	ret;
 					while (true)
 					{
+						if (req.correct_body_size(server1.getMaxBodySize()) == false)
+						{
+							ret = -10;
+							break ;
+						}
 						int bytes_read = read(fds[i].fd, buffer.data(), buffer.size());
 						ret = req.read_chunk(buffer, bytes_read);
 						if (ret < 0)
@@ -94,10 +99,16 @@ int main()
 					}
 					if (ret == 0)
 					{
-						server1.process_request(req);
+						std::string response = server1.process_request(req);
+						send(req.get_fd(), response.c_str(), response.size(), 0);
 						// std::cout << "The requested host is: " << req.get_host() << std::endl;
 						close(fds[i].fd);
 						fds[i].fd = -1;
+					}
+					if (ret == -10)
+					{
+						std::string response = server1.send_error_message(413);
+						send(req.get_fd(), response.c_str(), response.size(), 0);
 					}
 				}
 			}

@@ -21,9 +21,9 @@ class Server
 		std::unordered_map<std::string, std::string> _mime_types;
 
 		void				load_mime_types(const std::string& file_path);
-		int					process_get(const Request& req);
-		int					process_delete(const Request& req);
-		int					process_post(const Request& req);
+		std::string			process_get(const Request& req);
+		std::string			process_delete(const Request& req);
+		std::string			process_post(const Request& req);
 		std::string			extract_get_request(const std::string& request);
 		std::string			map_to_directory(const std::string& file_path);
 		std::string			get_mime_type(const std::string& file_path);
@@ -39,8 +39,8 @@ class Server
 		const std::string	getName(void) const;
 		size_t				getMaxBodySize(void) const;
 		int					acceptConnection(void);
-		int					process_request(const Request& req);
-		int					send_error_message(int error_code, const Request& req);
+		std::string			process_request(const Request& req);
+		std::string			send_error_message(int error_code);
 };
 
 #endif /*SERVER_HPP*/
