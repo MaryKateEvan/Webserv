@@ -133,7 +133,6 @@ void Polling::accept_new_client_connection(int server_fd)
 		close(new_socket);
 		throw SetSocketNonBLockingModeException("client");
 	}
-
 	//add the poll_fd of the client in the _poll_fds vector:
 	struct pollfd client_poll_fd;
 	client_poll_fd.fd = new_socket;
@@ -142,7 +141,10 @@ void Polling::accept_new_client_connection(int server_fd)
 
 	//add the client fd to the _client_fds vector:
 	_client_fds.push_back(new_socket);
-	//! maybe initialize here any other data of client structure, if i decide to make one
+
+	_clients[new_socket] = ClientData();
+	_clients[new_socket].fd_client = new_socket;
+	std::time(&_clients[new_socket].last_seen);
 
 	std::cout << GREEN(" ✅ 👨‍💻 New client connected on socket: " << BOLD(new_socket)) << std::endl; 
 }

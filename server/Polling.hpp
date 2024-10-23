@@ -2,8 +2,16 @@
 # define POLLING_HPP
 
 # include "../webserv.h"
+# include <map>
 
 class Server;
+
+struct ClientData
+{
+	int fd_client;
+	int port_of_server;
+	time_t last_seen;
+};
 
 class Polling
 {
@@ -13,6 +21,8 @@ class Polling
 		std::vector<int>			_client_fds; //to keep track of the active client sockets
 		std::vector<struct pollfd>	_poll_fds;
 		std::vector<int>			_used_ports; //? maybe parser handles that?
+		std::map<int, Server> 		_servers_map; //it indexes according to the client's fd
+		std::map<int, ClientData> 	_clients_map; //it indexes according to the client's fd
 
 		Polling(); //only instantiated with the vector of ServerData passed
 		// void server_poll_data();

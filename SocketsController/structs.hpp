@@ -2,6 +2,7 @@
 # define STRUCTS_HPP
 
 # include "../webserv.h"
+# include <ctime>
 
 struct LocationData
 {
@@ -27,6 +28,7 @@ struct ServerData
 	//the only attribute to be added after parser, in SocketsControl:
 	int				server_socket;
 };
+
 
 
 #endif //structs.hpp
