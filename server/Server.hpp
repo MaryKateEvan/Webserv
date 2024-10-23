@@ -11,6 +11,7 @@ class Server
 		int					_fd_server;
 		struct sockaddr_in	_address;
 		const std::string	_name;
+		int					_port_to_listen; //addition
 		const std::string	_index_file;
 		const std::string	_data_dir;
 		const std::string	_www_dir;
@@ -30,7 +31,7 @@ class Server
 		std::string			read_file(const std::string& file_path);
 
 	public:
-		Server(const std::string server_name, int port, const std::string ip_address, const std::string index_file,
+		Server(const std::string server_name, int port, const std::string index_file,
 		const std::string data_dir, const std::string www_dir, bool directory_listing_enabled, size_t keepalive_timeout,
 		size_t send_timeout, size_t max_body_size);
 		~Server();
@@ -42,6 +43,10 @@ class Server
 		int					acceptConnection(void);
 		std::string			process_request(const Request& req);
 		std::string			send_error_message(int error_code);
+
+		//the additions:
+		void initServerSocket(std::vector<int>&	_used_ports);
+		void bind_socket_and_listen(std::vector<int>& _used_ports);
 };
 
 #endif /*SERVER_HPP*/

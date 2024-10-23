@@ -15,20 +15,20 @@ class Polling
 		std::vector<int>			_used_ports; //? maybe parser handles that?
 
 		Polling(); //only instantiated with the vector of ServerData passed
-		void server_poll_data();
+		// void server_poll_data();
+		void boot_servers();
 		void loop_for_connections();
 		void accept_new_client_connection(int server_fd);
 		void read_client_request(pollfd & client_poll_fd);
 
 	public:
-		Polling(const std::vector<Server> & servers);
+		Polling(std::vector<Server> & servers);
 		~Polling();
 
 		// void initServerSockets();
 		// void bind_socket_and_listen_to_port(std::vector<ServerData>::iterator server);
 
 		// void close_server_sockets();//not used yet
-
 	
 };
 

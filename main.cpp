@@ -28,10 +28,27 @@ int main(int argc, char **argv)
 
 	try
 	{
-		//so that then the SocketsControl receives the vector servers:
-		Server	server1("Instalight", PORT, "0.0.0.0", "index.html", "usrimg", "www_image_webpage", true, 0, 0, 0);
+		
+		// //so that then the SocketsControl receives the vector servers:
+		Server	server1("Instalight", 8080, "index.html", "usrimg", "www_image_webpage", true, 0, 0, 0);
+		Server	server2("Eugen", 8081, "index.html", "usrimg", "www_image_webpage", true, 0, 0, 0);
+		Server	server3("MaryKate", 8082, "index.html", "usrimg", "www_image_webpage", true, 0, 0, 0);
 		std::vector<Server> servers;
-		servers.push_back(server1);
+		//when we know from the parser how many servers we have (num), i can do:
+		// servers.reserve(num); //TODO
+		servers.push_back(server1); //this was pushing back a copy, not the origianl object
+		servers.push_back(server2); 
+		servers.push_back(server3); 
+		//ALTERNATIVELY, id we don't want to push a copy but the original
+		// servers.push_back(std::move(server1));
+		// servers.push_back(std::move(server2));
+		// servers.push_back(std::move(server3));
+
+		//to verify the data of the vector:
+		// for (Server& server : servers) {
+		// 	std::cout << "Hi from server " << server.getName() << std::endl;
+		// }
+
 		Polling	manager(servers);
 
 		// std::signal(SI

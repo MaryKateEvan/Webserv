@@ -11,12 +11,16 @@
 	7. Connection Close: After responding, the server closes the connection to the client.
 */
 
-Polling::Polling(const std::vector<Server> & servers)
-	: _servers(servers)
+Polling::Polling(std::vector<Server> & servers)	: _servers(servers)
 {
-	server_poll_data();
-	if (_poll_fds.size() > 0) //there has to be at least on server socket active to continue with polling
-		loop_for_connections();
+	for (Server& server : _servers) {
+		std::cout << "Hi from server " << server.getName() << std::endl;
+	}
+	
+	// server_poll_data();
+	boot_servers();
+	// if (_poll_fds.size() > 0) //there has to be at least one server socket active to continue with polling
+	// 	loop_for_connections();
 }
 
 // private default constructor
@@ -24,12 +28,14 @@ Polling::Polling() {}
 
 Polling::~Polling() {}
 
-
-void Polling::server_poll_data()
+void Polling::boot_servers()
 {
 	for (Server& server : _servers)
 	// while(std::vector<Server>::iterator it = _servers.begin(); it != _servers.end(); ++it)
 	{
+		server.initServerSocket(this->_used_ports);
+		server.bind_socket_and_listen(this->_used_ports);
+
 		//we need one `struct pollfd` for every server socket
 		struct pollfd tmp;
 
@@ -45,13 +51,37 @@ void Polling::server_poll_data()
 }
 
 
+// void Polling::server_poll_data()
+// {
+// 	for (Server& server : _servers)
+// 	// while(std::vector<Server>::iterator it = _servers.begin(); it != _servers.end(); ++it)
+// 	{
+// 		//we need one `struct pollfd` for every server socket
+// 		struct pollfd tmp;
+
+// 		tmp.fd = server.getServerFD(); //tells the poll to monitor this server's socket
+// 		tmp.events = POLLIN; //only pollin because the server socket is waiting to "receive", "read", new client connections
+
+// 		//we add this struct to the vector of the poll_fds:
+// 		_poll_fds.push_back(tmp);
+
+// 		//keep the server's fd on the "Active server sockets" vector:
+// 		_server_fds.push_back(tmp.fd); // ->the size() of this becomes the `nfds`
+// 	}
+// }
+
+
 void Polling::loop_for_connections()
 {
 	signal(SIGINT, signal_handler);
 
+	std::cout << "Starting the poll loop" << std::endl;
+
 	while (true)
 	{
+		
 		if (poll(&_poll_fds[0], _poll_fds.size(), 0) < 0) //third argument as 0, cause we want non-blocking behavior of poll, meaning to return immediately after checking the file descriptors and not to wait
+		//? maybe 3rd argument should be the server's time_out if the parser saves such value from the config?
 		{
 			std::cerr << RED("❗ poll() failed: ") << std::string(strerror(errno)) << std::endl;
 			// continue ;
@@ -133,95 +163,141 @@ void Polling::accept_new_client_connection(int server_fd)
 	std::cout << GREEN(" ✅ 👨‍💻 New client connected on socket: " << BOLD(new_socket)) << std::endl; 
 }
 
-
-void Polling::read_client_request(pollfd & client)
+//! for now i changed all the occurences of 'fd[i].fd` to `client.fd`
+//! and the server1.getMaxBodySize to `this->_servers[0].getMaxBodySize()
+//TODO but i need to check how to put this in a loop for all servers.
+void Polling::read_client_request(pollfd & client) 
 {
-	std::vector<char>	accumulated_request;
-	std::vector<char>	buffer(4096 * 4);
-	size_t				content_len = 0;
-	bool				header_parsed = false;
-	size_t				body_bytes_read = 0;
-
-	// Response response("client socket", "index.html", "usrimg", "www_image_webpage");
-
-
+	Request				req(client.fd);
+	std::vector<char>	buffer(4096);
+	int	ret;
 	while (true)
 	{
+		if (req.correct_body_size(this->_servers[0].getMaxBodySize()) == false)
+		{
+			ret = -10;
+			break ;
+		}
 		int bytes_read = read(client.fd, buffer.data(), buffer.size());
-
-		if (bytes_read < 0)
-		{
-			std::cerr << RED("Error reading from fd " << client.fd) << std::endl;
-			close(client.fd);
-			_client_fds.erase(std::find(_client_fds.begin(), _client_fds.end(), client.fd));
-			break;
-		}
-		if (bytes_read == 0) //when the client disconnects
-		{
-			std::cout << YELLOW("🔓 🙅 Client on fd " << client.fd << " disconnected") << std::endl;
-			close(client.fd);
-			_client_fds.erase(std::find(_client_fds.begin(), _client_fds.end(), client.fd));
-			break;
-		}
-		accumulated_request.insert(accumulated_request.end(), buffer.begin(), buffer.begin() + bytes_read);
-		std::string temp_request(accumulated_request.begin(), accumulated_request.end());
-		if (!header_parsed)
-		{
-			size_t	header_end = temp_request.find("\r\n\r\n");
-			if (header_end != std::string::npos)
-			{
-				header_parsed = true;
-				std::string	headers = temp_request.substr(0, header_end + 4);
-				size_t content_len_pos = headers.find("Content-Length: ");
-				std::cout << "Headers:\n" << headers << std::endl;
-				if (content_len_pos != std::string::npos)
-				{
-					size_t content_length_start = content_len_pos + 16;
-					size_t content_length_end = headers.find("\r\n", content_length_start);
-					std::string content_length_str = headers.substr(content_length_start, content_length_end - content_length_start);
-					content_len = std::stoul(content_length_str);
-					// std::cout << "|TEMPREQUESTBEGIN:\n\n\n|" << temp_request << "|TEMPREQUESTEND\n\n\n|" << std::endl;
-				}
-				body_bytes_read = temp_request.size() - (header_end + 4);
-			}
-		}
-		// std::cout << "Body Bytes Read: " << body_bytes_read << std::endl;
-		if (header_parsed && content_len > 0)
-		{
-			if (body_bytes_read >= content_len)
-				break ;
-		}
-		if (header_parsed && content_len == 0)
-				break ;
-		if (header_parsed)
-			body_bytes_read += bytes_read;
+		ret = req.read_chunk(buffer, bytes_read);
+		if (ret < 0)
+			break ;
+		if (ret == 1)
+			continue;
+		if (ret == 0)
+			break ;
 	}
-	if (header_parsed && (content_len == 0 || body_bytes_read >= content_len))
+	if (ret == 0)
 	{
-		Request req(std::string(accumulated_request.begin(), accumulated_request.end()), client.fd);
-		// Response response("client socket", "index.html", "usrimg", "www_image_webpage");
-		// req.getIP();
-
-		_servers[0].process_request(req);
+		std::string response = this->_servers[0].process_request(req);
+		send(req.get_fd(), response.c_str(), response.size(), 0);
+		// std::cout << "The requested host is: " << req.get_host() << std::endl;
+		close(client.fd);
+		client.fd = -1;
 	}
-	accumulated_request.clear();
-
-	client.events |= POLLOUT;
-	// close(client.fd);
-	// client.fd = -1;
-
-	// //in order to delete this client form the _poll_fds array:
-	// std::vector<struct pollfd>::iterator search_client = std::find_if(_poll_fds.begin(), _poll_fds.end(),
-	// [&client](const struct pollfd& pfd) { return pfd.fd == client.fd; });
-	// if (search_client != _poll_fds.end()) {
-	// 	_poll_fds.erase(search_client);
-	// }
+	if (ret == -10)
+	{
+		std::string response = this->_servers[0].send_error_message(413);
+		send(req.get_fd(), response.c_str(), response.size(), 0);
+	}
+	else if (ret < 0)
+	{
+		std::string response = this->_servers[0].send_error_message(400);
+		send(req.get_fd(), response.c_str(), response.size(), 0);
+		close(client.fd);
+		client.fd = -1;
+	}
 }
+
+// // the old version:
+// void Polling::read_client_request(pollfd & client)
+// {
+// 	std::vector<char>	accumulated_request;
+// 	std::vector<char>	buffer(4096 * 4);
+// 	size_t				content_len = 0;
+// 	bool				header_parsed = false;
+// 	size_t				body_bytes_read = 0;
+
+// 	// Response response("client socket", "index.html", "usrimg", "www_image_webpage");
+
+
+// 	while (true)
+// 	{
+// 		int bytes_read = read(client.fd, buffer.data(), buffer.size());
+
+// 		if (bytes_read < 0)
+// 		{
+// 			std::cerr << RED("Error reading from fd " << client.fd) << std::endl;
+// 			close(client.fd);
+// 			_client_fds.erase(std::find(_client_fds.begin(), _client_fds.end(), client.fd));
+// 			break;
+// 		}
+// 		if (bytes_read == 0) //when the client disconnects
+// 		{
+// 			std::cout << YELLOW("🔓 🙅 Client on fd " << client.fd << " disconnected") << std::endl;
+// 			close(client.fd);
+// 			_client_fds.erase(std::find(_client_fds.begin(), _client_fds.end(), client.fd));
+// 			break;
+// 		}
+// 		accumulated_request.insert(accumulated_request.end(), buffer.begin(), buffer.begin() + bytes_read);
+// 		std::string temp_request(accumulated_request.begin(), accumulated_request.end());
+// 		if (!header_parsed)
+// 		{
+// 			size_t	header_end = temp_request.find("\r\n\r\n");
+// 			if (header_end != std::string::npos)
+// 			{
+// 				header_parsed = true;
+// 				std::string	headers = temp_request.substr(0, header_end + 4);
+// 				size_t content_len_pos = headers.find("Content-Length: ");
+// 				std::cout << "Headers:\n" << headers << std::endl;
+// 				if (content_len_pos != std::string::npos)
+// 				{
+// 					size_t content_length_start = content_len_pos + 16;
+// 					size_t content_length_end = headers.find("\r\n", content_length_start);
+// 					std::string content_length_str = headers.substr(content_length_start, content_length_end - content_length_start);
+// 					content_len = std::stoul(content_length_str);
+// 					// std::cout << "|TEMPREQUESTBEGIN:\n\n\n|" << temp_request << "|TEMPREQUESTEND\n\n\n|" << std::endl;
+// 				}
+// 				body_bytes_read = temp_request.size() - (header_end + 4);
+// 			}
+// 		}
+// 		// std::cout << "Body Bytes Read: " << body_bytes_read << std::endl;
+// 		if (header_parsed && content_len > 0)
+// 		{
+// 			if (body_bytes_read >= content_len)
+// 				break ;
+// 		}
+// 		if (header_parsed && content_len == 0)
+// 				break ;
+// 		if (header_parsed)
+// 			body_bytes_read += bytes_read;
+// 	}
+// 	if (header_parsed && (content_len == 0 || body_bytes_read >= content_len))
+// 	{
+// 		Request req(std::string(accumulated_request.begin(), accumulated_request.end()), client.fd);
+// 		// Response response("client socket", "index.html", "usrimg", "www_image_webpage");
+// 		// req.getIP();
+
+// 		_servers[0].process_request(req);
+// 	}
+// 	accumulated_request.clear();
+
+// 	client.events |= POLLOUT;
+// 	// close(client.fd);
+// 	// client.fd = -1;
+
+// 	// //in order to delete this client form the _poll_fds array:
+// 	// std::vector<struct pollfd>::iterator search_client = std::find_if(_poll_fds.begin(), _poll_fds.end(),
+// 	// [&client](const struct pollfd& pfd) { return pfd.fd == client.fd; });
+// 	// if (search_client != _poll_fds.end()) {
+// 	// 	_poll_fds.erase(search_client);
+// 	// }
+// }
 
 // the function given as second argument to the `signal` in order to exit the program
 void signal_handler(int signum)
 {
 	std::cerr << RED(" 🛑 Signal " << signum << " received, closing server... 🔚") << std::endl;
-	//! proper cleanup later
+	//! proper cleanup later, and closing of the fds
 	exit(0);
 }

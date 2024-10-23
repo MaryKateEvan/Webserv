@@ -1,9 +1,5 @@
 #include "Server.hpp"
 
-/* -------------------------------------------------------------------------- */
-/*                           Orthodox Canonical Form                          */
-/* -------------------------------------------------------------------------- */
-
 /**
  * @brief Creates a webserver
  * @param server_name The name of the server
@@ -17,59 +13,118 @@
  * @param send_timeout 
  * @param max_body_size 
  */
-Server::Server(const std::string server_name, int port, const std::string ip_address, const std::string index_file,
+Server::Server(const std::string server_name, int port, const std::string index_file,
 		const std::string data_dir, const std::string www_dir, bool directory_listing_enabled, size_t keepalive_timeout,
 		size_t send_timeout, size_t max_body_size)
-	: _name(server_name), _index_file(index_file), _data_dir(data_dir), _www_dir(www_dir),
+	: _name(server_name), _port_to_listen(port), _index_file(index_file), _data_dir(data_dir), _www_dir(www_dir),
 	_directory_listing_enabled(directory_listing_enabled), _keepalive_timeout(keepalive_timeout),
 	_send_timeout(send_timeout), _max_body_size(max_body_size)
 {
-	load_mime_types("mime_type.csv");
-	_fd_server = socket(AF_INET, SOCK_STREAM, 0);
-	if (_fd_server == -1)
-		throw SocketCreationFailedException(_name);
-	int opt = 1;
-	// Add keepalive here, not changed inside this branch since MK has to most current standart
-	// Add send_out here
-	if (setsockopt(_fd_server, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
-	{
-		close(_fd_server);
-		throw SetSocketOptionFailedException(_name);
-	}
-	_address.sin_family = AF_INET;
-	if (port < 0 || port > 65535)
-	{
-		close(_fd_server);
-		throw InvalidPortException(_name, port);
-	}
-	_address.sin_port = htons(port);
-	// replace forbidden function, not done now since MKs branch has it
-	if (inet_pton(AF_INET, ip_address.c_str(), &_address.sin_addr) != 1)
-	{
-		close(_fd_server);
-		throw InvalidIPAdressException(_name, ip_address);
-	}
-	if (bind(_fd_server, (struct sockaddr *)&_address, sizeof(_address)) != 0)
-	{
-		close(_fd_server);
-		throw BindFailedException(_name, ip_address);
-	}
-	if (listen(_fd_server ,SOMAXCONN) != 0)
-	{
-		close(_fd_server);
-		throw ListenFailedException(_name);
-	}
-	// temp to prevent -Werror complaints
+	std::cout << "Server constructor called" << std::endl;
+	
+	load_mime_types("mime_type.csv"); //TODO we should call this outside, only one time, not with every server to reread!
+	// _fd_server = socket(AF_INET, SOCK_STREAM, 0);
+	// if (_fd_server == -1)
+	// 	throw SocketCreationFailedException(_name);
+	// int opt = 1;
+	// // Add keepalive here, not changed inside this branch since MK has to most current standart
+	// // Add send_out here
+	// if (setsockopt(_fd_server, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
+	// {
+	// 	close(_fd_server);
+	// 	throw SetSocketOptionFailedException(_name);
+	// }
+	// _address.sin_family = AF_INET;
+	// if (port < 0 || port > 65535)
+	// {
+	// 	close(_fd_server);
+	// 	throw InvalidPortException(_name, port);
+	// }
+	// _address.sin_port = htons(port);
+	// // replace forbidden function, not done now since MKs branch has it
+	// if (inet_pton(AF_INET, ip_address.c_str(), &_address.sin_addr) != 1)
+	// {
+	// 	close(_fd_server);
+	// 	throw InvalidIPAdressException(_name, ip_address);
+	// }
+	// if (bind(_fd_server, (struct sockaddr *)&_address, sizeof(_address)) != 0)
+	// {
+	// 	close(_fd_server);
+	// 	throw BindFailedException(_name, ip_address);
+	// }
+	// if (listen(_fd_server ,SOMAXCONN) != 0)
+	// {
+	// 	close(_fd_server);
+	// 	throw ListenFailedException(_name);
+	// }
+	// // temp to prevent -Werror complaints
 	int temp = _send_timeout + _keepalive_timeout + _directory_listing_enabled + _max_body_size;
 	std::cout << temp << std::endl;
-	std::cout << "Server is now listening on port " << port << std::endl;
+	// std::cout << "Server is now listening on port " << port << std::endl;
 }
 
+// destructor
 Server::~Server()
 {
 	std::cout << "Server Default Destructor called" << std::endl;
 	close(_fd_server);
 }
+
+/* ------------------ THE FUNCTIONS REQUIRED FROM THE POLLING CONTROL ---------------------*/
+
+void Server::initServerSocket(std::vector<int>&	_used_ports)
+{
+	if (_port_to_listen < 0 || _port_to_listen > 65535)
+		throw InvalidPortException(_name, _port_to_listen);
+
+	// a port can be bound to one socket at a time, so if this port is already bound, we skip this socket creation
+	if (std::find(_used_ports.begin(), _used_ports.end(), _port_to_listen) != _used_ports.end())
+		return ;
+	
+	_fd_server = socket(AF_INET, SOCK_STREAM, 0);
+	if (_fd_server == -1)
+		throw SocketCreationFailedException(_name);
+	int opt = 1;
+	if (setsockopt(_fd_server, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
+	{
+		close(_fd_server);
+		throw SetSocketOptionFailedException(_name);
+	}
+	if (fcntl(_fd_server, F_SETFL, O_NONBLOCK) < 0) //for non-blocking mode of the server socket
+	{
+		close(_fd_server);
+		throw SetSocketNonBLockingModeException(_name);
+	}
+}
+
+void Server::bind_socket_and_listen(std::vector<int>& _used_ports)
+{
+	struct sockaddr_in address; // this struct is necessary when binding the socket to an IP address and port
+	address.sin_family = AF_INET; // for IPv4 addresses
+	address.sin_addr.s_addr = INADDR_ANY; // to listen in all available interfaces: localhost, ethernet etc...
+	address.sin_port = htons(_port_to_listen); //specifies the port number to listen to
+
+	//and then i bind the socket to the specified address and port:
+	if (bind(_fd_server, (struct sockaddr*)&address, sizeof(address)) < 0)
+	{
+		close(_fd_server);
+		throw FailedToBindSocketException(_name);
+	}
+
+	//listen to the specified, above, port:
+	if (listen(_fd_server, SOMAXCONN) < 0)
+	{
+		close(_fd_server);
+		throw ListenFailedException(_name);
+	}
+
+	//save the port to the "occupied ports" vector:
+	_used_ports.push_back(_port_to_listen);
+
+	std::cout << CYAN("🔉 Server socket " << UNDERLINE(_fd_server) 
+			<< CYAN(" is now listening on port: " << BOLD(_port_to_listen))) << std::endl;
+}
+
 
 /* -------------------------------------------------------------------------- */
 /*                                  Functions                                 */
