@@ -141,7 +141,7 @@ std::string	Server::read_file(const std::string& file_path)
 
 
 
-int	Server::process_request(const Request& req)
+std::string	Server::process_request(const Request& req)
 {
 	int	method = req.get_method();
 
@@ -157,10 +157,10 @@ int	Server::process_request(const Request& req)
 			return (process_post(req));
 			break;
 	}
-	return (1);
+	return (send_error_message(400));
 }
 
-int	Server::process_get(const Request& req)
+std::string	Server::process_get(const Request& req)
 {
 	std::string	url = req.get_file_path();
 	std::string	file_path = map_to_directory(url);
@@ -170,8 +170,7 @@ int	Server::process_get(const Request& req)
 	{
 		if (file_path != map_to_directory("/" + _data_dir + "/") && file_path != map_to_directory("/" + _data_dir))
 		{
-			send_error_message(403, req);
-			return (0);
+			return (send_error_message(403));
 		}
 		response += "Content-Type: text/html\r\n";
 		std::string	response_body = "<!DOCTYPE html>\n<html>\n<head><title>Index of " + req.get_file_path() + "</title></head>\n";
@@ -185,12 +184,13 @@ int	Server::process_get(const Request& req)
 		response += "Content-Length: " + std::to_string(response_body.size()) + "\r\n";
 		response += "\r\n";
 		response += response_body;
-		if (send(req.get_fd(), response.c_str(), response.size(), 0) == -1)
-				throw SendFailedException(_name, req.get_fd());
+		// if (send(req.get_fd(), response.c_str(), response.size(), 0) == -1)
+		// 		throw SendFailedException(_name, req.get_fd());
+		return (response);
 	}
 	else if (_directory_listing_enabled == false && std::filesystem::is_directory(file_path))
 	{
-		send_error_message(403, req);
+		return (send_error_message(403));
 	}
 	else if (std::filesystem::exists(file_path))
 	{
@@ -200,15 +200,15 @@ int	Server::process_get(const Request& req)
 		response += "Content-Length: " + std::to_string(file_content.size()) + "\r\n";
 		response += "\r\n";
 		response += file_content;
-		if (send(req.get_fd(), response.c_str(), response.size(), 0) == -1)
-				throw SendFailedException(_name, req.get_fd());
+		// if (send(req.get_fd(), response.c_str(), response.size(), 0) == -1)
+		// 		throw SendFailedException(_name, req.get_fd());
+		return (response);
 	}
 	else
-		send_error_message(404, req);
-	return (0);
+		return (send_error_message(404));
 }
 
-int	Server::process_delete(const Request& req)
+std::string	Server::process_delete(const Request& req)
 {
 	std::string	url = req.get_file_path();
 	std::string	file_path = _www_dir + "/" + _data_dir + "/" + url;
@@ -216,19 +216,19 @@ int	Server::process_delete(const Request& req)
 	{
 		if (std::remove(file_path.c_str()) == 0)
 		{
-			std::string	response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
-			if (send(req.get_fd(), response.c_str(), response.size(), 0) == -1)
-				throw SendFailedException(_name, req.get_fd());
+			// std::string	response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
+			// if (send(req.get_fd(), response.c_str(), response.size(), 0) == -1)
+			// 	throw SendFailedException(_name, req.get_fd());
+			return (send_error_message(200));
 		}
 		else
-			send_error_message(500, req);
+			return (send_error_message(500));
 	}
 	else
-		send_error_message(404, req);
-	return (0);
+		return (send_error_message(404));
 }
 
-int	Server::process_post(const Request& req)
+std::string	Server::process_post(const Request& req)
 {
 	long unsigned int	failed = 0;
 	for (const auto& entry : req._post_files)
@@ -236,9 +236,11 @@ int	Server::process_post(const Request& req)
 		const std::string&	file_name = entry.first;
 		const std::string&	content = entry.second;
 		std::string			full_path = _www_dir + "/" + _data_dir + "/" +file_name;
+
 		std::ofstream out_file(full_path, std::ios::binary);
 		if (!out_file)
 		{
+			std::cout << "Failed" << std::endl;
 			failed++;
 			continue;
 		}
@@ -246,15 +248,15 @@ int	Server::process_post(const Request& req)
 		out_file.close();
 	}
 	if (failed == req._post_files.size())
-		send_error_message(500, req);
-	if (failed > 0)
-		send_error_message(207, req);
-	send_error_message(200, req);
-	return (0);
+		return (send_error_message(500));
+	else if (failed > 0)
+		return (send_error_message(207));
+	else
+		return (send_error_message(200));
 }
 
 
-int	Server::send_error_message(int error_code, const Request& req)
+std::string	Server::send_error_message(int error_code)
 {
 	std::string	url = std::to_string(error_code);
 	std::string	file_path = "error_pages/" + url + ".jpg";
@@ -267,8 +269,9 @@ int	Server::send_error_message(int error_code, const Request& req)
 		response += "Content-Length: " + std::to_string(file_content.size()) + "\r\n";
 		response += "\r\n";
 		response += file_content;
-		if (send(req.get_fd(), response.c_str(), response.size(), 0) == -1)
-				throw SendFailedException(_name, req.get_fd());
+		// if (send(req.get_fd(), response.c_str(), response.size(), 0) == -1)
+		// 		throw SendFailedException(_name, req.get_fd());
+		return (response);
 	}
 	else
 	{
@@ -277,10 +280,11 @@ int	Server::send_error_message(int error_code, const Request& req)
 		response += "Content-Length: " + std::to_string(strlen("404 File Not Found")) + "\r\n";
 		response += "\r\n"; // End of headers
 		response += "404 File Not Found"; // Body
-		if (send(req.get_fd(), response.c_str(), response.size(), 0) == -1)
-			throw SendFailedException(_name, req.get_fd());
+		// if (send(req.get_fd(), response.c_str(), response.size(), 0) == -1)
+		// 	throw SendFailedException(_name, req.get_fd());
+		return (response);
 	}
-	return (0);
+	// return (0);
 }
 
 /* -------------------------------------------------------------------------- */
