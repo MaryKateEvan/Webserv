@@ -13,7 +13,16 @@ Request::Request(size_t fd)
 	_body_bytes_read = 0;
 	_header_parsed = false;
 	_finished_reading = false;
+}
 
+Request::Request()
+{
+	_method = -1;
+	_content_len = 0;
+	_port = -1;
+	_body_bytes_read = 0;
+	_header_parsed = false;
+	_finished_reading = false;
 }
 
 Request::~Request()

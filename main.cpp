@@ -1,4 +1,5 @@
 #include "webserv.h"
+#include "server/SocketManager.hpp"
 
 /*
 * Use curl localhost:PORT (replace port with actual value) to test responses

@@ -2,12 +2,13 @@
 # define SOCKETMANAGER_HPP
 
 # include "../webserv.h"
+# include "Server.hpp"
 
 # ifndef BUFFER_SIZE
 #  define BUFFER_SIZE 4096
 # endif /*BUFFER_SIZE*/
 
-// class Server;
+class Server;
 // class Request;
 
 class SocketManager

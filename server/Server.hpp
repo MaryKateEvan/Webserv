@@ -2,8 +2,8 @@
 # define SERVER_HPP
 
 # include "../webserv.h"
-
-class Request;
+# include "Request.hpp"
+// class Request;
 
 class Server
 {
