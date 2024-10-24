@@ -113,7 +113,6 @@ void	SocketManager::handle_read(int client_fd)
 		}
 		else if (status == -10)
 		{
-			std::cout << "hello hello" << std::endl;
 			int	port = _request_map[client_fd].get_port();
 
 			if (_server_map.find(port) != _server_map.end())
