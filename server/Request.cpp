@@ -6,6 +6,7 @@
 
 Request::Request(size_t fd)
 {
+	std::cout << "Request Constructed" << std::endl;
 	_fd = fd;
 	_method = -1;
 	_content_len = 0;
@@ -17,6 +18,7 @@ Request::Request(size_t fd)
 
 Request::Request()
 {
+	std::cout << "Request Constructed" << std::endl;
 	_method = -1;
 	_content_len = 0;
 	_port = -1;

@@ -105,6 +105,7 @@ void	SocketManager::handle_read(int client_fd)
 			{
 				std::string	response = _server_map[port]->process_request(_request_map[client_fd]);
 				_response_map[client_fd] = response;
+				_request_map.erase(client_fd);
 				set_pollevent(client_fd, POLLOUT);
 			}
 			else
@@ -112,12 +113,15 @@ void	SocketManager::handle_read(int client_fd)
 		}
 		else if (status == -10)
 		{
+			std::cout << "hello hello" << std::endl;
 			int	port = _request_map[client_fd].get_port();
 
 			if (_server_map.find(port) != _server_map.end())
 			{
+				_request_map[client_fd];
 				std::string	response = _server_map[port]->send_error_message(413);
 				_response_map[client_fd] = response;
+				_request_map.erase(client_fd);
 				set_pollevent(client_fd, POLLOUT);
 			}
 			else
@@ -131,6 +135,7 @@ void	SocketManager::handle_read(int client_fd)
 			{
 				std::string	response = _server_map[port]->send_error_message(400);
 				_response_map[client_fd] = response;
+				_request_map.erase(client_fd);
 				set_pollevent(client_fd, POLLOUT);
 			}
 			else
@@ -155,8 +160,8 @@ void	SocketManager::handle_write(int client_fd)
 		response.erase(0, bytes_sent);
 		if (response.empty())
 		{
-			// set_pollevent(client_fd, POLLIN);
-			remove_client(client_fd);
+			set_pollevent(client_fd, POLLIN);
+			// remove_client(client_fd);
 		}
 	}
 	// std::cout << "I FINISHED HELLO" << std::endl;
@@ -201,6 +206,7 @@ void SocketManager::accept_connections()
 			}
 
 			_fds.push_back({ new_socket, POLLIN, 0 });
+			_request_map[new_socket] = Request(new_socket);
 		}
 	}
 }
