@@ -21,9 +21,6 @@ SocketManager::~SocketManager()
 void SocketManager::add_server(int port, std::unique_ptr<Server> server)
 {
 	_server_map[port] = std::move(server);
-
-	pollfd pfd = { _server_map[port]->getServerFD(), POLLIN, 0 };
-	_fds.push_back(pfd);
 }
 
 
@@ -45,6 +42,15 @@ void	SocketManager::remove_client(int client_fd)
 
 void	SocketManager::handle_requests()
 {
+	int	num_servers = _server_map.size();
+	_fds.clear();
+	_fds.reserve(_server_map.size());
+
+	for (const auto& [port, server_ptr] : _server_map)
+	{
+		int server_fd = server_ptr->getServerFD();
+		_fds.push_back({server_fd, POLLIN, 0});
+	}
 	while (true)
 	{
 		int poll_count = poll(_fds.data(), _fds.size(), -1);
@@ -55,7 +61,8 @@ void	SocketManager::handle_requests()
 			break ;
 		}
 		accept_connections();
-		for (size_t i = 0; i < _fds.size(); i++)
+
+		for (size_t i = num_servers; i < _fds.size(); i++)
 		{
 			if (_fds[i].revents & POLLIN)
 			{
@@ -87,7 +94,6 @@ void	SocketManager::handle_read(int client_fd)
 		int	status = _request_map[client_fd].read_chunk(buffer, bytes_read);
 		if (_request_map[client_fd].get_port() != -1)
 		{
-			// std::cout << "Max body size: " << _server_map[_request_map[client_fd].get_port()]->getMaxBodySize() << std::endl;
 			if (_request_map[client_fd].correct_body_size(_server_map[_request_map[client_fd].get_port()]->getMaxBodySize()) == false)
 				status = -10;
 		}
@@ -159,7 +165,8 @@ void	SocketManager::handle_write(int client_fd)
 
 void	SocketManager::set_pollevent(int client_fd, short events)
 {
-	for (auto& pfd : _fds) {
+	for (auto& pfd : _fds)
+	{
 		if (pfd.fd == client_fd)
 		{
 			pfd.events = events;
@@ -170,25 +177,30 @@ void	SocketManager::set_pollevent(int client_fd, short events)
 
 void SocketManager::accept_connections()
 {
-	for (const auto& [port, server_ptr] : _server_map)
+	int	num_servers = _server_map.size();
+
+	for (int i = 0; i < num_servers; i++)
 	{
-		int server_fd = server_ptr->getServerFD();
-		if (std::find_if(_fds.begin(), _fds.end(), [server_fd](const pollfd& pfd) { return pfd.fd == server_fd; }) != _fds.end())
+		if (_fds[i].revents & POLLIN)
 		{
-		struct sockaddr_in client_addr;
-		socklen_t client_len = sizeof(client_addr);
-		int new_socket = accept(server_fd, (struct sockaddr*)&client_addr, &client_len);
-		if (new_socket < 0)
-		{
-			std::cerr << "❗ Failed to accept connection in socket: " << server_fd << " - " << strerror(errno) << std::endl;
-			return ;
-		}
-		if (fcntl(new_socket, F_SETFL, O_NONBLOCK) < 0)
-		{
-			close(new_socket);
-			throw SetSocketOptionFailedException("client");
-		}
-		add_client(new_socket);
+			struct sockaddr_in client_addr;
+			socklen_t client_len = sizeof(client_addr);
+			int new_socket = accept(_fds[i].fd, (struct sockaddr*)&client_addr, &client_len);
+
+			if (new_socket < 0)
+			{
+				std::cerr << "Failed to accept connection on server socket: " << strerror(errno) << std::endl;
+				continue;
+			}
+
+			if (fcntl(new_socket, F_SETFL, O_NONBLOCK) < 0)
+			{
+				close(new_socket);
+				 std::cerr << "Failed to set non-blocking on new socket: " << strerror(errno) << std::endl;
+				continue;
+			}
+
+			_fds.push_back({ new_socket, POLLIN, 0 });
 		}
 	}
 }
