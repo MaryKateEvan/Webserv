@@ -22,6 +22,7 @@ class SocketManager
 		void	handle_read(int client_fd);
 		void	handle_write(int client_fd);
 		void	set_pollevent(int client_fd, short events);
+		void	accept_connections();
 	public:
 		SocketManager();
 		~SocketManager();

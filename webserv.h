@@ -23,6 +23,7 @@
 # include <unordered_map>
 # include <cstdio>
 # include <filesystem>
+# include <fcntl.h>
 
 # include "exceptions/Exceptions.hpp"
 # include "utils/utils.h"

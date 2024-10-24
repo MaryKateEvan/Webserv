@@ -18,11 +18,14 @@ SocketManager::~SocketManager()
 /*                                  Functions                                 */
 /* -------------------------------------------------------------------------- */
 
-void	SocketManager::add_server(int port, std::unique_ptr<Server> server)
+void SocketManager::add_server(int port, std::unique_ptr<Server> server)
 {
-	//! if necessary add check here for duplicated ports
 	_server_map[port] = std::move(server);
+
+	pollfd pfd = { _server_map[port]->getServerFD(), POLLIN, 0 };
+	_fds.push_back(pfd);
 }
+
 
 void	SocketManager::add_client(int client_fd)
 {
@@ -51,30 +54,24 @@ void	SocketManager::handle_requests()
 			std::cerr << "Poll failed" << std::endl;
 			break ;
 		}
-		for (auto& pfd : _fds)
+		accept_connections();
+		for (size_t i = 0; i < _fds.size(); i++)
 		{
-			if (pfd.revents & POLLIN)
+			if (_fds[i].revents & POLLIN)
 			{
-				handle_read(pfd.fd);
+				handle_read(_fds[i].fd);
 			}
-			if (pfd.revents & POLLOUT)
+			if (_fds[i].revents & POLLOUT)
 			{
-				handle_write(pfd.fd);
+				handle_write(_fds[i].fd);
 			}
-			if (pfd.revents & (POLLERR | POLLHUP | POLLNVAL))
+			if (_fds[i].revents & (POLLERR | POLLHUP | POLLNVAL))
 			{
-				remove_client(pfd.fd);
+				remove_client(_fds[i].fd);
 			}
 		}
 	}
 }
-
-//  Server* get_server(int port) {
-//         if (server_map.find(port) != server_map.end()) {
-//             return server_map[port].get();
-//         }
-//         return nullptr;
-//     }
 
 void	SocketManager::handle_read(int client_fd)
 {
@@ -90,7 +87,8 @@ void	SocketManager::handle_read(int client_fd)
 		int	status = _request_map[client_fd].read_chunk(buffer, bytes_read);
 		if (_request_map[client_fd].get_port() != -1)
 		{
-			if (_request_map[client_fd].correct_body_size(_server_map[_request_map[client_fd].get_port()]->getMaxBodySize() == false))
+			// std::cout << "Max body size: " << _server_map[_request_map[client_fd].get_port()]->getMaxBodySize() << std::endl;
+			if (_request_map[client_fd].correct_body_size(_server_map[_request_map[client_fd].get_port()]->getMaxBodySize()) == false)
 				status = -10;
 		}
 		if (status == 0)
@@ -138,6 +136,7 @@ void	SocketManager::handle_read(int client_fd)
 void	SocketManager::handle_write(int client_fd)
 {
 	auto&	response = _response_map[client_fd];
+	// std::cout << "Response:\n" << response << std::endl;
 	ssize_t	bytes_sent = send(client_fd, response.c_str(), response.size(), 0);
 
 	if (bytes_sent == -1)
@@ -150,10 +149,11 @@ void	SocketManager::handle_write(int client_fd)
 		response.erase(0, bytes_sent);
 		if (response.empty())
 		{
-			set_pollevent(client_fd, POLLIN);
-			// remove_client(client_fd);
+			// set_pollevent(client_fd, POLLIN);
+			remove_client(client_fd);
 		}
 	}
+	// std::cout << "I FINISHED HELLO" << std::endl;
 }
 
 
@@ -164,6 +164,31 @@ void	SocketManager::set_pollevent(int client_fd, short events)
 		{
 			pfd.events = events;
 			break;
+		}
+	}
+}
+
+void SocketManager::accept_connections()
+{
+	for (const auto& [port, server_ptr] : _server_map)
+	{
+		int server_fd = server_ptr->getServerFD();
+		if (std::find_if(_fds.begin(), _fds.end(), [server_fd](const pollfd& pfd) { return pfd.fd == server_fd; }) != _fds.end())
+		{
+		struct sockaddr_in client_addr;
+		socklen_t client_len = sizeof(client_addr);
+		int new_socket = accept(server_fd, (struct sockaddr*)&client_addr, &client_len);
+		if (new_socket < 0)
+		{
+			std::cerr << "❗ Failed to accept connection in socket: " << server_fd << " - " << strerror(errno) << std::endl;
+			return ;
+		}
+		if (fcntl(new_socket, F_SETFL, O_NONBLOCK) < 0)
+		{
+			close(new_socket);
+			throw SetSocketOptionFailedException("client");
+		}
+		add_client(new_socket);
 		}
 	}
 }

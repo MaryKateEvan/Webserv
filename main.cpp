@@ -19,6 +19,7 @@ int main()
 	{
 		SocketManager	socket_manager;
 		socket_manager.add_server(8080, std::make_unique<Server>("Instalight", PORT, "0.0.0.0", "index.html", "usrimg", "www_image_webpage", true, 0, 0, 3000000));
+		// socket_manager.add_server(8080, std::make_unique<Server>("Instalight", PORT, "0.0.0.0", "index.html", "usrimg", "www", true, 0, 0, 3000000));
 		socket_manager.handle_requests();
 		//  socketManager.add_server(8080, std::make_unique<Server>("Server1", 8080, "127.0.0.1", "index.html", "data", "www", true, 300, 30, 1048576));
 		// std::signal(SIGINT, signal_handler);
