@@ -38,7 +38,6 @@ class Server
 		struct sockaddr_in	getAddress(void) const;
 		const std::string	getName(void) const;
 		size_t				getMaxBodySize(void) const;
-		int					acceptConnection(void);
 		std::string			process_request(const Request& req);
 		std::string			send_error_message(int error_code);
 };

@@ -81,14 +81,6 @@ Server::~Server()
 /*                                  Functions                                 */
 /* -------------------------------------------------------------------------- */
 
-int		Server::acceptConnection(void)
-{
-	socklen_t	addr_len = sizeof(_address);
-	int			fd_new_socket = accept(_fd_server,  (struct sockaddr *)&_address, &addr_len);
-	//potentially add exception on accept fail
-	return (fd_new_socket);
-}
-
 /// @brief Takes the http request and extracts the requested resource
 /// @param request Takes the request sent by the client
 /// @return String of the requested resource
