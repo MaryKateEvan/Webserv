@@ -24,10 +24,11 @@
 # include <cstdio>
 # include <filesystem>
 
-# include "server/Server.hpp"
-# include "server/Request.hpp"
-# include "exceptions/Exceptions.hpp"
 # include "utils/utils.h"
+# include "exceptions/Exceptions.hpp"
+# include "server/Request.hpp"
+# include "server/Server.hpp"
+# include "server/SocketManager.hpp"
 
 # ifndef PORT
 #  define PORT 8080
