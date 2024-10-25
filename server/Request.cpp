@@ -6,6 +6,7 @@
 
 Request::Request(size_t fd)
 {
+	std::cout << "Request Constructed" << std::endl;
 	_fd = fd;
 	_method = -1;
 	_content_len = 0;
@@ -13,17 +14,27 @@ Request::Request(size_t fd)
 	_body_bytes_read = 0;
 	_header_parsed = false;
 	_finished_reading = false;
+}
 
+Request::Request()
+{
+	std::cout << "Request Constructed" << std::endl;
+	_method = -1;
+	_content_len = 0;
+	_port = -1;
+	_body_bytes_read = 0;
+	_header_parsed = false;
+	_finished_reading = false;
 }
 
 Request::~Request()
 {
-	std::cout << "Request Default Destructor called" << std::endl;
+	// std::cout << "Request Default Destructor called" << std::endl;
 }
 
 Request::Request(const Request& copy)
 {
-	std::cout << "Request Copy Constructor called" << std::endl;
+	// std::cout << "Request Copy Constructor called" << std::endl;
 	if (this != &copy)
 	{
 	}
@@ -31,7 +42,7 @@ Request::Request(const Request& copy)
 
 Request&	Request::operator=(const Request &copy)
 {
-	std::cout << "Request Copy Assignment called" << std::endl;
+	// std::cout << "Request Copy Assignment called" << std::endl;
 	if (this != &copy)
 	{
 	}
@@ -103,7 +114,7 @@ int		Request::read_chunk(std::vector<char> buffer, int bytes_read)
 		{
 			std::cout << "HEADER:\n" << _header << std::endl;
 			if (fill_in_request() == 1)
-				return (1);
+				return (-1);
 			return (0);
 		}
 	}
@@ -111,7 +122,7 @@ int		Request::read_chunk(std::vector<char> buffer, int bytes_read)
 	{
 		std::cout << "HEADER:\n" << _header << std::endl;
 		if (fill_in_request() == 1)
-			return (1);
+			return (-1);
 		_finished_reading = true;
 		return (0);
 	}
@@ -139,11 +150,10 @@ int	Request::fill_in_request(void)
 		method = _header.find("DELETE ") + 7;
 	}
 	else
-		throw NoMethodFoundException(_header);
+		return (1);
 	std::string::size_type	http = _header.find(" HTTP/");
-	//replace exception
 	if (method == std::string::npos || http == std::string::npos)
-		throw NoMethodFoundException(_header);
+		return (1);
 	_file_path = _header.substr(method, http - method);
 	return (0);
 }

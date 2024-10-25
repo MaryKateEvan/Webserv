@@ -43,6 +43,11 @@ Server::Server(const std::string server_name, int port, const std::string ip_add
 		close(_fd_server);
 		throw InvalidPortException(_name, port);
 	}
+	if (fcntl(_fd_server, F_SETFL, O_NONBLOCK) < 0)
+	{
+		close(_fd_server);
+		throw SetSocketOptionFailedException(_name);
+	}
 	_address.sin_port = htons(port);
 	// replace forbidden function, not done now since MKs branch has it
 	if (inet_pton(AF_INET, ip_address.c_str(), &_address.sin_addr) != 1)
@@ -60,7 +65,7 @@ Server::Server(const std::string server_name, int port, const std::string ip_add
 		close(_fd_server);
 		throw ListenFailedException(_name);
 	}
-	// temp to prevent -Werror complaints
+
 	int temp = _send_timeout + _keepalive_timeout + _directory_listing_enabled + _max_body_size;
 	std::cout << temp << std::endl;
 	std::cout << "Server is now listening on port " << port << std::endl;
@@ -75,14 +80,6 @@ Server::~Server()
 /* -------------------------------------------------------------------------- */
 /*                                  Functions                                 */
 /* -------------------------------------------------------------------------- */
-
-int		Server::acceptConnection(void)
-{
-	socklen_t	addr_len = sizeof(_address);
-	int			fd_new_socket = accept(_fd_server,  (struct sockaddr *)&_address, &addr_len);
-	//potentially add exception on accept fail
-	return (fd_new_socket);
-}
 
 /// @brief Takes the http request and extracts the requested resource
 /// @param request Takes the request sent by the client

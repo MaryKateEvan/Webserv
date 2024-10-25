@@ -36,6 +36,12 @@ class SetSocketOptionFailedException : public BaseException
 		explicit SetSocketOptionFailedException(const std::string& server_name);
 };
 
+class SetSocketNonBLockingModeException : public BaseException
+{
+	public:
+		explicit SetSocketNonBLockingModeException(const std::string& server_name);
+};
+
 class InvalidPortException : public BaseException
 {
 	public:
@@ -52,6 +58,12 @@ class BindFailedException : public BaseException
 {
 	public:
 		explicit BindFailedException(const std::string& server_name, const std::string& ip_address);
+};
+
+class FailedToBindSocketException : public BaseException
+{
+	public:
+		explicit FailedToBindSocketException(const std::string& server_name);
 };
 
 class ListenFailedException : public BaseException
