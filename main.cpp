@@ -11,8 +11,6 @@
 
 void signal_handler(int signum);
 
-int fd_server;
-
 int main(int argc, char **argv)
 {
 	std::cout << GREEN("🚀 Launching Webserv ... 🚀") << std::endl;
