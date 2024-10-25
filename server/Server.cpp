@@ -95,17 +95,19 @@ void Server::initServerSocket(std::vector<int>&	_used_ports)
 		close(_fd_server);
 		throw SetSocketNonBLockingModeException(_name);
 	}
-}
-
-void Server::bind_socket_and_listen(std::vector<int>& _used_ports)
-{
-	struct sockaddr_in address; // this struct is necessary when binding the socket to an IP address and port
-	address.sin_family = AF_INET; // for IPv4 addresses
-	address.sin_addr.s_addr = INADDR_ANY; // to listen in all available interfaces: localhost, ethernet etc...
-	address.sin_port = htons(_port_to_listen); //specifies the port number to listen to
-
-	//and then i bind the socket to the specified address and port:
-	if (bind(_fd_server, (struct sockaddr*)&address, sizeof(address)) < 0)
+	if (fcntl(_fd_server, F_SETFL, O_NONBLOCK) < 0)
+	{
+		close(_fd_server);
+		throw SetSocketOptionFailedException(_name);
+	}
+	_address.sin_port = htons(port);
+	// replace forbidden function, not done now since MKs branch has it
+	if (inet_pton(AF_INET, ip_address.c_str(), &_address.sin_addr) != 1)
+	{
+		close(_fd_server);
+		throw InvalidIPAdressException(_name, ip_address);
+	}
+	if (bind(_fd_server, (struct sockaddr *)&_address, sizeof(_address)) != 0)
 	{
 		close(_fd_server);
 		throw FailedToBindSocketException(_name);
@@ -118,35 +120,20 @@ void Server::bind_socket_and_listen(std::vector<int>& _used_ports)
 		throw ListenFailedException(_name);
 	}
 
-	//save the port to the "occupied ports" vector:
-	_used_ports.push_back(_port_to_listen);
-
-	std::cout << CYAN("🔉 Server socket " << UNDERLINE(_fd_server) 
-			<< CYAN(" is now listening on port: " << BOLD(_port_to_listen))) << std::endl;
+	int temp = _send_timeout + _keepalive_timeout + _directory_listing_enabled + _max_body_size;
+	std::cout << temp << std::endl;
+	std::cout << "Server is now listening on port " << port << std::endl;
 }
 
+Server::~Server()
+{
+	std::cout << "Server Default Destructor called" << std::endl;
+	close(_fd_server);
+}
 
 /* -------------------------------------------------------------------------- */
 /*                                  Functions                                 */
 /* -------------------------------------------------------------------------- */
-
-void	Server::load_mime_types(const std::string& file_path)
-{
-	std::ifstream file(file_path);
-	if (!file.is_open())
-		throw OpenFailedException(_name, file_path);
-	std::string	line;
-	while(std::getline(file, line))
-	{
-		std::istringstream	ss(line);
-		std::string			extension;
-		std::string			mime_type;
-
-		if (std::getline(ss, extension, '\t') && std::getline(ss, mime_type))
-			_mime_types[extension] = mime_type;
-	}
-	file.close();
-}
 
 /// @brief Takes the http request and extracts the requested resource
 /// @param request Takes the request sent by the client
