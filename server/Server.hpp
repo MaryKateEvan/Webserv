@@ -42,10 +42,6 @@ class Server
 		size_t				getMaxBodySize(void) const;
 		std::string			process_request(const Request& req);
 		std::string			send_error_message(int error_code);
-
-		//the additions:
-		void initServerSocket(std::vector<int>&	_used_ports);
-		void bind_socket_and_listen(std::vector<int>& _used_ports);
 };
 
 #endif /*SERVER_HPP*/

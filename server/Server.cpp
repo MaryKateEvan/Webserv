@@ -1,5 +1,9 @@
 #include "Server.hpp"
 
+/* -------------------------------------------------------------------------- */
+/*                           Orthodox Canonical Form                          */
+/* -------------------------------------------------------------------------- */
+
 /**
  * @brief Creates a webserver
  * @param server_name The name of the server
@@ -13,87 +17,31 @@
  * @param send_timeout 
  * @param max_body_size 
  */
-Server::Server(const std::string server_name, int port, const std::string index_file,
+Server::Server(const std::string server_name, int port, const std::string ip_address, const std::string index_file,
 		const std::string data_dir, const std::string www_dir, bool directory_listing_enabled, size_t keepalive_timeout,
 		size_t send_timeout, size_t max_body_size)
-	: _name(server_name), _port_to_listen(port), _index_file(index_file), _data_dir(data_dir), _www_dir(www_dir),
+	: _name(server_name), _index_file(index_file), _data_dir(data_dir), _www_dir(www_dir),
 	_directory_listing_enabled(directory_listing_enabled), _keepalive_timeout(keepalive_timeout),
 	_send_timeout(send_timeout), _max_body_size(max_body_size)
 {
-	std::cout << "Server constructor called" << std::endl;
-	
-	load_mime_types("mime_type.csv"); //TODO we should call this outside, only one time, not with every server to reread!
-	// _fd_server = socket(AF_INET, SOCK_STREAM, 0);
-	// if (_fd_server == -1)
-	// 	throw SocketCreationFailedException(_name);
-	// int opt = 1;
-	// // Add keepalive here, not changed inside this branch since MK has to most current standart
-	// // Add send_out here
-	// if (setsockopt(_fd_server, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
-	// {
-	// 	close(_fd_server);
-	// 	throw SetSocketOptionFailedException(_name);
-	// }
-	// _address.sin_family = AF_INET;
-	// if (port < 0 || port > 65535)
-	// {
-	// 	close(_fd_server);
-	// 	throw InvalidPortException(_name, port);
-	// }
-	// _address.sin_port = htons(port);
-	// // replace forbidden function, not done now since MKs branch has it
-	// if (inet_pton(AF_INET, ip_address.c_str(), &_address.sin_addr) != 1)
-	// {
-	// 	close(_fd_server);
-	// 	throw InvalidIPAdressException(_name, ip_address);
-	// }
-	// if (bind(_fd_server, (struct sockaddr *)&_address, sizeof(_address)) != 0)
-	// {
-	// 	close(_fd_server);
-	// 	throw BindFailedException(_name, ip_address);
-	// }
-	// if (listen(_fd_server ,SOMAXCONN) != 0)
-	// {
-	// 	close(_fd_server);
-	// 	throw ListenFailedException(_name);
-	// }
-	// // temp to prevent -Werror complaints
-	int temp = _send_timeout + _keepalive_timeout + _directory_listing_enabled + _max_body_size;
-	std::cout << temp << std::endl;
-	// std::cout << "Server is now listening on port " << port << std::endl;
-}
-
-// destructor
-Server::~Server()
-{
-	std::cout << "Server Default Destructor called" << std::endl;
-	close(_fd_server);
-}
-
-/* ------------------ THE FUNCTIONS REQUIRED FROM THE POLLING CONTROL ---------------------*/
-
-void Server::initServerSocket(std::vector<int>&	_used_ports)
-{
-	if (_port_to_listen < 0 || _port_to_listen > 65535)
-		throw InvalidPortException(_name, _port_to_listen);
-
-	// a port can be bound to one socket at a time, so if this port is already bound, we skip this socket creation
-	if (std::find(_used_ports.begin(), _used_ports.end(), _port_to_listen) != _used_ports.end())
-		return ;
-	
+	std::cout << "Server Default Constructor called" << std::endl;
+	load_mime_types("mime_type.csv");
 	_fd_server = socket(AF_INET, SOCK_STREAM, 0);
 	if (_fd_server == -1)
 		throw SocketCreationFailedException(_name);
 	int opt = 1;
+	// Add keepalive here, not changed inside this branch since MK has to most current standart
+	// Add send_out here
 	if (setsockopt(_fd_server, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
 	{
 		close(_fd_server);
 		throw SetSocketOptionFailedException(_name);
 	}
-	if (fcntl(_fd_server, F_SETFL, O_NONBLOCK) < 0) //for non-blocking mode of the server socket
+	_address.sin_family = AF_INET;
+	if (port < 0 || port > 65535)
 	{
 		close(_fd_server);
-		throw SetSocketNonBLockingModeException(_name);
+		throw InvalidPortException(_name, port);
 	}
 	if (fcntl(_fd_server, F_SETFL, O_NONBLOCK) < 0)
 	{
@@ -110,11 +58,9 @@ void Server::initServerSocket(std::vector<int>&	_used_ports)
 	if (bind(_fd_server, (struct sockaddr *)&_address, sizeof(_address)) != 0)
 	{
 		close(_fd_server);
-		throw FailedToBindSocketException(_name);
+		throw BindFailedException(_name, ip_address);
 	}
-
-	//listen to the specified, above, port:
-	if (listen(_fd_server, SOMAXCONN) < 0)
+	if (listen(_fd_server ,SOMAXCONN) != 0)
 	{
 		close(_fd_server);
 		throw ListenFailedException(_name);
@@ -181,7 +127,23 @@ std::string	Server::read_file(const std::string& file_path)
 	return (buffer.str());
 }
 
+void	Server::load_mime_types(const std::string& file_path)
+{
+	std::ifstream file(file_path);
+	if (!file.is_open())
+		throw OpenFailedException(_name, file_path);
+	std::string	line;
+	while(std::getline(file, line))
+	{
+		std::istringstream	ss(line);
+		std::string			extension;
+		std::string			mime_type;
 
+		if (std::getline(ss, extension, '\t') && std::getline(ss, mime_type))
+			_mime_types[extension] = mime_type;
+	}
+	file.close();
+}
 
 std::string	Server::process_request(const Request& req)
 {
