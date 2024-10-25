@@ -1,4 +1,3 @@
-
 #pragma once
 #include <iostream>
 #include <sstream>
@@ -179,4 +178,3 @@ class ConfigData
 				void	print();
 		};
 };
-

@@ -1,4 +1,3 @@
-
 #include "Twin.hpp"
 
 Twin::Twin()

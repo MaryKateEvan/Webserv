@@ -1,4 +1,3 @@
-
 #include "StringDataTracker.hpp"
 
 StringDataTracker::StringDataTracker()

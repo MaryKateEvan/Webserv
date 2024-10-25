@@ -1,4 +1,3 @@
-
 #include "StringHelp.hpp"
 
 //	checks if position is inside a comment, comment being anything betweedd '#' and the next '\n'

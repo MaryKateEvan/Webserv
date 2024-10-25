@@ -1,4 +1,3 @@
-
 #include "Pair.hpp"
 
 Pair::Pair()

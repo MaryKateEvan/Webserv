@@ -1,4 +1,3 @@
-
 #include "StringArr.hpp"
 
 StringArr::StringArr() : num(0)

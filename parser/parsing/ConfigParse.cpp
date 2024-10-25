@@ -1,4 +1,3 @@
-
 #include "ConfigParse.hpp"
 
 extern StringDataTracker	tracker;

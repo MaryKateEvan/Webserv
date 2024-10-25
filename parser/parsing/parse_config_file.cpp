@@ -1,4 +1,3 @@
-
 #include "parse_config_file.hpp"
 
 bool	file_to_string(std::string name, std::string & text)
