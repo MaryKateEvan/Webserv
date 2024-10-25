@@ -42,6 +42,7 @@ class Request
 	public:
 		std::unordered_map<std::string, std::string> _post_files;
 		Request(size_t fd);
+		Request();
 		~Request();
 		Request(const Request& copy);
 		Request& operator=(const Request& copy);
