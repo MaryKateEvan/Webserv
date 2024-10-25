@@ -114,7 +114,7 @@ int		Request::read_chunk(std::vector<char> buffer, int bytes_read)
 		{
 			std::cout << "HEADER:\n" << _header << std::endl;
 			if (fill_in_request() == 1)
-				return (1);
+				return (-1);
 			return (0);
 		}
 	}
@@ -122,7 +122,7 @@ int		Request::read_chunk(std::vector<char> buffer, int bytes_read)
 	{
 		std::cout << "HEADER:\n" << _header << std::endl;
 		if (fill_in_request() == 1)
-			return (1);
+			return (-1);
 		_finished_reading = true;
 		return (0);
 	}
@@ -150,11 +150,10 @@ int	Request::fill_in_request(void)
 		method = _header.find("DELETE ") + 7;
 	}
 	else
-		throw NoMethodFoundException(_header);
+		return (1);
 	std::string::size_type	http = _header.find(" HTTP/");
-	//replace exception
 	if (method == std::string::npos || http == std::string::npos)
-		throw NoMethodFoundException(_header);
+		return (1);
 	_file_path = _header.substr(method, http - method);
 	return (0);
 }
