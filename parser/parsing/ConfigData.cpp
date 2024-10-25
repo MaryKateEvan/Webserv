@@ -1,4 +1,3 @@
-
 #include "ConfigData.hpp"
 
 extern StringDataTracker	tracker;
@@ -275,4 +274,3 @@ void	ConfigData::MainData::print()
 		http[i] -> print();
 	}
 }
-
