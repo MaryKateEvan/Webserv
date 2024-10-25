@@ -3,8 +3,8 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
-#include "../Stringing/StringArr.hpp"
-#include "../Stringing/StringDataTracker.hpp"
+#include "../stringing/StringArr.hpp"
+#include "../stringing/StringDataTracker.hpp"
 
 /*
 	these are for gather all the configuration data

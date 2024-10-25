@@ -1,9 +1,9 @@
 
 #pragma once
 #include <iostream>
-#include "../Stringing/StringHelp.hpp"
-#include "../Stringing/StringArr.hpp"
-#include "../Stringing/StringDataTracker.hpp"
+#include "../stringing/StringHelp.hpp"
+#include "../stringing/StringArr.hpp"
+#include "../stringing/StringDataTracker.hpp"
 
 class ConfigParse
 {

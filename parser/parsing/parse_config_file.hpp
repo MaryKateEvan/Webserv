@@ -4,11 +4,11 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
-#include "../Stringing/StringHelp.hpp"
-#include "../Stringing/StringArr.hpp"
-#include "../Stringing/Pair.hpp"
-#include "../Stringing/Twin.hpp"
-#include "../Stringing/StringDataTracker.hpp"
+#include "../stringing/StringHelp.hpp"
+#include "../stringing/StringArr.hpp"
+#include "../stringing/Pair.hpp"
+#include "../stringing/Twin.hpp"
+#include "../stringing/StringDataTracker.hpp"
 #include "ConfigParse.hpp"
 #include "ConfigData.hpp"
 
