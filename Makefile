@@ -14,7 +14,7 @@ CPPFLAGS		:= -Wall -Wextra -Werror -std=c++17
 
 OBJ_DIR			:= ./objs
 
-VPATH			:= ./utils/ ./server/ ./exceptions/
+VPATH			:= ./utils/ ./server/ ./exceptions/ ./parser/parsing/ ./parser/stringing
 
 SRC				:= main.cpp
 
