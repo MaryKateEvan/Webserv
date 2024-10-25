@@ -14,7 +14,7 @@ CPPFLAGS		:= -Wall -Wextra -Werror -std=c++17
 
 OBJ_DIR			:= ./objs
 
-VPATH			:= ./utils/ ./server/ ./exceptions/
+VPATH			:= ./utils/ ./server/ ./exceptions/ ./parser/
 
 SRC				:= main.cpp
 
@@ -24,7 +24,11 @@ SERVER_SRC		:= Server.cpp Request.cpp SocketManager.cpp
 
 EXCEPTIONS_SRC	:= Exception_server.cpp Exception_request.cpp
 
-SRCS			:= $(SRC) $(UTILS_SRC) $(SERVER_SRC) $(EXCEPTIONS_SRC)
+PARSER_SRC		:= 	Stringing/StringHelp.cpp Stringing/StringArr.cpp Stringing/Pair.cpp \
+					Stringing/Twin.cpp Stringing/StringDataTracker.cpp Parsing/ConfigParse.cpp \
+					Parsing/ConfigData.cpp Parsing/parse_config_file.cpp
+
+SRCS			:= $(SRC) $(UTILS_SRC) $(SERVER_SRC) $(EXCEPTIONS_SRC) $(PARSER_SRC)
 
 OBJS			:= $(addprefix $(OBJ_DIR)/, $(SRCS:%.cpp=%.o))
 

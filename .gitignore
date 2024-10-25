@@ -38,7 +38,6 @@
 *.plist
 .vscode
 webserv
-*.conf
 
 www/usrimg/*
 !www/usrimg/no-bedbugs.jpg
