@@ -30,6 +30,7 @@
 // # include "SocketsController/SocketsControl.hpp"
 // # include "SocketsController/structs.hpp"
 # include "utils/utils.h"
+#include "parser/parsing/parse_config_file.hpp"
 
 // some output formatting macros:
 # define BOLD(text) "\033[1m" << text << "\033[0m"
