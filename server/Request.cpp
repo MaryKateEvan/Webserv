@@ -37,6 +37,16 @@ Request::Request(const Request& copy)
 	// std::cout << "Request Copy Constructor called" << std::endl;
 	if (this != &copy)
 	{
+		this->_fd = copy._fd;
+		this->_client_ip = copy._client_ip;
+		// this->_method = copy._method;
+		// this->_content_len = copy._content_len;
+		// this->_port = copy._port;
+		// this->_body_bytes_read = copy._body_bytes_read;
+		// this->_header_parsed = copy._header_parsed;
+		// this->_finished_reading = copy._finished_reading;
+		// this->_file_path = copy._file_path;
+		// this->_host = copy._host;
 	}
 }
 
@@ -45,7 +55,9 @@ Request&	Request::operator=(const Request &copy)
 	// std::cout << "Request Copy Assignment called" << std::endl;
 	if (this != &copy)
 	{
-	}
+		this->_fd = copy._fd;
+		this->_client_ip = copy._client_ip;
+}
 	return (*this);
 }
 
@@ -125,6 +137,22 @@ int		Request::read_chunk(std::vector<char> buffer, int bytes_read)
 
 int	Request::fill_in_request(void)
 {
+	std::time_t	now = std::time(NULL);
+	std::tm local_tm = *std::localtime(&now);
+	char	buffer[100];
+	std::string	format = "%d/%b/%Y:%H:%M:%S %z";
+	if (std::strftime(buffer, sizeof(buffer), format.c_str(), &local_tm))
+	{
+		_request_received_time = std::string(buffer);
+	}
+	else
+	{
+		_request_received_time = "Error-Formating-Time";
+	}
+
+	std::cout << "FD: " << _fd << std::endl;
+	std::cout << "IP-Address: " << _client_ip << std::endl;
+
 	std::string::size_type	method;
 	if (_header.compare(0, 3, "GET") == 0)
 	{
@@ -285,4 +313,40 @@ std::string	Request::get_request_received_time(void) const
 std::string	Request::get_request_line(void) const
 {
 	return (_request_line);
+}
+
+void	Request::set_fd(size_t fd)
+{
+	_fd = fd;
+}
+
+void	Request::set_client_ip(uint32_t ip_binary)
+{
+	std::string	ip_str;
+
+	for (int i = 0; i < 4; i++)
+	{
+		if (i != 0)
+			ip_str += ".";
+		ip_str += std::to_string((ip_binary >> (8 * i)) & 0xFF);
+	}
+	_client_ip = ip_str;
+}
+
+void	Request::reset()
+{
+	_method = -1;
+	_file_path.clear();
+	_content_len = 0;
+	_host.clear();
+	_port = -1;
+	_content_type.clear();
+	_header.clear();
+	_accumulated_request.clear();
+	_body_bytes_read = 0;
+	_header_parsed = false;
+	_finished_reading = false;
+	_request_received_time.clear();
+	_request_line.clear();
+	_post_files.clear();
 }

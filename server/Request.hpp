@@ -64,6 +64,11 @@ class Request
 		std::string	get_client_ip(void) const;
 		std::string	get_request_received_time(void) const;
 		std::string	get_request_line(void) const;
+
+		void		set_fd(size_t fd);
+		void		set_client_ip(uint32_t ip_binary);
+
+		void		reset();
 };
 
 #endif /*REQUEST_HPP*/
