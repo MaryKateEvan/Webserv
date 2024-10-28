@@ -102,6 +102,8 @@ void	SocketManager::handle_read(int client_fd)
 			std::string	response;
 			if (_server_map.find(port) != _server_map.end())
 			{
+				//! If we want to make the server perfect, we add another map taking the client fd and a bool.
+				//! should the response fail, leading us to return a 400 or 413 we then set this to true, letting us know to disconnect the client after sending
 				switch (status)
 				{
 					case 0:
@@ -131,7 +133,6 @@ void	SocketManager::handle_read(int client_fd)
 void	SocketManager::handle_write(int client_fd)
 {
 	auto&	response = _response_map[client_fd];
-	// std::cout << "Response:\n" << response << std::endl;
 	ssize_t	bytes_sent = send(client_fd, response.c_str(), response.size(), 0);
 
 	if (bytes_sent == -1)
@@ -149,7 +150,6 @@ void	SocketManager::handle_write(int client_fd)
 			// remove_client(client_fd);
 		}
 	}
-	// std::cout << "I FINISHED HELLO" << std::endl;
 }
 
 
