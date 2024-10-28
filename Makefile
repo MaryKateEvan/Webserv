@@ -24,11 +24,13 @@ SERVER_SRC		:= Server.cpp Request.cpp SocketManager.cpp
 
 EXCEPTIONS_SRC	:= Exception_server.cpp Exception_request.cpp
 
-PARSER_SRC		:= 	stringing/StringHelp.cpp stringing/StringArr.cpp stringing/Pair.cpp \
+PARSER_SRC		:= stringing/StringHelp.cpp stringing/StringArr.cpp stringing/Pair.cpp \
 					stringing/Twin.cpp stringing/StringDataTracker.cpp parsing/ConfigParse.cpp \
 					parsing/ConfigData.cpp parsing/parse_config_file.cpp
 
-SRCS			:= $(SRC) $(UTILS_SRC) $(SERVER_SRC) $(EXCEPTIONS_SRC) $(PARSER_SRC)
+LOG_SRC			:= log/Logger.cpp
+
+SRCS			:= $(SRC) $(UTILS_SRC) $(SERVER_SRC) $(EXCEPTIONS_SRC) $(PARSER_SRC) $(LOG_SRC)
 
 OBJS			:= $(addprefix $(OBJ_DIR)/, $(SRCS:%.cpp=%.o))
 
