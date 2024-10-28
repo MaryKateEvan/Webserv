@@ -105,15 +105,15 @@ void	SocketManager::handle_read(int client_fd)
 			{
 				switch (status)
 				{
-				case 0:
-					response = _server_map[port]->process_request(_request_map[client_fd]);
-					break;
-				case -10:
-					response = _server_map[port]->send_error_message(413);
-					break;
-				default:
-					response = _server_map[port]->send_error_message(400);
-					break;
+					case 0:
+						response = _server_map[port]->process_request(_request_map[client_fd]);
+						break;
+					case -10:
+						response = _server_map[port]->send_error_message(413);
+						break;
+					default:
+						response = _server_map[port]->send_error_message(400);
+						break;
 				}
 				_response_map[client_fd] = response;
 				_request_map[client_fd].reset();

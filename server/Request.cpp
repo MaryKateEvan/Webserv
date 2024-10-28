@@ -149,9 +149,15 @@ int	Request::fill_in_request(void)
 	{
 		_request_received_time = "Error-Formating-Time";
 	}
-
-	std::cout << "FD: " << _fd << std::endl;
-	std::cout << "IP-Address: " << _client_ip << std::endl;
+	std::string::size_type pos = _header.find('\n');
+	if (pos != std::string::npos) 
+	{
+		_request_line = _header.substr(0, pos);
+	}
+	else
+	{
+		_request_line = "Error-Finding-Request_Line";
+	}
 
 	std::string::size_type	method;
 	if (_header.compare(0, 3, "GET") == 0)
