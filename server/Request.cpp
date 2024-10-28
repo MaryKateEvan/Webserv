@@ -61,16 +61,10 @@ int		Request::read_chunk(std::vector<char> buffer, int bytes_read)
 		return (0);
 	if (bytes_read < 0)
 	{
-		// std::cerr << "Error reading from fd " << fds[i].fd << std::endl;
-		// close(fds[i].fd);
-		// fds[i].fd = -1;
 		return (-1);
 		}
 	if (bytes_read == 0)
 	{
-		// std::cout << "Client on fd " << fds[i].fd << " disconnected" << std::endl;
-		// close(fds[i].fd);
-		// fds[i].fd = -1;
 		return (-2);
 	}
 	_accumulated_request.insert(_accumulated_request.end(), buffer.begin(), buffer.begin() + bytes_read);
@@ -276,4 +270,19 @@ bool	Request::get_finished_reading(void) const
 std::string	Request::get_host(void) const
 {
 	return (_host);
+}
+
+std::string	Request::get_client_ip(void) const
+{
+	return (_client_ip);
+}
+
+std::string	Request::get_request_received_time(void) const
+{
+	return (_request_received_time);
+}
+
+std::string	Request::get_request_line(void) const
+{
+	return (_request_line);
 }
