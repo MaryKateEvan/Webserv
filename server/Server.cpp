@@ -82,9 +82,6 @@ Server::Server(const std::string server_name, int port, const std::string ip_add
 		close(_fd_server);
 		throw ListenFailedException(_name);
 	}
-
-	int temp = _send_timeout + _keepalive_timeout + _directory_listing_enabled + _max_body_size;
-	std::cout << temp << std::endl;
 	std::cout << "Server is now listening on port " << port << std::endl;
 }
 
