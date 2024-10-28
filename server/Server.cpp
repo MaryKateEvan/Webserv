@@ -30,9 +30,26 @@ Server::Server(const std::string server_name, int port, const std::string ip_add
 	if (_fd_server == -1)
 		throw SocketCreationFailedException(_name);
 	int opt = 1;
-	// Add keepalive here, not changed inside this branch since MK has to most current standart
-	// Add send_out here
 	if (setsockopt(_fd_server, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
+	{
+		close(_fd_server);
+		throw SetSocketOptionFailedException(_name);
+	}
+	if (setsockopt(_fd_server, SOL_SOCKET, SO_KEEPALIVE, &opt, sizeof(opt)) < 0)
+	{
+		close(_fd_server);
+		throw SetSocketOptionFailedException(_name);
+	}
+	int	keep_idle = _keepalive_timeout;
+	if (setsockopt(_fd_server, IPPROTO_TCP, TCP_KEEPIDLE, &keep_idle, sizeof(keep_idle)) < 0)
+	{
+		close(_fd_server);
+		throw SetSocketOptionFailedException(_name);
+	}
+	struct timeval	send_timeout_val;
+	send_timeout_val.tv_sec = _send_timeout;
+	send_timeout_val.tv_usec = 0;
+	if (setsockopt(_fd_server, SOL_SOCKET, SO_SNDTIMEO, &send_timeout_val, sizeof(send_timeout_val)) < 0)
 	{
 		close(_fd_server);
 		throw SetSocketOptionFailedException(_name);
@@ -49,7 +66,7 @@ Server::Server(const std::string server_name, int port, const std::string ip_add
 		throw SetSocketOptionFailedException(_name);
 	}
 	_address.sin_port = htons(port);
-	// replace forbidden function, not done now since MKs branch has it
+	// replace forbidden function
 	if (inet_pton(AF_INET, ip_address.c_str(), &_address.sin_addr) != 1)
 	{
 		close(_fd_server);
