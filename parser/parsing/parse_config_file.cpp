@@ -85,10 +85,8 @@ std::vector<ServerData>	read_config_file(std::string file)
 
 	ConfigData::MainData data;
 	parseConfig(conf, &data);
-	std::cout << "INFO: config file reading done\n";
-	//std::cout << "\n";
-	//data.print();
-	//std::cout << "\n";
+	// std::cout << "INFO: config file reading done\n";
+	Logger::getInstance().log("", "Config file read", 2);
 
 	if (data.http.size() == 0)
 	{
@@ -136,7 +134,8 @@ std::vector<ServerData>	read_config_file(std::string file)
 		}
 	}
 
-	std::cout << "INFO: config data interpreting done\n";
+	// std::cout << "INFO: config data interpreting done\n";
+	Logger::getInstance().log("", "Config file interpreted", 2);
 
 	return (server_vec);
 }

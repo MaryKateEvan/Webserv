@@ -24,10 +24,10 @@ ConfigParse::ConfigParse(
 	this -> new_func = new_func;
 	this -> set_func = set_func;
 
-	if (new_func == NULL && set_func == NULL)
-	{
-		std::cout << "NOTE: Configuration Parsing Element '" << name << "' was given neither a new() nor a set() function.\n";
-	}
+	// if (new_func == NULL && set_func == NULL)
+	// {
+	// 	std::cout << "NOTE: Configuration Parsing Element '" << name << "' was given neither a new() nor a set() function.\n";
+	// }
 }
 ConfigParse::ConfigParse(ConfigParse const & othr) :
 	name(othr.name),
