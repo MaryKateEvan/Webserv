@@ -41,7 +41,7 @@ OBJS			:= $(addprefix $(OBJ_DIR)/, $(SRCS:%.cpp=%.o))
 all: submodule $(NAME)
 
 submodule:
-	git submodule update --init --recursive
+	@git submodule update --init --recursive
 
 $(NAME): $(OBJS)
 	$(CPP) $(CPPFLAGS) $(OBJS) -o $(NAME)
