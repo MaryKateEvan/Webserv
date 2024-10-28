@@ -24,15 +24,32 @@ Server::Server(const std::string server_name, int port, const std::string ip_add
 	_directory_listing_enabled(directory_listing_enabled), _keepalive_timeout(keepalive_timeout),
 	_send_timeout(send_timeout), _max_body_size(max_body_size)
 {
-	std::cout << "Server Default Constructor called" << std::endl;
+	Logger::getInstance().log(server_name, "Constructor called", 2);
 	load_mime_types("mime_type.csv");
 	_fd_server = socket(AF_INET, SOCK_STREAM, 0);
 	if (_fd_server == -1)
 		throw SocketCreationFailedException(_name);
 	int opt = 1;
-	// Add keepalive here, not changed inside this branch since MK has to most current standart
-	// Add send_out here
 	if (setsockopt(_fd_server, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
+	{
+		close(_fd_server);
+		throw SetSocketOptionFailedException(_name);
+	}
+	if (setsockopt(_fd_server, SOL_SOCKET, SO_KEEPALIVE, &opt, sizeof(opt)) < 0)
+	{
+		close(_fd_server);
+		throw SetSocketOptionFailedException(_name);
+	}
+	int	keep_idle = _keepalive_timeout;
+	if (setsockopt(_fd_server, IPPROTO_TCP, TCP_KEEPIDLE, &keep_idle, sizeof(keep_idle)) < 0)
+	{
+		close(_fd_server);
+		throw SetSocketOptionFailedException(_name);
+	}
+	struct timeval	send_timeout_val;
+	send_timeout_val.tv_sec = _send_timeout;
+	send_timeout_val.tv_usec = 0;
+	if (setsockopt(_fd_server, SOL_SOCKET, SO_SNDTIMEO, &send_timeout_val, sizeof(send_timeout_val)) < 0)
 	{
 		close(_fd_server);
 		throw SetSocketOptionFailedException(_name);
@@ -49,7 +66,7 @@ Server::Server(const std::string server_name, int port, const std::string ip_add
 		throw SetSocketOptionFailedException(_name);
 	}
 	_address.sin_port = htons(port);
-	// replace forbidden function, not done now since MKs branch has it
+	// replace forbidden function
 	if (inet_pton(AF_INET, ip_address.c_str(), &_address.sin_addr) != 1)
 	{
 		close(_fd_server);
@@ -65,15 +82,13 @@ Server::Server(const std::string server_name, int port, const std::string ip_add
 		close(_fd_server);
 		throw ListenFailedException(_name);
 	}
+	Logger::getInstance().log(server_name, "Server is now listening on " + std::to_string(port), 2);
 
-	int temp = _send_timeout + _keepalive_timeout + _directory_listing_enabled + _max_body_size;
-	std::cout << temp << std::endl;
-	std::cout << "Server is now listening on port " << port << std::endl;
 }
 
 Server::~Server()
 {
-	std::cout << "Server Default Destructor called" << std::endl;
+	Logger::getInstance().log(_name, "Destructor called", 2);
 	close(_fd_server);
 }
 
@@ -114,6 +129,7 @@ std::string	Server::get_mime_type(const std::string& file_path)
 	}
 	catch (const std::out_of_range& e)
 	{
+		Logger::getInstance().log(_name, file_path + " has unknown MIME Type", 3);
 		return ("unknown/unknown");
 	}
 }
@@ -147,6 +163,7 @@ void	Server::load_mime_types(const std::string& file_path)
 
 std::string	Server::process_request(const Request& req)
 {
+	_CLF_line = req.get_CLF_line();
 	int	method = req.get_method();
 
 	switch (method)
@@ -185,11 +202,11 @@ std::string	Server::process_get(const Request& req)
 			response_body += "    <li><a href=\"" + _data_dir + "/" + entry.path().filename().string() + "\">" + entry.path().filename().string() + "</a></li>\n";
 		}
 		response_body += "</ul>\n<hr>\n</body>\n</html>\n";
-		response += "Content-Length: " + std::to_string(response_body.size()) + "\r\n";
+		std::string	con_len_str = std::to_string(response_body.size());
+		response += "Content-Length: " + con_len_str + "\r\n";
 		response += "\r\n";
 		response += response_body;
-		// if (send(req.get_fd(), response.c_str(), response.size(), 0) == -1)
-		// 		throw SendFailedException(_name, req.get_fd());
+		_CLF_line += " " + std::to_string(200) + " " + con_len_str;
 		return (response);
 	}
 	else if (_directory_listing_enabled == false && std::filesystem::is_directory(file_path))
@@ -201,11 +218,11 @@ std::string	Server::process_get(const Request& req)
 		std::string	file_content = read_file(file_path);
 		std::string	mime_type = get_mime_type(file_path);
 		response += "Content-Type: " + mime_type + "\r\n";
-		response += "Content-Length: " + std::to_string(file_content.size()) + "\r\n";
+		std::string	con_len_str = std::to_string(file_content.size());
+		response += "Content-Length: " + con_len_str + "\r\n";
 		response += "\r\n";
 		response += file_content;
-		// if (send(req.get_fd(), response.c_str(), response.size(), 0) == -1)
-		// 		throw SendFailedException(_name, req.get_fd());
+		_CLF_line += " " + std::to_string(200) + " " + con_len_str;
 		return (response);
 	}
 	else
@@ -270,25 +287,24 @@ std::string	Server::send_error_message(int error_code)
 		std::string	mime_type = get_mime_type(file_path);
 		std::string	response = "HTTP/1.1 " + std::to_string(error_code) + " Error\r\n";
 		response += "Content-Type: " + mime_type + "\r\n";
-		response += "Content-Length: " + std::to_string(file_content.size()) + "\r\n";
+		std::string	con_len_str = std::to_string(file_content.size());
+		response += "Content-Length: " + con_len_str + "\r\n";
 		response += "\r\n";
 		response += file_content;
-		// if (send(req.get_fd(), response.c_str(), response.size(), 0) == -1)
-		// 		throw SendFailedException(_name, req.get_fd());
+		_CLF_line += " " + std::to_string(error_code) + " " + con_len_str;
 		return (response);
 	}
 	else
 	{
 		std::string response = "HTTP/1.1 404 Not Found\r\n";
 		response += "Content-Type: text/html\r\n";
-		response += "Content-Length: " + std::to_string(strlen("404 File Not Found")) + "\r\n";
+		std::string	con_len_str = std::to_string(strlen("404 File Not Found"));
+		response += "Content-Length: " + con_len_str + "\r\n";
 		response += "\r\n"; // End of headers
 		response += "404 File Not Found"; // Body
-		// if (send(req.get_fd(), response.c_str(), response.size(), 0) == -1)
-		// 	throw SendFailedException(_name, req.get_fd());
+		_CLF_line += " " + std::to_string(error_code) + " " + con_len_str;
 		return (response);
 	}
-	// return (0);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -313,4 +329,9 @@ const std::string	Server::getName(void) const
 size_t	Server::getMaxBodySize(void) const
 {
 	return (_max_body_size);
+}
+
+void	Server::log_CLF_line(void)
+{
+	Logger::getInstance().log(_name, _CLF_line, 1);
 }

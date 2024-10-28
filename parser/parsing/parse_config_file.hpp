@@ -10,6 +10,7 @@
 #include "../stringing/StringDataTracker.hpp"
 #include "ConfigParse.hpp"
 #include "ConfigData.hpp"
+#include "../../log/Logger.hpp"
 
 struct LocationData
 {

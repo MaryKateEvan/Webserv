@@ -18,6 +18,7 @@ class Server
 		size_t				_keepalive_timeout;
 		size_t				_send_timeout;
 		size_t				_max_body_size;
+		std::string			_CLF_line;
 		std::unordered_map<std::string, std::string> _mime_types;
 
 		void				load_mime_types(const std::string& file_path);
@@ -40,6 +41,7 @@ class Server
 		size_t				getMaxBodySize(void) const;
 		std::string			process_request(const Request& req);
 		std::string			send_error_message(int error_code);
+		void				log_CLF_line(void);
 };
 
 #endif /*SERVER_HPP*/
