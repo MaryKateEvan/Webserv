@@ -6,12 +6,12 @@
 
 SocketManager::SocketManager()
 {
-	std::cout << "SocketManager Default Constructor called" << std::endl;
+	Logger::getInstance().log("", "Socket Manager Constructor called", 2);
 }
 
 SocketManager::~SocketManager()
 {
-	std::cout << "SocketManager Default Destructor called" << std::endl;
+	Logger::getInstance().log("", "Socket Manager Destructor called", 2);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -57,8 +57,7 @@ void	SocketManager::handle_requests()
 
 		if (poll_count == -1)
 		{
-			std::cerr << "Poll failed" << std::endl;
-			break ;
+			throw PollFailedException();
 		}
 		accept_connections();
 
@@ -107,12 +106,15 @@ void	SocketManager::handle_read(int client_fd)
 				{
 					case 0:
 						response = _server_map[port]->process_request(_request_map[client_fd]);
+						_server_map[port]->log_CLF_line();
 						break;
 					case -10:
 						response = _server_map[port]->send_error_message(413);
+						Logger::getInstance().log("",  _request_map[client_fd].get_client_ip() + " on " + std::to_string(_request_map[client_fd].get_fd()) + std::to_string(413) + " \"Body too big\"", 3);
 						break;
 					default:
 						response = _server_map[port]->send_error_message(400);
+						Logger::getInstance().log("", _request_map[client_fd].get_client_ip() + " on " + std::to_string(_request_map[client_fd].get_fd()) + std::to_string(400) + " \"Wrong Request Header\"", 3);
 						break;
 				}
 				_response_map[client_fd] = response;
@@ -135,6 +137,7 @@ void	SocketManager::handle_write(int client_fd)
 	if (bytes_sent == -1)
 	{
 		std::cerr << "Send failed!" << std::endl;
+		Logger::getInstance().log("", "Sending to " + std::to_string(client_fd) + " failed/timeout", 2);
 		remove_client(client_fd);
 	}
 	else
@@ -176,17 +179,16 @@ void SocketManager::accept_connections()
 
 			if (new_socket < 0)
 			{
-				std::cerr << "Failed to accept connection on server socket: " << strerror(errno) << std::endl;
+				Logger::getInstance().log("", "Failed to accept connection on server socket: " + std::string(strerror(errno)), 3);
 				continue;
 			}
 
 			if (fcntl(new_socket, F_SETFL, O_NONBLOCK) < 0)
 			{
+				Logger::getInstance().log("", "Failed to set non-blocking on new socket: " + std::string(strerror(errno)), 3);
 				close(new_socket);
-				 std::cerr << "Failed to set non-blocking on new socket: " << strerror(errno) << std::endl;
 				continue;
 			}
-
 			_fds.push_back({ new_socket, POLLIN, 0 });
 			_request_map[new_socket] = Request(new_socket);
 			_request_map[new_socket].set_client_ip(client_addr.sin_addr.s_addr);

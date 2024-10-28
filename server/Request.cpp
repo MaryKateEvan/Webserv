@@ -6,7 +6,6 @@
 
 Request::Request(size_t fd)
 {
-	std::cout << "Request Constructed" << std::endl;
 	_fd = fd;
 	_method = -1;
 	_content_len = 0;
@@ -18,7 +17,6 @@ Request::Request(size_t fd)
 
 Request::Request()
 {
-	std::cout << "Request Constructed" << std::endl;
 	_method = -1;
 	_content_len = 0;
 	_port = -1;
@@ -118,7 +116,7 @@ int		Request::read_chunk(std::vector<char> buffer, int bytes_read)
 	{
 		if (_body_bytes_read >= _content_len)
 		{
-			std::cout << "HEADER:\n" << _header << std::endl;
+			// std::cout << "HEADER:\n" << _header << std::endl;
 			if (fill_in_request() == 1)
 				return (-1);
 			return (0);
@@ -126,7 +124,7 @@ int		Request::read_chunk(std::vector<char> buffer, int bytes_read)
 	}
 	if (_header_parsed && _content_len == 0)
 	{
-		std::cout << "HEADER:\n" << _header << std::endl;
+		// std::cout << "HEADER:\n" << _header << std::endl;
 		if (fill_in_request() == 1)
 			return (-1);
 		_finished_reading = true;
@@ -140,7 +138,7 @@ int	Request::fill_in_request(void)
 	std::time_t	now = std::time(NULL);
 	std::tm local_tm = *std::localtime(&now);
 	char	buffer[100];
-	std::string	format = "%d/%b/%Y:%H:%M:%S %z";
+	std::string	format = "[%d/%b/%Y:%H:%M:%S %z]";
 	if (std::strftime(buffer, sizeof(buffer), format.c_str(), &local_tm))
 	{
 		_request_received_time = std::string(buffer);
@@ -152,12 +150,13 @@ int	Request::fill_in_request(void)
 	std::string::size_type pos = _header.find('\n');
 	if (pos != std::string::npos) 
 	{
-		_request_line = _header.substr(0, pos);
+		_request_line = _header.substr(0, pos -1);
 	}
 	else
 	{
 		_request_line = "Error-Finding-Request_Line";
 	}
+	_CLF_line = _client_ip + "\t" + std::to_string(_fd) + "\t- " + _request_received_time + "\t\"" + _request_line + "\"";
 
 	std::string::size_type	method;
 	if (_header.compare(0, 3, "GET") == 0)
@@ -355,4 +354,10 @@ void	Request::reset()
 	_request_received_time.clear();
 	_request_line.clear();
 	_post_files.clear();
+	_CLF_line.clear();
+}
+
+std::string	Request::get_CLF_line(void) const
+{
+	return (_CLF_line);
 }

@@ -20,28 +20,26 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
-	//receiving values from the `example1.config`:
-	// fill_server_data(servers); //what the parser from the config will fill out
-	// print_server_data(servers); // for verification
-	// (void)argv;
-	
+	std::vector<ServerData> server_vec;
+	try
+	{
+		server_vec = read_config_file(argv[1]);
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+		return (0);
+	}
 
 	try
 	{
 		SocketManager	socket_manager;
-		try
+		
+		for (size_t s = 0; s < server_vec.size(); s++)
 		{
-			std::vector<ServerData> server_vec = read_config_file(argv[1]);
-			for (size_t s = 0; s < server_vec.size(); s++)
-			{
-				ServerData const & server = server_vec[s];
-				socket_manager.add_server(server.port_to_listen, std::make_unique<Server>(server.server_name, server.port_to_listen, "0.0.0.0", server.index_file,
-				"usrimg", server.root, server.directory_listing, server.keepalive_timeout, server.send_timeout, server.max_request_size));
-			}
-		}
-		catch(const std::exception& e)
-		{
-			std::cerr << "Exception: " << e.what() << std::endl;
+			ServerData const & server = server_vec[s];
+			socket_manager.add_server(server.port_to_listen, std::make_unique<Server>(server.server_name, server.port_to_listen, "0.0.0.0", server.index_file,
+			"usrimg", server.root, server.directory_listing, server.keepalive_timeout, server.send_timeout, server.max_request_size));
 		}
 		// socket_manager.add_server(8080, std::make_unique<Server>("Instalight", 8080, "0.0.0.0", "index.html", "usrimg", "www_image_webpage", true, 0, 0, 3000000));
 		// socket_manager.add_server(8081, std::make_unique<Server>("A little webserver", 8081, "0.0.0.0", "index.html", "usrimg", "www", true, 0, 0, 3000000));
@@ -49,9 +47,7 @@ int main(int argc, char **argv)
 	}
 	catch (const std::exception& e)
 	{
-		std::cerr << "Exception: " << e.what() << std::endl;
+			Logger::getInstance().log("", e.what(), 4);
 	}
 	return (0);
 }
-
-

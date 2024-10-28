@@ -38,6 +38,7 @@ class Request
 		std::string			_client_ip;
 		std::string			_request_received_time;
 		std::string			_request_line;
+		std::string			_CLF_line;
 
 		int			fill_in_request(void);
 
@@ -64,6 +65,7 @@ class Request
 		std::string	get_client_ip(void) const;
 		std::string	get_request_received_time(void) const;
 		std::string	get_request_line(void) const;
+		std::string	get_CLF_line(void) const;
 
 		void		set_fd(size_t fd);
 		void		set_client_ip(uint32_t ip_binary);
