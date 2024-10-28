@@ -90,4 +90,11 @@ class SendFailedException : public BaseException
 		explicit SendFailedException(const std::string& server_name, const int& fd);
 };
 
+class PollFailedException : public BaseException
+{
+	public:
+		explicit PollFailedException(void)
+		: BaseException("Poll failed") {}
+};
+
 #endif /*EXCEPTIONS_HPP*/
