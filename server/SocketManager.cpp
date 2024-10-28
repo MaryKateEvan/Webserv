@@ -97,44 +97,27 @@ void	SocketManager::handle_read(int client_fd)
 			if (_request_map[client_fd].correct_body_size(_server_map[_request_map[client_fd].get_port()]->getMaxBodySize()) == false)
 				status = -10;
 		}
-		if (status == 0)
+		if (status <= 0)
 		{
 			int	port = _request_map[client_fd].get_port();
-
+			std::string	response;
 			if (_server_map.find(port) != _server_map.end())
 			{
-				std::string	response = _server_map[port]->process_request(_request_map[client_fd]);
+				switch (status)
+				{
+				case 0:
+					response = _server_map[port]->process_request(_request_map[client_fd]);
+					break;
+				case -10:
+					response = _server_map[port]->send_error_message(413);
+					break;
+				default:
+					response = _server_map[port]->send_error_message(400);
+					break;
+				}
 				_response_map[client_fd] = response;
-				_request_map.erase(client_fd);
-				set_pollevent(client_fd, POLLOUT);
-			}
-			else
-				remove_client(client_fd);
-		}
-		else if (status == -10)
-		{
-			int	port = _request_map[client_fd].get_port();
-
-			if (_server_map.find(port) != _server_map.end())
-			{
-				_request_map[client_fd];
-				std::string	response = _server_map[port]->send_error_message(413);
-				_response_map[client_fd] = response;
-				_request_map.erase(client_fd);
-				set_pollevent(client_fd, POLLOUT);
-			}
-			else
-				remove_client(client_fd);
-		}
-		else if (status < 0)
-		{
-			int	port = _request_map[client_fd].get_port();
-
-			if (_server_map.find(port) != _server_map.end())
-			{
-				std::string	response = _server_map[port]->send_error_message(400);
-				_response_map[client_fd] = response;
-				_request_map.erase(client_fd);
+				_request_map[client_fd].reset();
+				// _request_map.erase(client_fd);
 				set_pollevent(client_fd, POLLOUT);
 			}
 			else
@@ -206,6 +189,7 @@ void SocketManager::accept_connections()
 
 			_fds.push_back({ new_socket, POLLIN, 0 });
 			_request_map[new_socket] = Request(new_socket);
+			_request_map[new_socket].set_client_ip(client_addr.sin_addr.s_addr);
 		}
 	}
 }
