@@ -27,10 +27,9 @@
 # include <fcntl.h>
 # include <chrono>
 
-// for the keep_alive_timeout setsockopt flags:
-# ifdef __linux__
-# include <netinet/tcp.h> // For TCP_KEEPIDLE, TCP_KEEPINTVL, etc.
-# endif
+#  ifdef __linux__
+#   include <netinet/tcp.h>
+#  endif
 
 # include "exceptions/Exceptions.hpp"
 # include "utils/utils.h"
