@@ -13,9 +13,9 @@
  * @param data_dir the directory to POST/DELETE from (might be replaced by a redirect map in the future)
  * @param www_dir the location of the webpage files 
  * @param directory_listing_enabled true or false if the directory listing should be enabled
- * @param keepalive_timeout 
- * @param send_timeout 
- * @param max_body_size 
+ * @param keepalive_timeout Keepalive timeout in seconds, 0 to disable
+ * @param send_timeout Send timeout in seconds, 0 to disable
+ * @param max_body_size Max Body size the Server will read (the server may send bigger responses to the client), 0 to diable
  */
 Server::Server(const std::string server_name, int port, const std::string ip_address, const std::string index_file,
 		const std::string data_dir, const std::string www_dir, bool directory_listing_enabled, size_t keepalive_timeout,

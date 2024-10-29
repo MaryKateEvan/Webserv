@@ -21,6 +21,7 @@ class MimeTypes
 		void operator=(const MimeTypes& copy) = delete;
 
 		std::string			get_mime_type(const std::string& file_path);
+		std::string			get_file_extension(const std::string& mime_type);
 };
 
 #endif /*MIMETYPES_HPP*/

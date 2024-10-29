@@ -43,3 +43,14 @@ std::string	MimeTypes::get_mime_type(const std::string& file_path)
 		return ("unknown/unknown");
 	}
 }
+
+std::string MimeTypes::get_file_extension(const std::string& mime_type)
+{
+	for (const auto& pair : _mime_types)
+	{
+		if (pair.second == mime_type)
+			return (pair.first);
+	}
+	Logger::getInstance().log("", mime_type + " has unknown file extension", 3);
+	return (".unknown");
+}
