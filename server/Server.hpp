@@ -6,9 +6,9 @@
 // class Request;
 
 # if defined(__APPLE__)
-#  define RETOPT retopt = setsockopt(_fd_server, IPPROTO_TCP, TCP_KEEPALIVE, &keep_idle, sizeof(keep_idle))
+#  define RETOPT() setsockopt(_fd_server, IPPROTO_TCP, TCP_KEEPALIVE, &keep_idle, sizeof(keep_idle))
 # else
-#  define RETOPT retopt = setsockopt(_fd_server, IPPROTO_TCP, TCP_KEEPIDLE, &keep_idle, sizeof(keep_idle))
+#  define RETOPT() setsockopt(_fd_server, IPPROTO_TCP, TCP_KEEPIDLE, &keep_idle, sizeof(keep_idle))
 # endif
 
 class Server
