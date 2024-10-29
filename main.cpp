@@ -9,8 +9,6 @@
 * -d30s stands for a 30s test lenght
 */
 
-// void signal_handler(int signum);
-
 int main(int argc, char **argv)
 {
 	std::cout << GREEN("🚀 Launching Webserv ... 🚀") << std::endl;
