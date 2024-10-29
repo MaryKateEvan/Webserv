@@ -9,12 +9,12 @@
 * -d30s stands for a 30s test lenght
 */
 
-void signal_handler(int signum);
+// void signal_handler(int signum);
 
 int main(int argc, char **argv)
 {
 	std::cout << GREEN("🚀 Launching Webserv ... 🚀") << std::endl;
-	if (argc != 2)
+	if (argc > 2)
 	{
 		std::cout << ERROR("Expected usage: ") << UNDERLINE("./webserv") << " or " << UNDERLINE("./webserv <path_to_config_file>") << std::endl;
 		return 0;
@@ -23,7 +23,10 @@ int main(int argc, char **argv)
 	std::vector<ServerData> server_vec;
 	try
 	{
-		server_vec = read_config_file(argv[1]);
+		if (argc == 2)
+			server_vec = read_config_file(argv[1]);
+		else
+			server_vec = read_config_file("config_files/standart.conf");
 	}
 	catch(const std::exception& e)
 	{

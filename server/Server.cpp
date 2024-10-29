@@ -40,7 +40,17 @@ Server::Server(const std::string server_name, int port, const std::string ip_add
 		throw SetSocketOptionFailedException(_name);
 	}
 	int	keep_idle = _keepalive_timeout;
-	if (setsockopt(_fd_server, IPPROTO_TCP, TCP_KEEPIDLE, &keep_idle, sizeof(keep_idle)) < 0)
+	int retopt;
+	#ifdef __linux__
+		retopt = setsockopt(_fd_server, IPPROTO_TCP, TCP_KEEPIDLE, &keep_idle, sizeof(keep_idle));
+	#elif defined(__APPLE__)
+		retopt = setsockopt(_fd_server, IPPROTO_TCP, TCP_KEEPALIVE, &keep_idle, sizeof(keep_idle));
+	#elif defined(_WIN32)
+		DWORD keep_idle = _keepalive_timeout; // milliseconds
+		tcp_keepalive keepalive = {1, keep_idle, 1000};
+		WSAIoctl(_fd_server, SIO_KEEPALIVE_VALS, &keepalive, sizeof(keepalive), NULL, 0, NULL, NULL, NULL);
+	#endif
+	if (retopt < 0)
 	{
 		close(_fd_server);
 		throw SetSocketOptionFailedException(_name);

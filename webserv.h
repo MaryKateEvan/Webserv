@@ -48,6 +48,16 @@
 # define ORANGE(text) "\033[38;5;214m" << text << "\033[0m"
 # define ERROR(text) "\033[31mError: \033[0m" << text
 
+// for the keep_alive_timeout setsockopt flags:
+# ifdef __linux__
+# include <netinet/tcp.h> // For TCP_KEEPIDLE, TCP_KEEPINTVL, etc.
+# elif defined(_WIN32)
+# include <winsock2.h> // Windows sockets
+# include <ws2tcpip.h>
+# elif defined(__APPLE__)
+# include <sys/types.h>
+# include <sys/socket.h>
+# endif
 
 # ifndef PORT
 #  define PORT 8080
