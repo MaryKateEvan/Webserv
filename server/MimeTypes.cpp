@@ -32,7 +32,13 @@ MimeTypes::~MimeTypes()
 
 std::string	MimeTypes::get_mime_type(const std::string& file_path)
 {
-	std::string	file_extension = file_path.substr(file_path.find_last_of('.'));
+	size_t		ext_pos = file_path.find_last_of('.');
+	if (ext_pos == std::string::npos)
+	{
+		Logger::getInstance().log("", file_path + " has unknown MIME Type", 3);
+		return ("unknown/unknown");
+	}
+	std::string	file_extension = file_path.substr(ext_pos);
 	try
 	{
 		return (_mime_types.at(file_extension));
