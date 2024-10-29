@@ -27,9 +27,14 @@
 # include <fcntl.h>
 # include <chrono>
 
-#  ifdef __linux__
-#   include <netinet/tcp.h>
-#  endif
+# ifdef __linux__
+	#include <netinet/tcp.h>
+# elif defined(__APPLE__)
+	#include <sys/types.h>
+	#include <sys/socket.h>
+	#include <netinet/in.h>
+	#include <netinet/tcp.h> // This includes TCP_KEEPALIVE for macOS
+# endif
 
 # include "exceptions/Exceptions.hpp"
 # include "utils/utils.h"
