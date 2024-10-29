@@ -40,7 +40,7 @@ Server::Server(const std::string server_name, int port, const std::string ip_add
 		throw SetSocketOptionFailedException(_name);
 	}
 	int	keep_idle = _keepalive_timeout;
-	if (setsockopt(_fd_server, IPPROTO_TCP, TCP_KEEPIDLE, &keep_idle, sizeof(keep_idle)) < 0)
+	if (RETOPT() < 0)
 	{
 		close(_fd_server);
 		throw SetSocketOptionFailedException(_name);

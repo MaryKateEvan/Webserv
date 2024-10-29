@@ -11,7 +11,6 @@
 # include <sys/types.h>
 # include <sys/socket.h>
 # include <netinet/in.h>
-# include <netinet/tcp.h>
 # include <unistd.h>
 # include <fcntl.h>
 # include <climits>
@@ -28,9 +27,16 @@
 # include <fcntl.h>
 # include <chrono>
 
+# ifdef __linux__
+	#include <netinet/tcp.h>
+# elif defined(__APPLE__)
+	#include <sys/types.h>
+	#include <sys/socket.h>
+	#include <netinet/in.h>
+	#include <netinet/tcp.h> // This includes TCP_KEEPALIVE for macOS
+# endif
+
 # include "exceptions/Exceptions.hpp"
-// # include "SocketsController/SocketsControl.hpp"
-// # include "SocketsController/structs.hpp"
 # include "utils/utils.h"
 # include "parser/parsing/parse_config_file.hpp"
 # include "log/Logger.hpp"
