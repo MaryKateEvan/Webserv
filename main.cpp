@@ -34,7 +34,8 @@ int main(int argc, char **argv)
 	try
 	{
 		SocketManager	socket_manager;
-		
+		MimeTypes::getInstance();
+
 		for (size_t s = 0; s < server_vec.size(); s++)
 		{
 			ServerData const & server = server_vec[s];

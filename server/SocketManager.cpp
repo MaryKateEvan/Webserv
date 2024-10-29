@@ -112,11 +112,13 @@ void	SocketManager::handle_read(int client_fd)
 						break;
 					case -10:
 						response = _server_map[port]->send_error_message(413);
-						Logger::getInstance().log("",  _request_map[client_fd].get_client_ip() + " on " + std::to_string(_request_map[client_fd].get_fd()) + std::to_string(413) + " \"Body too big\"", 3);
+						_disconnect_after_send.push_back(client_fd);
+						Logger::getInstance().log("",  _request_map[client_fd].get_client_ip() + " on " + std::to_string(_request_map[client_fd].get_fd()) + " " + std::to_string(413) + " \"Body too big\"", 3);
 						break;
 					default:
 						response = _server_map[port]->send_error_message(400);
-						Logger::getInstance().log("", _request_map[client_fd].get_client_ip() + " on " + std::to_string(_request_map[client_fd].get_fd()) + std::to_string(400) + " \"Wrong Request Header\"", 3);
+						_disconnect_after_send.push_back(client_fd);
+						Logger::getInstance().log("", _request_map[client_fd].get_client_ip() + " on " + std::to_string(_request_map[client_fd].get_fd()) + " " + std::to_string(400) + " \"Wrong Request Header\"", 3);
 						break;
 				}
 				_response_map[client_fd] = response;
@@ -146,12 +148,21 @@ void	SocketManager::handle_write(int client_fd)
 		response.erase(0, bytes_sent);
 		if (response.empty())
 		{
-			set_pollevent(client_fd, POLLIN);
-			// remove_client(client_fd);
+			if (std::find(_disconnect_after_send.begin(), _disconnect_after_send.end(), client_fd) != _disconnect_after_send.end())
+			{
+				auto it = std::remove(_disconnect_after_send.begin(), _disconnect_after_send.end(), client_fd);
+				if (it != _disconnect_after_send.end())
+				_disconnect_after_send.erase(it, _disconnect_after_send.end());
+				remove_client(client_fd);
+			}
+			else
+			{
+				set_pollevent(client_fd, POLLIN);
+				// remove_client(client_fd);
+			}
 		}
 	}
 }
-
 
 void	SocketManager::set_pollevent(int client_fd, short events)
 {

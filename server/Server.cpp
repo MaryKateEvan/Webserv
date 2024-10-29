@@ -13,9 +13,9 @@
  * @param data_dir the directory to POST/DELETE from (might be replaced by a redirect map in the future)
  * @param www_dir the location of the webpage files 
  * @param directory_listing_enabled true or false if the directory listing should be enabled
- * @param keepalive_timeout 
- * @param send_timeout 
- * @param max_body_size 
+ * @param keepalive_timeout Keepalive timeout in seconds, 0 to disable
+ * @param send_timeout Send timeout in seconds, 0 to disable
+ * @param max_body_size Max Body size the Server will read (the server may send bigger responses to the client), 0 to diable
  */
 Server::Server(const std::string server_name, int port, const std::string ip_address, const std::string index_file,
 		const std::string data_dir, const std::string www_dir, bool directory_listing_enabled, size_t keepalive_timeout,
@@ -25,7 +25,6 @@ Server::Server(const std::string server_name, int port, const std::string ip_add
 	_send_timeout(send_timeout), _max_body_size(max_body_size)
 {
 	Logger::getInstance().log(server_name, "Constructor called", 2);
-	load_mime_types("mime_type.csv");
 	_fd_server = socket(AF_INET, SOCK_STREAM, 0);
 	if (_fd_server == -1)
 		throw SocketCreationFailedException(_name);
@@ -120,20 +119,6 @@ std::string	Server::map_to_directory(const std::string& file_path)
 		return (_www_dir + file_path);
 }
 
-std::string	Server::get_mime_type(const std::string& file_path)
-{
-	std::string	file_extension = file_path.substr(file_path.find_last_of('.'));
-	try
-	{
-		return (_mime_types.at(file_extension));
-	}
-	catch (const std::out_of_range& e)
-	{
-		Logger::getInstance().log(_name, file_path + " has unknown MIME Type", 3);
-		return ("unknown/unknown");
-	}
-}
-
 std::string	Server::read_file(const std::string& file_path)
 {
 	std::ifstream		file(file_path);
@@ -141,24 +126,6 @@ std::string	Server::read_file(const std::string& file_path)
 
 	buffer << file.rdbuf();
 	return (buffer.str());
-}
-
-void	Server::load_mime_types(const std::string& file_path)
-{
-	std::ifstream file(file_path);
-	if (!file.is_open())
-		throw OpenFailedException(_name, file_path);
-	std::string	line;
-	while(std::getline(file, line))
-	{
-		std::istringstream	ss(line);
-		std::string			extension;
-		std::string			mime_type;
-
-		if (std::getline(ss, extension, '\t') && std::getline(ss, mime_type))
-			_mime_types[extension] = mime_type;
-	}
-	file.close();
 }
 
 std::string	Server::process_request(const Request& req)
@@ -216,7 +183,7 @@ std::string	Server::process_get(const Request& req)
 	else if (std::filesystem::exists(file_path))
 	{
 		std::string	file_content = read_file(file_path);
-		std::string	mime_type = get_mime_type(file_path);
+		std::string	mime_type = MimeTypes::getInstance().get_mime_type(file_path);
 		response += "Content-Type: " + mime_type + "\r\n";
 		std::string	con_len_str = std::to_string(file_content.size());
 		response += "Content-Length: " + con_len_str + "\r\n";
@@ -237,9 +204,6 @@ std::string	Server::process_delete(const Request& req)
 	{
 		if (std::remove(file_path.c_str()) == 0)
 		{
-			// std::string	response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
-			// if (send(req.get_fd(), response.c_str(), response.size(), 0) == -1)
-			// 	throw SendFailedException(_name, req.get_fd());
 			return (send_error_message(200));
 		}
 		else
@@ -284,7 +248,7 @@ std::string	Server::send_error_message(int error_code)
 	if (std::filesystem::exists(file_path))
 	{
 		std::string	file_content = read_file(file_path);
-		std::string	mime_type = get_mime_type(file_path);
+		std::string	mime_type = MimeTypes::getInstance().get_mime_type(file_path);
 		std::string	response = "HTTP/1.1 " + std::to_string(error_code) + " Error\r\n";
 		response += "Content-Type: " + mime_type + "\r\n";
 		std::string	con_len_str = std::to_string(file_content.size());

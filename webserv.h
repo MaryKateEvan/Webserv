@@ -34,6 +34,7 @@
 # include "utils/utils.h"
 # include "parser/parsing/parse_config_file.hpp"
 # include "log/Logger.hpp"
+# include "server/MimeTypes.hpp"
 
 // some output formatting macros:
 # define BOLD(text) "\033[1m" << text << "\033[0m"

@@ -65,8 +65,6 @@ Request&	Request::operator=(const Request &copy)
 
 int		Request::read_chunk(std::vector<char> buffer, int bytes_read)
 {
-	//! Make the main loop check if the content_len variable is bigger than the allowed one for that server, in that case we would send an error
-	//! basically if this function returns something that isnt 0 or 1 send an error to the client
 	if (_finished_reading == true)
 		return (0);
 	if (bytes_read < 0)
@@ -213,9 +211,9 @@ int	Request::process_post(void)
 	}
 	else
 	{
-		//! Replace the unknown filename with something like unknow.fileending or random.fileending, getting the ending from the mimetype map that is currently in the server class
+		std::string	file_extention = MimeTypes::getInstance().get_file_extension(con_type);
 		std::string body_str(_accumulated_request.begin(), _accumulated_request.end());
-		_post_files["unknown"] = body_str;
+		_post_files["unknown" + file_extention] = body_str;
 	}
 	return (0);
 }
