@@ -28,6 +28,25 @@ struct ConnectionData
 		out_pipe[0] = pipe[0];
 		out_pipe[1] = pipe[1];
 	}
+	ConnectionData(const ConnectionData& other)
+		: client_fd(other.client_fd), server_port(other.server_port), child_pid(other.child_pid)
+	{
+		out_pipe[0] = other.out_pipe[0];
+		out_pipe[1] = other.out_pipe[1];
+	}
+	ConnectionData& operator=(const ConnectionData& other)
+	{
+		if (this != &other)
+		{
+			client_fd = other.client_fd;
+			server_port = other.server_port;
+			out_pipe[0] = other.out_pipe[0];
+			out_pipe[1] = other.out_pipe[1];
+			child_pid = other.child_pid;
+		}
+		return (*this);
+	}
+	ConnectionData() : client_fd(0), server_port(0), out_pipe{0, 0}, child_pid(0) {}
 };
 
 class SocketManager

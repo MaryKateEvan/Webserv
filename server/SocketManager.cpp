@@ -269,7 +269,7 @@ std::string	SocketManager::handle_cgi(int client_fd, int server_port)
 		const_cast<char *>(_server_map[server_port]->getCgiPost().c_str()),
 		NULL
 	};
-	std::vector<char*>	envp = _server_map[server_port]->getCgiEnvStrings();
+	std::vector<const char*>	envp = _server_map[server_port]->getCgiEnvStrings();
 
 	pid_t	pid = fork();
 	if (pid == 0) // Child
@@ -279,7 +279,9 @@ std::string	SocketManager::handle_cgi(int client_fd, int server_port)
 		close(in_pipe[1]);
 		close(out_pipe[0]);
 
-		execve(args[0], args, envp.data());
+		// execve(args[0], args, envp.data());
+			// const char* argv[] = {"/usr/bin/python3", scriptpath, NULL};
+		execve(args[0], const_cast<char* const*>(args), const_cast<char* const*>(envp.data()));
 		exit(1);
 	}
 	else if (pid > 0) // Parent

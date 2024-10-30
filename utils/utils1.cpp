@@ -15,6 +15,5 @@ std::vector<std::string>	tokenize(const std::string& str, const std::string& del
 	}
 
 	tokens.push_back(str.substr(start));
-
 	return (tokens);
 }
