@@ -102,13 +102,15 @@ void	SocketManager::handle_read(int client_fd)
 			std::string	response;
 			if (_server_map.find(port) != _server_map.end())
 			{
-				//! If we want to make the server perfect, we add another map taking the client fd and a bool.
-				//! should the response fail, leading us to return a 400 or 413 we then set this to true, letting us know to disconnect the client after sending
 				switch (status)
 				{
 					case 0:
 						response = _server_map[port]->process_request(_request_map[client_fd]);
 						_server_map[port]->log_CLF_line();
+						if (response == "")
+						{
+							response = handle_cgi(client_fd, port);
+						}
 						break;
 					case -10:
 						response = _server_map[port]->send_error_message(413);
@@ -135,19 +137,99 @@ void	SocketManager::handle_read(int client_fd)
 void	SocketManager::handle_write(int client_fd)
 {
 	auto&	response = _response_map[client_fd];
-	ssize_t	bytes_sent = send(client_fd, response.c_str(), response.size(), 0);
 
-	if (bytes_sent == -1)
+	if (response == "")
 	{
-		std::cerr << "Send failed!" << std::endl;
-		Logger::getInstance().log("", "Sending to " + std::to_string(client_fd) + " failed/timeout", 2);
-		remove_client(client_fd);
+		handle_write_cgi(client_fd);
 	}
 	else
 	{
-		response.erase(0, bytes_sent);
-		if (response.empty())
+		ssize_t	bytes_sent = send(client_fd, response.c_str(), response.size(), 0);
+
+		if (bytes_sent == -1)
 		{
+			std::cerr << "Send failed!" << std::endl;
+			Logger::getInstance().log("", "Sending to " + std::to_string(client_fd) + " failed/timeout", 2);
+			remove_client(client_fd);
+		}
+		else
+		{
+			response.erase(0, bytes_sent);
+			if (response.empty())
+			{
+				if (std::find(_disconnect_after_send.begin(), _disconnect_after_send.end(), client_fd) != _disconnect_after_send.end())
+				{
+					auto it = std::remove(_disconnect_after_send.begin(), _disconnect_after_send.end(), client_fd);
+					if (it != _disconnect_after_send.end())
+					_disconnect_after_send.erase(it, _disconnect_after_send.end());
+					remove_client(client_fd);
+				}
+				else
+				{
+					set_pollevent(client_fd, POLLIN);
+					// remove_client(client_fd);
+				}
+			}
+		}
+	}
+}
+
+void	SocketManager::handle_write_cgi(int client_fd)
+{
+	auto	it = _cgi_map.find(client_fd);
+	if (it == _cgi_map.end())
+	{
+		remove_client(client_fd);
+		Logger::getInstance().log("", _request_map[client_fd].get_client_ip() + " on " + std::to_string(_request_map[client_fd].get_fd()) + " " + std::to_string(500) + " \"Something went wrong, no client inside the cgi_map, disconnecting client\"", 3);
+		return;
+	}
+	ConnectionData&	con_data = it->second;
+	char	buffer[BUFFER_SIZE];
+	ssize_t	bytes_read;
+
+	bytes_read = read(con_data.out_pipe[0], buffer, BUFFER_SIZE);
+	if (bytes_read > 0)
+	{
+		ssize_t	bytes_sent = send(client_fd, buffer, bytes_read, 0);
+		if (bytes_sent == -1)
+		{
+			Logger::getInstance().log("", "Sending to " + std::to_string(client_fd) + " failed/timeout", 2);
+			close(con_data.out_pipe[0]);
+			kill(con_data.child_pid, SIGTERM);
+			_cgi_map.erase(it);
+			remove_client(client_fd);
+		}
+	}
+	else if (bytes_read == 0) // Pipe finished
+	{
+		close(con_data.out_pipe[0]);
+	}
+	else
+	{
+		Logger::getInstance().log("", _request_map[client_fd].get_client_ip() + " on " + std::to_string(_request_map[client_fd].get_fd()) + " " + std::to_string(500) + " \"Error Reading from the pipe\"", 3);
+		close(con_data.out_pipe[0]);
+		kill(con_data.child_pid, SIGTERM);
+		_cgi_map.erase(it);
+		remove_client(client_fd);
+	}
+	int	status;
+	if (waitpid(con_data.child_pid, &status, WNOHANG) > 0)
+	{
+		_cgi_map.erase(it);
+		if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
+		{
+			Logger::getInstance().log("", _request_map[client_fd].get_client_ip() + " on " + std::to_string(_request_map[client_fd].get_fd()) + " " + std::to_string(500) + " \"Child Process exited with an error\"", 3);
+			if (std::find(_disconnect_after_send.begin(), _disconnect_after_send.end(), client_fd) != _disconnect_after_send.end())
+			{
+				auto it = std::remove(_disconnect_after_send.begin(), _disconnect_after_send.end(), client_fd);
+				if (it != _disconnect_after_send.end())
+					_disconnect_after_send.erase(it, _disconnect_after_send.end());
+			}
+			remove_client(client_fd);
+		}
+		else
+		{
+			kill(con_data.child_pid, SIGTERM);
 			if (std::find(_disconnect_after_send.begin(), _disconnect_after_send.end(), client_fd) != _disconnect_after_send.end())
 			{
 				auto it = std::remove(_disconnect_after_send.begin(), _disconnect_after_send.end(), client_fd);
@@ -158,9 +240,69 @@ void	SocketManager::handle_write(int client_fd)
 			else
 			{
 				set_pollevent(client_fd, POLLIN);
-				// remove_client(client_fd);
 			}
 		}
+	}
+}
+
+std::string	SocketManager::handle_cgi(int client_fd, int server_port)
+{
+	auto	it = _cgi_map.find(client_fd);
+	if (it != _cgi_map.end())
+	{
+		Logger::getInstance().log("",  _request_map[client_fd].get_client_ip() + " on " + std::to_string(_request_map[client_fd].get_fd()) + " " + std::to_string(429) + " \"Client tried running multiple scripts on one socket\"", 3);
+		return (_server_map[server_port]->send_error_message(429));
+	}
+	if (_cgi_map.size() >= MAX_SCRIPTS)
+	{
+		Logger::getInstance().log("",  _request_map[client_fd].get_client_ip() + " on " + std::to_string(_request_map[client_fd].get_fd()) + " " + std::to_string(500) + " \"Max amount of scripts already running\"", 3);
+		return (_server_map[server_port]->send_error_message(503));
+	}
+
+	int		in_pipe[2];
+	int		out_pipe[2];
+
+	pipe(in_pipe);
+	pipe(out_pipe);
+	char *args[] = {
+		const_cast<char *>("/usr/bin/python3"),
+		const_cast<char *>(_server_map[server_port]->getCgiPost().c_str()),
+		NULL
+	};
+	std::vector<char*>	envp = _server_map[server_port]->getCgiEnvStrings();
+
+	pid_t	pid = fork();
+	if (pid == 0) // Child
+	{
+		dup2(in_pipe[0], STDIN_FILENO);
+		dup2(out_pipe[1], STDOUT_FILENO);
+		close(in_pipe[1]);
+		close(out_pipe[0]);
+
+		execve(args[0], args, envp.data());
+		exit(1);
+	}
+	else if (pid > 0) // Parent
+	{
+		close(in_pipe[0]);
+		close(out_pipe[1]);
+		if (_server_map[server_port]->getCgiPost() != "")
+		{
+			write(in_pipe[1], _server_map[server_port]->getCgiPost().c_str(), _server_map[server_port]->getCgiPost().size());
+		}
+		close(in_pipe[1]);
+		ConnectionData	con_data(client_fd, server_port, out_pipe, pid);
+		_cgi_map[client_fd] = con_data;
+		return ("");
+	}
+	else // Fork fail
+	{
+		close(in_pipe[0]);
+		close(in_pipe[1]);
+		close(out_pipe[0]);
+		close(out_pipe[1]);
+		Logger::getInstance().log("",  _request_map[client_fd].get_client_ip() + " on " + std::to_string(_request_map[client_fd].get_fd()) + " " + std::to_string(500) + " \"Fork failed\"", 3);
+		return (_server_map[server_port]->send_error_message(500));
 	}
 }
 
