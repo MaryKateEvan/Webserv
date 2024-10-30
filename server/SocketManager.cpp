@@ -207,18 +207,16 @@ void	SocketManager::handle_write_cgi(int client_fd)
 		}
 	}
 	else if (bytes_read == 0) // Pipe finished
-	{
-		// close(con_data.out_pipe[0]);
-		
-	}
-	else
-	{
-		Logger::getInstance().log("", _request_map[client_fd].get_client_ip() + " on " + std::to_string(_request_map[client_fd].get_fd()) + " " + std::to_string(500) + " \"Error Reading from the pipe\"", 3);
-		close(con_data.out_pipe[0]);
-		kill(con_data.child_pid, SIGTERM);
-		_cgi_map.erase(it);
-		remove_client(client_fd);
-	}
+	{}
+	// else if (errno == EAGAIN || errno == EWOULDBLOCK) {}
+	// else
+	// {
+	// 	Logger::getInstance().log("", _request_map[client_fd].get_client_ip() + " on " + std::to_string(_request_map[client_fd].get_fd()) + " " + std::to_string(500) + " \"Error Reading from the pipe\"", 3);
+	// 	close(con_data.out_pipe[0]);
+	// 	kill(con_data.child_pid, SIGTERM);
+	// 	_cgi_map.erase(it);
+	// 	remove_client(client_fd);
+	// }
 	int	status;
 	if (waitpid(con_data.child_pid, &status, WNOHANG) > 0)
 	{
@@ -271,18 +269,59 @@ std::string	SocketManager::handle_cgi(int client_fd, int server_port)
 	int		out_pipe[2];
 
 	std::string	temp = _server_map[server_port]->getCgiFilePath();
-	if (!pipe(in_pipe))
+	if (pipe(in_pipe) == -1)
 	{
 		Logger::getInstance().log("",  _request_map[client_fd].get_client_ip() + " on " + std::to_string(_request_map[client_fd].get_fd()) + " " + std::to_string(500) + " \"Pipe failed\"", 3);
 		return (_server_map[server_port]->send_error_message(500));
 	}
-	if (!pipe(out_pipe))
+	if (pipe(out_pipe) == -1)
 	{
 		close(in_pipe[0]);
 		close(in_pipe[1]);
 		Logger::getInstance().log("",  _request_map[client_fd].get_client_ip() + " on " + std::to_string(_request_map[client_fd].get_fd()) + " " + std::to_string(500) + " \"Pipe failed\"", 3);
 		return (_server_map[server_port]->send_error_message(500));
 	}
+	// int flags = fcntl(in_pipe[1], F_GETFL, 0);
+	// if (flags == -1 || fcntl(in_pipe[1], F_SETFL, flags | O_NONBLOCK) == -1)
+	// {
+	// 	close(in_pipe[0]);
+	// 	close(in_pipe[1]);
+	// 	close(out_pipe[0]);
+	// 	close(out_pipe[1]);
+	// 	Logger::getInstance().log("",  _request_map[client_fd].get_client_ip() + " on " + std::to_string(_request_map[client_fd].get_fd()) + " " + std::to_string(500) + " \"Configuring Pipe failed\"", 3);
+	// 	return (_server_map[server_port]->send_error_message(500));
+	// }
+	// flags = fcntl(in_pipe[0], F_GETFL, 0);
+	// if (flags == -1 || fcntl(in_pipe[0], F_SETFL, flags | O_NONBLOCK) == -1)
+	// {
+	// 	close(in_pipe[0]);
+	// 	close(in_pipe[1]);
+	// 	close(out_pipe[0]);
+	// 	close(out_pipe[1]);
+	// 	Logger::getInstance().log("",  _request_map[client_fd].get_client_ip() + " on " + std::to_string(_request_map[client_fd].get_fd()) + " " + std::to_string(500) + " \"Configuring Pipe failed\"", 3);
+	// 	return (_server_map[server_port]->send_error_message(500));
+	// }
+	int flags = fcntl(out_pipe[1], F_GETFL, 0);
+	if (flags == -1 || fcntl(out_pipe[1], F_SETFL, flags | O_NONBLOCK) == -1)
+	{
+		close(in_pipe[0]);
+		close(in_pipe[1]);
+		close(out_pipe[0]);
+		close(out_pipe[1]);
+		Logger::getInstance().log("",  _request_map[client_fd].get_client_ip() + " on " + std::to_string(_request_map[client_fd].get_fd()) + " " + std::to_string(500) + " \"Configuring Pipe failed\"", 3);
+		return (_server_map[server_port]->send_error_message(500));
+	}
+	flags = fcntl(out_pipe[0], F_GETFL, 0);
+	if (flags == -1 || fcntl(out_pipe[0], F_SETFL, flags | O_NONBLOCK) == -1)
+	{
+		close(in_pipe[0]);
+		close(in_pipe[1]);
+		close(out_pipe[0]);
+		close(out_pipe[1]);
+		Logger::getInstance().log("",  _request_map[client_fd].get_client_ip() + " on " + std::to_string(_request_map[client_fd].get_fd()) + " " + std::to_string(500) + " \"Configuring Pipe failed\"", 3);
+		return (_server_map[server_port]->send_error_message(500));
+	}
+
 	char *args[] = {
 		const_cast<char *>("/usr/bin/python3"),
 		const_cast<char *>(temp.c_str()),
@@ -297,9 +336,6 @@ std::string	SocketManager::handle_cgi(int client_fd, int server_port)
 		dup2(out_pipe[1], STDOUT_FILENO);
 		close(in_pipe[1]);
 		close(out_pipe[0]);
-
-		// execve(args[0], args, envp.data());
-			// const char* argv[] = {"/usr/bin/python3", scriptpath, NULL};
 		execve(args[0], const_cast<char* const*>(args), const_cast<char* const*>(envp.data()));
 		exit(1);
 	}
