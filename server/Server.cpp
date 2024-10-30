@@ -135,18 +135,17 @@ std::string	Server::process_request(const Request& req)
 
 	if (method == GET || method == POST)
 	{
-		if (req.get_file_path().compare(0, 8, "/cgi-bin/") && req.get_file_path().size() > 9)
+		// std::cout << "File Path: " << req.get_file_path() << std::endl;
+// 		std::cout << "Method: " << method << std::endl;
+// std::cout << "File Path: '" << req.get_file_path() << "'" << std::endl;
+// std::cout << "File Path Length: " << req.get_file_path().size() << std::endl;
+// std::cout << "Compare: " << req.get_file_path().compare(0, 8, "/cgi-bin/") << std::endl;
+		// if (req.get_file_path().size() > 9 && req.get_file_path().compare(0, 8, "/cgi-bin/") == 0)
+		if (req.get_file_path().find(".py") != std::string::npos)
+		{
 			return (process_cgi(req));
+		}
 	}
-
-	// if (req.get_file_path().size() > 9 && req.get_file_path().compare(0, 8, "/cgi-bin/"))
-	// {
-	// 	if (method == DELETE)
-	// 		return (send_error_message(405));
-	// 	if (method == GET || method == POST)
-	// 		return (process_cgi(req));
-	// }
-	
 	switch (method)
 	{
 		case GET:

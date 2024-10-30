@@ -98,6 +98,7 @@ void	SocketManager::handle_read(int client_fd)
 		}
 		if (status <= 0)
 		{
+			// std::cout << "Request: " << _request_map[client_fd].get_method_in_string() << std::endl;
 			int	port = _request_map[client_fd].get_port();
 			std::string	response;
 			if (_server_map.find(port) != _server_map.end())
@@ -109,6 +110,7 @@ void	SocketManager::handle_read(int client_fd)
 						_server_map[port]->log_CLF_line();
 						if (response == "")
 						{
+							// std::cout << "Hello, response: " << response << std::endl;
 							response = handle_cgi(client_fd, port);
 						}
 						break;
@@ -262,11 +264,12 @@ std::string	SocketManager::handle_cgi(int client_fd, int server_port)
 	int		in_pipe[2];
 	int		out_pipe[2];
 
+	std::string	temp = _server_map[server_port]->getCgiFilePath();
 	pipe(in_pipe);
 	pipe(out_pipe);
 	char *args[] = {
 		const_cast<char *>("/usr/bin/python3"),
-		const_cast<char *>(_server_map[server_port]->getCgiPost().c_str()),
+		const_cast<char *>(temp.c_str()),
 		NULL
 	};
 	std::vector<const char*>	envp = _server_map[server_port]->getCgiEnvStrings();
