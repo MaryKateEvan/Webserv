@@ -110,7 +110,6 @@ void	SocketManager::handle_read(int client_fd)
 						_server_map[port]->log_CLF_line();
 						if (response == "")
 						{
-							// std::cout << "Hello, response: " << response << std::endl;
 							response = handle_cgi(client_fd, port);
 						}
 						break;
