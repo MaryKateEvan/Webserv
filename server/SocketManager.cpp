@@ -140,6 +140,10 @@ void	SocketManager::handle_write(int client_fd)
 {
 	auto&	response = _response_map[client_fd];
 
+	// if (_cgi_map.find(client_fd) != _cgi_map.end())
+	// {
+	// 	handle_write_cgi(client_fd);
+	// }
 	if (response == "")
 	{
 		handle_write_cgi(client_fd);
@@ -204,7 +208,8 @@ void	SocketManager::handle_write_cgi(int client_fd)
 	}
 	else if (bytes_read == 0) // Pipe finished
 	{
-		close(con_data.out_pipe[0]);
+		// close(con_data.out_pipe[0]);
+		
 	}
 	else
 	{
@@ -217,6 +222,7 @@ void	SocketManager::handle_write_cgi(int client_fd)
 	int	status;
 	if (waitpid(con_data.child_pid, &status, WNOHANG) > 0)
 	{
+		close(con_data.out_pipe[0]);
 		_cgi_map.erase(it);
 		if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
 		{
@@ -265,8 +271,18 @@ std::string	SocketManager::handle_cgi(int client_fd, int server_port)
 	int		out_pipe[2];
 
 	std::string	temp = _server_map[server_port]->getCgiFilePath();
-	pipe(in_pipe);
-	pipe(out_pipe);
+	if (!pipe(in_pipe))
+	{
+		Logger::getInstance().log("",  _request_map[client_fd].get_client_ip() + " on " + std::to_string(_request_map[client_fd].get_fd()) + " " + std::to_string(500) + " \"Pipe failed\"", 3);
+		return (_server_map[server_port]->send_error_message(500));
+	}
+	if (!pipe(out_pipe))
+	{
+		close(in_pipe[0]);
+		close(in_pipe[1]);
+		Logger::getInstance().log("",  _request_map[client_fd].get_client_ip() + " on " + std::to_string(_request_map[client_fd].get_fd()) + " " + std::to_string(500) + " \"Pipe failed\"", 3);
+		return (_server_map[server_port]->send_error_message(500));
+	}
 	char *args[] = {
 		const_cast<char *>("/usr/bin/python3"),
 		const_cast<char *>(temp.c_str()),

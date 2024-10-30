@@ -4,7 +4,7 @@ import time
 print("HTTP/1.1 200 OK\r")
 print("Content-Type: text/html\r")
 print("Content-Length: 64\r\n\r")
-time.sleep(40)
+time.sleep(10)
 print("<html><body>")
 print("<h1>Hello, World from Python CGI!</h1>")
 print("</body></html>")
