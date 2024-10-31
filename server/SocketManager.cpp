@@ -11,6 +11,11 @@ SocketManager::SocketManager()
 
 SocketManager::~SocketManager()
 {
+	int	num_servers = _server_map.size();
+	for (size_t i = num_servers; i < _fds.size(); i++)
+	{
+		remove_client(_fds[i].fd);
+	}
 	Logger::getInstance().log("", "Socket Manager Destructor called", 2);
 }
 
@@ -36,6 +41,15 @@ void	SocketManager::remove_client(int client_fd)
 	close(client_fd);
 	_request_map.erase(client_fd);
 	_response_map.erase(client_fd);
+	auto	it = _cgi_map.find(client_fd);
+	if (it != _cgi_map.end())
+	{
+		ConnectionData&	con_data = it->second;
+		Logger::getInstance().log("", std::to_string(client_fd) + " disconnected with running CGI script", 3);
+		close(con_data.out_pipe[0]);
+		kill(con_data.child_pid, SIGTERM);
+		_cgi_map.erase(it);
+	}
 	_fds.erase(std::remove_if(_fds.begin(), _fds.end(),
 	[client_fd](pollfd& pfd) { return pfd.fd == client_fd; }), _fds.end());
 }
@@ -143,37 +157,34 @@ void	SocketManager::handle_write(int client_fd)
 	// {
 	// 	handle_write_cgi(client_fd);
 	// }
-	if (response == "")
+	if (response == "") // If the response is empty, it has to be a CGI process, in case of bug try if above
 	{
-		handle_write_cgi(client_fd);
+		return (handle_write_cgi(client_fd));
+	}
+	ssize_t	bytes_sent = send(client_fd, response.c_str(), response.size(), 0);
+
+	if (bytes_sent == -1)
+	{
+		std::cerr << "Send failed!" << std::endl;
+		Logger::getInstance().log("", "Sending to " + std::to_string(client_fd) + " failed/timeout", 2);
+		remove_client(client_fd);
 	}
 	else
 	{
-		ssize_t	bytes_sent = send(client_fd, response.c_str(), response.size(), 0);
-
-		if (bytes_sent == -1)
+		response.erase(0, bytes_sent);
+		if (response.empty())
 		{
-			std::cerr << "Send failed!" << std::endl;
-			Logger::getInstance().log("", "Sending to " + std::to_string(client_fd) + " failed/timeout", 2);
-			remove_client(client_fd);
-		}
-		else
-		{
-			response.erase(0, bytes_sent);
-			if (response.empty())
+			if (std::find(_disconnect_after_send.begin(), _disconnect_after_send.end(), client_fd) != _disconnect_after_send.end())
 			{
-				if (std::find(_disconnect_after_send.begin(), _disconnect_after_send.end(), client_fd) != _disconnect_after_send.end())
-				{
-					auto it = std::remove(_disconnect_after_send.begin(), _disconnect_after_send.end(), client_fd);
-					if (it != _disconnect_after_send.end())
-					_disconnect_after_send.erase(it, _disconnect_after_send.end());
-					remove_client(client_fd);
-				}
-				else
-				{
-					set_pollevent(client_fd, POLLIN);
-					// remove_client(client_fd);
-				}
+				auto it = std::remove(_disconnect_after_send.begin(), _disconnect_after_send.end(), client_fd);
+				if (it != _disconnect_after_send.end())
+				_disconnect_after_send.erase(it, _disconnect_after_send.end());
+				remove_client(client_fd);
+			}
+			else
+			{
+				set_pollevent(client_fd, POLLIN);
+				// remove_client(client_fd);
 			}
 		}
 	}
@@ -207,45 +218,45 @@ void	SocketManager::handle_write_cgi(int client_fd)
 	}
 	else if (bytes_read == 0) // Pipe finished
 	{}
-	// else if (errno == EAGAIN || errno == EWOULDBLOCK) {}
-	// else
-	// {
-	// 	Logger::getInstance().log("", _request_map[client_fd].get_client_ip() + " on " + std::to_string(_request_map[client_fd].get_fd()) + " " + std::to_string(500) + " \"Error Reading from the pipe\"", 3);
-	// 	close(con_data.out_pipe[0]);
-	// 	kill(con_data.child_pid, SIGTERM);
-	// 	_cgi_map.erase(it);
-	// 	remove_client(client_fd);
-	// }
 	int	status;
 	if (waitpid(con_data.child_pid, &status, WNOHANG) > 0)
 	{
 		close(con_data.out_pipe[0]);
 		_cgi_map.erase(it);
-		if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
+		if (WIFEXITED(status) && WEXITSTATUS(status) != 0) // Script exited with an error code
 		{
 			Logger::getInstance().log("", _request_map[client_fd].get_client_ip() + " on " + std::to_string(_request_map[client_fd].get_fd()) + " " + std::to_string(500) + " \"Child Process exited with an error\"", 3);
-			if (std::find(_disconnect_after_send.begin(), _disconnect_after_send.end(), client_fd) != _disconnect_after_send.end())
-			{
-				auto it = std::remove(_disconnect_after_send.begin(), _disconnect_after_send.end(), client_fd);
-				if (it != _disconnect_after_send.end())
-					_disconnect_after_send.erase(it, _disconnect_after_send.end());
-			}
-			remove_client(client_fd);
+			kill(con_data.child_pid, SIGTERM);
+			_response_map[client_fd] = _server_map[con_data.server_port]->send_error_message(500);
+			_cgi_map.erase(it);
 		}
-		else
+		else // Script exited as expected
 		{
 			kill(con_data.child_pid, SIGTERM);
 			if (std::find(_disconnect_after_send.begin(), _disconnect_after_send.end(), client_fd) != _disconnect_after_send.end())
 			{
-				auto it = std::remove(_disconnect_after_send.begin(), _disconnect_after_send.end(), client_fd);
-				if (it != _disconnect_after_send.end())
-				_disconnect_after_send.erase(it, _disconnect_after_send.end());
+				auto it2 = std::remove(_disconnect_after_send.begin(), _disconnect_after_send.end(), client_fd);
+				if (it2 != _disconnect_after_send.end())
+				_disconnect_after_send.erase(it2, _disconnect_after_send.end());
 				remove_client(client_fd);
 			}
 			else
 			{
 				set_pollevent(client_fd, POLLIN);
 			}
+		}
+	}
+	else // Terminate if timeout
+	{
+		auto current_time = std::chrono::steady_clock::now();
+		auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(current_time - con_data.start_time);
+
+		if (elapsed >= std::chrono::seconds(SCRIPT_TIMEOUT))
+		{
+			close(con_data.out_pipe[0]);
+			kill(con_data.child_pid, SIGTERM);
+			_response_map[client_fd] = _server_map[con_data.server_port]->send_error_message(508);
+			_cgi_map.erase(it);
 		}
 	}
 }
@@ -347,7 +358,7 @@ std::string	SocketManager::handle_cgi(int client_fd, int server_port)
 			write(in_pipe[1], _server_map[server_port]->getCgiPost().c_str(), _server_map[server_port]->getCgiPost().size());
 		}
 		close(in_pipe[1]);
-		ConnectionData	con_data(client_fd, server_port, out_pipe, pid);
+		ConnectionData	con_data(client_fd, server_port, out_pipe, pid, std::chrono::steady_clock::now());
 		_cgi_map[client_fd] = con_data;
 		return ("");
 	}

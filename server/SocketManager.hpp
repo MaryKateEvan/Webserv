@@ -12,6 +12,10 @@
 #  define MAX_SCRIPTS 20
 # endif
 
+# ifndef SCRIPT_TIMEOUT
+#  define SCRIPT_TIMEOUT 40
+# endif
+
 class Server;
 // class Request;
 
@@ -21,15 +25,16 @@ struct ConnectionData
 	int					server_port;
 	int 				out_pipe[2];
 	pid_t				child_pid;
+	std::chrono::time_point<std::chrono::steady_clock>	start_time;
 
-	ConnectionData(int client, int port, int pipe[2], pid_t pid)
-		: client_fd(client), server_port(port), child_pid(pid)
+	ConnectionData(int client, int port, int pipe[2], pid_t pid, std::chrono::time_point<std::chrono::steady_clock> time_now)
+		: client_fd(client), server_port(port), child_pid(pid), start_time(time_now)
 	{
 		out_pipe[0] = pipe[0];
 		out_pipe[1] = pipe[1];
 	}
 	ConnectionData(const ConnectionData& other)
-		: client_fd(other.client_fd), server_port(other.server_port), child_pid(other.child_pid)
+		: client_fd(other.client_fd), server_port(other.server_port), child_pid(other.child_pid), start_time(other.start_time)
 	{
 		out_pipe[0] = other.out_pipe[0];
 		out_pipe[1] = other.out_pipe[1];
@@ -43,6 +48,7 @@ struct ConnectionData
 			out_pipe[0] = other.out_pipe[0];
 			out_pipe[1] = other.out_pipe[1];
 			child_pid = other.child_pid;
+			start_time = other.start_time;
 		}
 		return (*this);
 	}
