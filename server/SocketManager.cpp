@@ -165,27 +165,24 @@ void	SocketManager::handle_write(int client_fd)
 
 	if (bytes_sent == -1)
 	{
-		std::cerr << "Send failed!" << std::endl;
 		Logger::getInstance().log("", "Sending to " + std::to_string(client_fd) + " failed/timeout", 2);
 		remove_client(client_fd);
+		return ;
 	}
-	else
+	response.erase(0, bytes_sent);
+	if (response.empty())
 	{
-		response.erase(0, bytes_sent);
-		if (response.empty())
+		if (std::find(_disconnect_after_send.begin(), _disconnect_after_send.end(), client_fd) != _disconnect_after_send.end())
 		{
-			if (std::find(_disconnect_after_send.begin(), _disconnect_after_send.end(), client_fd) != _disconnect_after_send.end())
-			{
-				auto it = std::remove(_disconnect_after_send.begin(), _disconnect_after_send.end(), client_fd);
-				if (it != _disconnect_after_send.end())
-				_disconnect_after_send.erase(it, _disconnect_after_send.end());
-				remove_client(client_fd);
-			}
-			else
-			{
-				set_pollevent(client_fd, POLLIN);
-				// remove_client(client_fd);
-			}
+			auto it = std::remove(_disconnect_after_send.begin(), _disconnect_after_send.end(), client_fd);
+			if (it != _disconnect_after_send.end())
+			_disconnect_after_send.erase(it, _disconnect_after_send.end());
+			remove_client(client_fd);
+		}
+		else
+		{
+			set_pollevent(client_fd, POLLIN);
+			// remove_client(client_fd);
 		}
 	}
 }
@@ -263,13 +260,14 @@ void	SocketManager::handle_write_cgi(int client_fd)
 
 std::string	SocketManager::handle_cgi(int client_fd, int server_port)
 {
+	// Ensures the client isnt already requesting a CGI Script
 	auto	it = _cgi_map.find(client_fd);
 	if (it != _cgi_map.end())
 	{
 		Logger::getInstance().log("",  _request_map[client_fd].get_client_ip() + " on " + std::to_string(_request_map[client_fd].get_fd()) + " " + std::to_string(429) + " \"Client tried running multiple scripts on one socket\"", 3);
 		return (_server_map[server_port]->send_error_message(429));
 	}
-	if (_cgi_map.size() >= MAX_SCRIPTS)
+	if (_cgi_map.size() >= MAX_SCRIPTS) // A condition ensuring the server doesnt get overloaded
 	{
 		Logger::getInstance().log("",  _request_map[client_fd].get_client_ip() + " on " + std::to_string(_request_map[client_fd].get_fd()) + " " + std::to_string(500) + " \"Max amount of scripts already running\"", 3);
 		return (_server_map[server_port]->send_error_message(503));
@@ -311,6 +309,7 @@ std::string	SocketManager::handle_cgi(int client_fd, int server_port)
 	// 	Logger::getInstance().log("",  _request_map[client_fd].get_client_ip() + " on " + std::to_string(_request_map[client_fd].get_fd()) + " " + std::to_string(500) + " \"Configuring Pipe failed\"", 3);
 	// 	return (_server_map[server_port]->send_error_message(500));
 	// }
+	// * Setting the output pipe to NON_BLOCKING so reading from it doesnt halt the whole program.
 	int flags = fcntl(out_pipe[1], F_GETFL, 0);
 	if (flags == -1 || fcntl(out_pipe[1], F_SETFL, flags | O_NONBLOCK) == -1)
 	{
@@ -353,7 +352,7 @@ std::string	SocketManager::handle_cgi(int client_fd, int server_port)
 	{
 		close(in_pipe[0]);
 		close(out_pipe[1]);
-		if (_server_map[server_port]->getCgiPost() != "")
+		if (_server_map[server_port]->getCgiPost() != "") // POSTing a CGI Method wants the POSTED as STDIN for the program.
 		{
 			write(in_pipe[1], _server_map[server_port]->getCgiPost().c_str(), _server_map[server_port]->getCgiPost().size());
 		}
