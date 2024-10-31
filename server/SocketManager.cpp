@@ -219,7 +219,6 @@ void	SocketManager::handle_write_cgi(int client_fd)
 	if (waitpid(con_data.child_pid, &status, WNOHANG) > 0)
 	{
 		close(con_data.out_pipe[0]);
-		_cgi_map.erase(it);
 		if (WIFEXITED(status) && WEXITSTATUS(status) != 0) // Script exited with an error code
 		{
 			Logger::getInstance().log("", _request_map[client_fd].get_client_ip() + " on " + std::to_string(_request_map[client_fd].get_fd()) + " " + std::to_string(500) + " \"Child Process exited with an error\"", 3);
@@ -235,6 +234,7 @@ void	SocketManager::handle_write_cgi(int client_fd)
 				auto it2 = std::remove(_disconnect_after_send.begin(), _disconnect_after_send.end(), client_fd);
 				if (it2 != _disconnect_after_send.end())
 				_disconnect_after_send.erase(it2, _disconnect_after_send.end());
+				_cgi_map.erase(it);
 				remove_client(client_fd);
 			}
 			else

@@ -295,6 +295,10 @@ std::string	Server::process_cgi(const Request& req)
 		main_part = full_path.substr(qmark_pos + 1);
 		_cgi_file_path = full_path.substr(0, qmark_pos);
 	}
+	if (!std::filesystem::exists(_cgi_file_path))
+	{
+		return (send_error_message(404));
+	}
 	else
 	{
 		_cgi_file_path = full_path;
