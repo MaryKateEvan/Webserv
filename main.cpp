@@ -9,6 +9,12 @@
 * -d30s stands for a 30s test lenght
 */
 
+void signalHandler(int signum)
+{
+	std::cout << "Interrupt signal (" << signum << ") received.\n";
+	throw InterruptSignal();
+}
+
 int main(int argc, char **argv)
 {
 	std::cout << GREEN("🚀 Launching Webserv ... 🚀") << std::endl;
@@ -31,7 +37,7 @@ int main(int argc, char **argv)
 		std::cerr << e.what() << '\n';
 		return (0);
 	}
-
+	std::signal(SIGINT, signalHandler);
 	try
 	{
 		SocketManager	socket_manager;
