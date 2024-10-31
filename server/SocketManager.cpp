@@ -261,12 +261,12 @@ void	SocketManager::handle_write_cgi(int client_fd)
 std::string	SocketManager::handle_cgi(int client_fd, int server_port)
 {
 	// Ensures the client isnt already requesting a CGI Script
-	auto	it = _cgi_map.find(client_fd);
-	if (it != _cgi_map.end())
-	{
-		Logger::getInstance().log("",  _request_map[client_fd].get_client_ip() + " on " + std::to_string(_request_map[client_fd].get_fd()) + " " + std::to_string(429) + " \"Client tried running multiple scripts on one socket\"", 3);
-		return (_server_map[server_port]->send_error_message(429));
-	}
+	// auto	it = _cgi_map.find(client_fd);
+	// if (it != _cgi_map.end())
+	// {
+	// 	Logger::getInstance().log("",  _request_map[client_fd].get_client_ip() + " on " + std::to_string(_request_map[client_fd].get_fd()) + " " + std::to_string(429) + " \"Client tried running multiple scripts on one socket\"", 3);
+	// 	return (_server_map[server_port]->send_error_message(429));
+	// }
 	if (_cgi_map.size() >= MAX_SCRIPTS) // A condition ensuring the server doesnt get overloaded
 	{
 		Logger::getInstance().log("",  _request_map[client_fd].get_client_ip() + " on " + std::to_string(_request_map[client_fd].get_fd()) + " " + std::to_string(500) + " \"Max amount of scripts already running\"", 3);
@@ -316,7 +316,11 @@ std::string	SocketManager::handle_cgi(int client_fd, int server_port)
 		const_cast<char *>(temp.c_str()),
 		NULL
 	};
-	std::vector<const char*>	envp = _server_map[server_port]->getCgiEnvStrings();
+	std::vector<const char*>	envp;
+	std::vector<std::string>	temp1 = _server_map[server_port]->getCgiEnvStrings();
+	for (auto& str : temp1)
+		envp.push_back(str.c_str());
+	envp.push_back(NULL);
 
 	pid_t	pid = fork();
 	if (pid == 0) // Child

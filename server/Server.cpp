@@ -321,7 +321,6 @@ std::string	Server::process_cgi(const Request& req)
 	}
 	// if (req.get_method_in_string() == "POST" && main_part.empty())
 	// 	main_part = ... it should be the main body that has the input of the user
-
 	std::vector<std::string> env_strings = 
 	{
 		"QUERY_STRING=" + main_part,
@@ -336,11 +335,12 @@ std::string	Server::process_cgi(const Request& req)
 	};
 
 	// std::vector<char*> envp;
-	std::vector<const char*> envp;
-	for (auto& str : env_strings)
-		envp.push_back(str.c_str());
-	envp.push_back(NULL);
-	this->_cgi_env_strings = envp;
+	_cgi_env_strings = env_strings;
+	// std::vector<const char*> envp;
+	// for (auto& str : env_strings)
+	// 	envp.push_back(str.c_str());
+	// envp.push_back(NULL);
+	// this->_cgi_env_strings = envp;
 	return ("");
 }
 
@@ -368,7 +368,7 @@ std::string			Server::getCgiFilePath(void) const
 	return (_cgi_file_path);
 }
 
-std::vector<const char*>	Server::getCgiEnvStrings(void) const
+std::vector<std::string>	Server::getCgiEnvStrings(void) const
 {
 	return (_cgi_env_strings);
 }

@@ -30,7 +30,7 @@ class Server
 		// p. e. www/cgi-bin/hello_world.py
 		std::string					_cgi_file_path;
 		// p. e. QUERY_STRING= etc.
-		std::vector<const char*>	_cgi_env_strings;
+		std::vector<std::string>	_cgi_env_strings;
 		// _cgi_post = _post_files (the first entry)
 		std::string					_cgi_post;
 
@@ -52,7 +52,7 @@ class Server
 		const std::string			getName(void) const;
 		size_t						getMaxBodySize(void) const;
 		std::string					getCgiFilePath(void) const;
-		std::vector<const char*>	getCgiEnvStrings(void) const;
+		std::vector<std::string>	getCgiEnvStrings(void) const;
 		std::string					getCgiPost(void) const;
 		std::string					process_request(const Request& req);
 		std::string					send_error_message(int error_code);
