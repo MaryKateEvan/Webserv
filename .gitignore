@@ -47,3 +47,4 @@ env
 media
 
 SocketsController/sockets_notes.cpp
+secret.json

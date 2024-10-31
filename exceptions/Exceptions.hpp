@@ -97,4 +97,11 @@ class PollFailedException : public BaseException
 		: BaseException("Poll failed") {}
 };
 
+class InterruptSignal : public BaseException
+{
+	public:
+		explicit InterruptSignal(void)
+		: BaseException("Kill Signal received, shutting down!") {}
+};
+
 #endif /*EXCEPTIONS_HPP*/

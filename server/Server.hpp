@@ -27,9 +27,17 @@ class Server
 		std::string			_CLF_line;
 		std::unordered_map<std::string, std::string> _mime_types;
 
+		// p. e. www/cgi-bin/hello_world.py
+		std::string					_cgi_file_path;
+		// p. e. QUERY_STRING= etc.
+		std::vector<std::string>	_cgi_env_strings;
+		// _cgi_post = _post_files (the first entry)
+		std::string					_cgi_post;
+
 		std::string			process_get(const Request& req);
 		std::string			process_delete(const Request& req);
 		std::string			process_post(const Request& req);
+		std::string			process_cgi(const Request& req);
 		std::string			extract_get_request(const std::string& request);
 		std::string			map_to_directory(const std::string& file_path);
 		std::string			read_file(const std::string& file_path);
@@ -39,13 +47,16 @@ class Server
 		size_t send_timeout, size_t max_body_size);
 		~Server();
 
-		int					getServerFD(void) const;
-		struct sockaddr_in	getAddress(void) const;
-		const std::string	getName(void) const;
-		size_t				getMaxBodySize(void) const;
-		std::string			process_request(const Request& req);
-		std::string			send_error_message(int error_code);
-		void				log_CLF_line(void);
+		int							getServerFD(void) const;
+		struct sockaddr_in			getAddress(void) const;
+		const std::string			getName(void) const;
+		size_t						getMaxBodySize(void) const;
+		std::string					getCgiFilePath(void) const;
+		std::vector<std::string>	getCgiEnvStrings(void) const;
+		std::string					getCgiPost(void) const;
+		std::string					process_request(const Request& req);
+		std::string					send_error_message(int error_code);
+		void						log_CLF_line(void);
 };
 
 #endif /*SERVER_HPP*/

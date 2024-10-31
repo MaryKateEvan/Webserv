@@ -133,6 +133,19 @@ std::string	Server::process_request(const Request& req)
 	_CLF_line = req.get_CLF_line();
 	int	method = req.get_method();
 
+	if (method == GET || method == POST)
+	{
+		// std::cout << "File Path: " << req.get_file_path() << std::endl;
+// 		std::cout << "Method: " << method << std::endl;
+// std::cout << "File Path: '" << req.get_file_path() << "'" << std::endl;
+// std::cout << "File Path Length: " << req.get_file_path().size() << std::endl;
+// std::cout << "Compare: " << req.get_file_path().compare(0, 8, "/cgi-bin/") << std::endl;
+		// if (req.get_file_path().size() > 9 && req.get_file_path().compare(0, 8, "/cgi-bin/") == 0)
+		if (req.get_file_path().find(".py") != std::string::npos)
+		{
+			return (process_cgi(req));
+		}
+	}
 	switch (method)
 	{
 		case GET:
@@ -271,6 +284,66 @@ std::string	Server::send_error_message(int error_code)
 	}
 }
 
+std::string	Server::process_cgi(const Request& req)
+{
+	std::string	url = req.get_file_path();
+	std::string	full_path = map_to_directory(url);
+	std::string main_part;
+	size_t qmark_pos = full_path.find("?");
+	if (qmark_pos != std::string::npos)
+	{
+		main_part = full_path.substr(qmark_pos + 1);
+		_cgi_file_path = full_path.substr(0, qmark_pos);
+	}
+	else
+	{
+		_cgi_file_path = full_path;
+	}
+	if (!std::filesystem::exists(_cgi_file_path))
+	{
+		return (send_error_message(404));
+	}
+	if (req.get_method() == POST)
+	{
+		if (!req._post_files.empty())
+		{
+			auto it = req._post_files.begin();
+			_cgi_post = it->second;
+		}
+		else
+		{
+			_cgi_post = "";
+		}
+	}
+	else
+	{
+		_cgi_post = "";
+	}
+	// if (req.get_method_in_string() == "POST" && main_part.empty())
+	// 	main_part = ... it should be the main body that has the input of the user
+	std::vector<std::string> env_strings = 
+	{
+		"QUERY_STRING=" + main_part,
+		"REQUEST_METHOD=" + req.get_method_in_string(),
+		"CONTENT_LENGTH=" + std::to_string(req.get_content_len()),
+		"CONTENT_TYPE=text/html",
+		"GATEWAY_INTERFACE=CGI/1.1",
+		"SCRIPT_NAME=" + _cgi_file_path,
+		"SERVER_NAME=" + this->_name,
+		"SERVER_PORT=" + std::to_string(req.get_port()),
+		"SERVER_PROTOCOL=HTTP/1.1"
+	};
+
+	// std::vector<char*> envp;
+	_cgi_env_strings = env_strings;
+	// std::vector<const char*> envp;
+	// for (auto& str : env_strings)
+	// 	envp.push_back(str.c_str());
+	// envp.push_back(NULL);
+	// this->_cgi_env_strings = envp;
+	return ("");
+}
+
 /* -------------------------------------------------------------------------- */
 /*                                Getter/Setter                               */
 /* -------------------------------------------------------------------------- */
@@ -288,6 +361,21 @@ struct sockaddr_in	Server::getAddress(void) const
 const std::string	Server::getName(void) const
 {
 	return (_name);
+}
+
+std::string			Server::getCgiFilePath(void) const
+{
+	return (_cgi_file_path);
+}
+
+std::vector<std::string>	Server::getCgiEnvStrings(void) const
+{
+	return (_cgi_env_strings);
+}
+
+std::string			Server::getCgiPost(void) const
+{
+	return (_cgi_post);
 }
 
 size_t	Server::getMaxBodySize(void) const

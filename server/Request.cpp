@@ -268,9 +268,21 @@ bool	Request::correct_body_size(size_t max_size)
 /*                                Getter/Setter                               */
 /* -------------------------------------------------------------------------- */
 
+
 int	Request::get_method(void) const
 {
 	return (_method);
+}
+
+std::string	Request::get_method_in_string(void) const
+{
+	switch (_method)
+	{
+		case GET: return "GET";
+		case DELETE: return "DELETE";
+		case POST: return "POST";
+		default: return "UNKNOWN";
+	}
 }
 
 int	Request::get_fd(void) const
@@ -286,6 +298,11 @@ std::string	Request::get_file_path(void) const
 std::string	Request::get_content_type(void) const
 {
 	return (_content_type);
+}
+
+size_t	Request::get_content_len(void) const
+{
+	return (_content_len);
 }
 
 int	Request::get_port(void) const

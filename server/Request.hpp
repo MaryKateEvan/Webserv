@@ -56,9 +56,11 @@ class Request
 		bool		correct_body_size(size_t max_size);
 
 		int			get_method(void) const;
+		std::string	get_method_in_string(void) const;
 		int			get_fd(void) const;
 		std::string	get_file_path(void) const;
 		std::string	get_content_type(void) const;
+		size_t		get_content_len(void) const;
 		bool		get_finished_reading(void) const;
 		int			get_port(void) const;
 		std::string	get_host(void) const;
