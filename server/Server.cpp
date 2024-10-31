@@ -299,10 +299,6 @@ std::string	Server::process_cgi(const Request& req)
 	{
 		return (send_error_message(404));
 	}
-	else
-	{
-		_cgi_file_path = full_path;
-	}
 	if (req.get_method() == POST)
 	{
 		if (!req._post_files.empty())
