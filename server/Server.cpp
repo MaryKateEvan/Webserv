@@ -19,10 +19,10 @@
  */
 Server::Server(const std::string server_name, int port, const std::string ip_address, const std::string index_file,
 		const std::string data_dir, const std::string www_dir, bool directory_listing_enabled, size_t keepalive_timeout,
-		size_t send_timeout, size_t max_body_size)
+		size_t send_timeout, size_t max_body_size, std::vector<LocationData> locations)
 	: _name(server_name), _index_file(index_file), _data_dir(data_dir), _www_dir(www_dir),
 	_directory_listing_enabled(directory_listing_enabled), _keepalive_timeout(keepalive_timeout),
-	_send_timeout(send_timeout), _max_body_size(max_body_size)
+	_send_timeout(send_timeout), _max_body_size(max_body_size), _locations(locations)
 {
 	Logger::getInstance().log(server_name, "Constructor called", 2);
 	_fd_server = socket(AF_INET, SOCK_STREAM, 0);
@@ -161,10 +161,53 @@ std::string	Server::process_request(const Request& req)
 	return (send_error_message(400));
 }
 
+bool Server::uri_is_a_location(const std::vector<LocationData>& locations, const std::string& targetPath) 
+{
+	return std::find_if(locations.begin(), locations.end(),
+		[&targetPath](const LocationData& loc) { return loc.path == targetPath; }) != locations.end();
+}
+
+std::string	Server::redirect_to(const std::string& redir_path, const Request& req)
+{
+	// here i should contruct the reeponse of the redirection. Like:
+	/*
+	HTTP/1.1 302 Found
+	Location: http://www.google.com
+	Content-Length: 0
+	Connection: close
+	*/
+}
+
+std::string	Server::handle_locations(const Request& req)
+{
+	std::string uri = req.get_file_path();
+	LocationData loc_data;
+
+	for (size_t i = 0; i < _locations.size(); ++i)
+	{
+		if (_locations[i].path == uri)
+			loc_data = _locations[i];
+	}
+	if (loc_data.redirection)
+		redirect_to(loc_data.path_to_redirect, req);
+
+
+	return (send_error_message(300));
+}
+
 std::string	Server::process_get(const Request& req)
 {
 	std::string	url = req.get_file_path();
+
+	// if (req.is_a_redirection(url))
+	// 	return (response_of_redirect())
+	if (uri_is_a_location(this->_locations, url))
+		handle_locations(req);
+
+	std::cout << GREEN("uri here is: " << url) << std::endl;
+
 	std::string	file_path = map_to_directory(url);
+	std::cout << YELLOW("file_path of Eugen here is: " << file_path) << std::endl;
 	std::string	response = "HTTP/1.1 200 OK\r\n";
 
 	if (_directory_listing_enabled == true && std::filesystem::is_directory(file_path))
