@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 		if (argc == 2)
 			server_vec = read_config_file(argv[1]);
 		else
-			server_vec = read_config_file("config_files/standart.conf");
+			server_vec = read_config_file("config_files/example.conf");
 	}
 	catch(const std::exception& e)
 	{
