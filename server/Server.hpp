@@ -44,7 +44,7 @@ class Server
 		std::string			read_file(const std::string& file_path);
 		bool				uri_is_a_location(const std::vector<LocationData>& locations, const std::string& targetPath);
 		std::string			handle_locations(const Request& req);
-		std::string			redirect_to(const std::string& redir_path, const Request& req);
+		std::string			redirect_to(const std::string& redir_path);
 	
 	public:
 		Server(const std::string server_name, int port, const std::string ip_address, const std::string index_file,

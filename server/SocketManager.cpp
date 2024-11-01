@@ -123,9 +123,9 @@ void	SocketManager::handle_read(int client_fd)
 						response = _server_map[port]->process_request(_request_map[client_fd]);
 						_server_map[port]->log_CLF_line();
 						if (response == "")
-						{
 							response = handle_cgi(client_fd, port);
-						}
+						else if (response.find("302") != std::string::npos)
+							_disconnect_after_send.push_back(client_fd);
 						break;
 					case -10:
 						response = _server_map[port]->send_error_message(413);
@@ -170,6 +170,7 @@ void	SocketManager::handle_write(int client_fd)
 		return ;
 	}
 	response.erase(0, bytes_sent);
+	// if (response.empty() || (response.find("302") != std::string::npos))
 	if (response.empty())
 	{
 		if (std::find(_disconnect_after_send.begin(), _disconnect_after_send.end(), client_fd) != _disconnect_after_send.end())

@@ -163,19 +163,37 @@ std::string	Server::process_request(const Request& req)
 
 bool Server::uri_is_a_location(const std::vector<LocationData>& locations, const std::string& targetPath) 
 {
-	return std::find_if(locations.begin(), locations.end(),
-		[&targetPath](const LocationData& loc) { return loc.path == targetPath; }) != locations.end();
+	// return std::find_if(locations.begin(), locations.end(),
+	// 	[&targetPath](const LocationData& loc) { return loc.path == targetPath; }) != locations.end();
+
+	for (size_t i = 0; i < locations.size(); ++i)
+	{
+		if (locations[i].path == targetPath)
+			return true;
+	}
+	return false;
 }
 
-std::string	Server::redirect_to(const std::string& redir_path, const Request& req)
+std::string	Server::redirect_to(const std::string& redir_path)
 {
-	// here i should contruct the reeponse of the redirection. Like:
+	// here i should contruct the response of the redirection. Like:
 	/*
 	HTTP/1.1 302 Found
-	Location: http://www.google.com
+	Location: https://www.google.com/
 	Content-Length: 0
+	Content-Type: text/html
 	Connection: close
 	*/
+	std::string	response = "HTTP/1.1 302 Found\r\n";
+	response += ("Location: " + redir_path + "\r\n");
+
+	std::cout << GREEN("Location: " << redir_path) << std::endl;
+
+	response += ("Content-Length: 0\r\n");
+	response += ("Content-Type: text/html\r\n");
+	response += ("Connection: close\r\n");
+	_CLF_line += " " + std::to_string(302) + " 0";
+	return (response);
 }
 
 std::string	Server::handle_locations(const Request& req)
@@ -189,10 +207,13 @@ std::string	Server::handle_locations(const Request& req)
 			loc_data = _locations[i];
 	}
 	if (loc_data.redirection)
-		redirect_to(loc_data.path_to_redirect, req);
-
-
-	return (send_error_message(300));
+	{
+		if (std::find(loc_data.allowed_methods.begin(), loc_data.allowed_methods.end(), req.get_method_in_string()) == loc_data.allowed_methods.end())
+			return (send_error_message(405));
+		else
+			return (redirect_to(loc_data.path_to_redirect));
+	}
+	return (send_error_message(405));
 }
 
 std::string	Server::process_get(const Request& req)
@@ -201,13 +222,22 @@ std::string	Server::process_get(const Request& req)
 
 	// if (req.is_a_redirection(url))
 	// 	return (response_of_redirect())
-	if (uri_is_a_location(this->_locations, url))
-		handle_locations(req);
+
+	for (size_t i = 0; i < this->_locations.size(); ++i)
+		std::cout << CYAN("Location[" << i + 1 << "]: " << this->_locations[i].path) << std::endl;
+
+	if (url != "/" && uri_is_a_location(this->_locations, url))
+	{
+		std::cout << RED("I ENTERED HERE") << std::endl;
+		return (handle_locations(req));
+	}
 
 	std::cout << GREEN("uri here is: " << url) << std::endl;
 
 	std::string	file_path = map_to_directory(url);
+
 	std::cout << YELLOW("file_path of Eugen here is: " << file_path) << std::endl;
+	
 	std::string	response = "HTTP/1.1 200 OK\r\n";
 
 	if (_directory_listing_enabled == true && std::filesystem::is_directory(file_path))
