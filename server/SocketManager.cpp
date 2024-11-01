@@ -124,7 +124,7 @@ void	SocketManager::handle_read(int client_fd)
 						_server_map[port]->log_CLF_line();
 						if (response == "")
 							response = handle_cgi(client_fd, port);
-						else if (response.find("302") != std::string::npos)
+						else if (response.find("302 Found") != std::string::npos)
 							_disconnect_after_send.push_back(client_fd);
 						break;
 					case -10:
