@@ -24,8 +24,8 @@ int main(int argc, char **argv)
 		return 0;
 	}
 	std::cout << GREEN("\n🚀 Webserv is up and running ... 🚀\n") << std::endl;
-	std::cout << YELLOW(BOLD("💡 TIP: ")) << "For server's " << BOLD("output") << " and/or " 
-			<< BOLD("errors") << " check the " << UNDERLINE("Log directory") << ". 📁 🔍" << std::endl;
+	std::cout << YELLOW(BOLD("💡 TIP: ")) << "For server's " << BOLD("output") 
+			<< " check the " << UNDERLINE("Log directory") << ". 📁 🔍" << std::endl;
 
 	std::vector<ServerData> server_vec;
 	try
