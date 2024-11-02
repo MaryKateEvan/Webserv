@@ -36,12 +36,6 @@ class InvalidPortException : public BaseException
 		explicit InvalidPortException(const std::string& server_name, int port);
 };
 
-class InvalidIPAdressException : public BaseException
-{
-	public:
-		explicit InvalidIPAdressException(const std::string& server_name, const std::string& ip_address);
-};
-
 class BindFailedException : public BaseException
 {
 	public:

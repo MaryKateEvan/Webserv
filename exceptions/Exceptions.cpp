@@ -18,9 +18,6 @@ SetSocketOptionFailedException::SetSocketOptionFailedException(const std::string
 InvalidPortException::InvalidPortException(const std::string& server_name, int port)
 	: BaseException("The port " + std::to_string(port) + " for server \"" + server_name + "\" is invalid") {}
 
-InvalidIPAdressException::InvalidIPAdressException(const std::string& server_name, const std::string& ip_address)
-	: BaseException("The IP-Address " + ip_address + " for server \"" + server_name + "\" is invalid") {}
-
 BindFailedException::BindFailedException(const std::string& server_name, int port)
 	: BaseException("Binding server \"" + server_name + "\" to port " + std::to_string(port) + " failed") {}
 

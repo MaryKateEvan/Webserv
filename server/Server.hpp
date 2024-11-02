@@ -47,7 +47,7 @@ class Server
 		std::string			redirect_to(const std::string& redir_path);
 	
 	public:
-		Server(const std::string server_name, int port, const std::string ip_address, const std::string index_file,
+		Server(const std::string server_name, int port, const std::string index_file,
 		const std::string data_dir, const std::string www_dir, bool directory_listing_enabled, size_t keepalive_timeout,
 		size_t send_timeout, size_t max_body_size, std::vector<LocationData> locations);
 		~Server();
