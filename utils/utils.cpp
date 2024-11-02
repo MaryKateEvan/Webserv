@@ -1,6 +1,5 @@
 #include "utils.h"
 
-
 std::vector<std::string>	tokenize(const std::string& str, const std::string& delim)
 {
 	std::vector<std::string>	tokens;

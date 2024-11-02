@@ -18,7 +18,7 @@ VPATH			:= ./utils/ ./server/ ./exceptions/ ./parser/
 
 SRC				:= main.cpp
 
-UTILS_SRC		:= utils1.cpp
+UTILS_SRC		:= utils.cpp
 
 SERVER_SRC		:= Server.cpp Request.cpp SocketManager.cpp MimeTypes.cpp
 
