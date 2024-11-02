@@ -169,9 +169,6 @@ std::string	Server::redirect_to(const std::string& redir_path)
 {
 	std::string	response = "HTTP/1.1 302 Found\r\n";
 	response += ("Location: " + redir_path + "\r\n");
-
-	std::cout << GREEN("Location: " << redir_path) << std::endl;
-
 	response += ("Content-Length: 0\r\n");
 	response += ("Content-Type: text/html\r\n");
 	response += ("Connection: close\r\n");
@@ -203,21 +200,13 @@ std::string	Server::process_get(const Request& req)
 {
 	std::string	url = req.get_file_path();
 
-	for (size_t i = 0; i < this->_locations.size(); ++i)
-		std::cout << CYAN("Location[" << i + 1 << "]: " << this->_locations[i].path) << std::endl;
-
 	if (url != "/" && uri_is_a_location(this->_locations, url))
 	{
-		std::cout << RED("I ENTERED HERE") << std::endl;
 		return (handle_locations(req));
 	}
 
-	std::cout << GREEN("uri here is: " << url) << std::endl;
-
 	std::string	file_path = map_to_directory(url);
 
-	std::cout << YELLOW("file_path of Eugen here is: " << file_path) << std::endl;
-	
 	std::string	response = "HTTP/1.1 200 OK\r\n";
 
 	if (_directory_listing_enabled == true && std::filesystem::is_directory(file_path))
@@ -291,7 +280,6 @@ std::string	Server::process_post(const Request& req)
 		std::ofstream out_file(full_path, std::ios::binary);
 		if (!out_file)
 		{
-			std::cout << "Failed" << std::endl;
 			failed++;
 			continue;
 		}
