@@ -24,6 +24,7 @@ class Server
 		size_t				_keepalive_timeout;
 		size_t				_send_timeout;
 		size_t				_max_body_size;
+		std::vector<LocationData> _locations; 
 		std::string			_CLF_line;
 		std::unordered_map<std::string, std::string> _mime_types;
 
@@ -41,10 +42,14 @@ class Server
 		std::string			extract_get_request(const std::string& request);
 		std::string			map_to_directory(const std::string& file_path);
 		std::string			read_file(const std::string& file_path);
+		bool				uri_is_a_location(const std::vector<LocationData>& locations, const std::string& targetPath);
+		std::string			handle_locations(const Request& req);
+		std::string			redirect_to(const std::string& redir_path);
+	
 	public:
-		Server(const std::string server_name, int port, const std::string ip_address, const std::string index_file,
+		Server(const std::string server_name, int port, const std::string index_file,
 		const std::string data_dir, const std::string www_dir, bool directory_listing_enabled, size_t keepalive_timeout,
-		size_t send_timeout, size_t max_body_size);
+		size_t send_timeout, size_t max_body_size, std::vector<LocationData> locations);
 		~Server();
 
 		int							getServerFD(void) const;

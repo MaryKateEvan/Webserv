@@ -55,13 +55,4 @@
 # define ORANGE(text) "\033[38;5;214m" << text << "\033[0m"
 # define ERROR(text) "\033[31mError: \033[0m" << text
 
-
-# ifndef PORT
-#  define PORT 8080
-# endif 
-
-# ifndef MAX_CLIENTS
-#  define MAX_CLIENTS 8080
-# endif 
-
 #endif /*WEBSERV_H*/

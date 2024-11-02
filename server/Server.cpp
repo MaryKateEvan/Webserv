@@ -8,7 +8,6 @@
  * @brief Creates a webserver
  * @param server_name The name of the server
  * @param port The port the server should listen to
- * @param ip_address the IP adress of the server
  * @param index_file the index file of the server (relative to the www_dir)
  * @param data_dir the directory to POST/DELETE from (might be replaced by a redirect map in the future)
  * @param www_dir the location of the webpage files 
@@ -17,12 +16,12 @@
  * @param send_timeout Send timeout in seconds, 0 to disable
  * @param max_body_size Max Body size the Server will read (the server may send bigger responses to the client), 0 to diable
  */
-Server::Server(const std::string server_name, int port, const std::string ip_address, const std::string index_file,
+Server::Server(const std::string server_name, int port, const std::string index_file,
 		const std::string data_dir, const std::string www_dir, bool directory_listing_enabled, size_t keepalive_timeout,
-		size_t send_timeout, size_t max_body_size)
+		size_t send_timeout, size_t max_body_size, std::vector<LocationData> locations)
 	: _name(server_name), _index_file(index_file), _data_dir(data_dir), _www_dir(www_dir),
 	_directory_listing_enabled(directory_listing_enabled), _keepalive_timeout(keepalive_timeout),
-	_send_timeout(send_timeout), _max_body_size(max_body_size)
+	_send_timeout(send_timeout), _max_body_size(max_body_size), _locations(locations)
 {
 	Logger::getInstance().log(server_name, "Constructor called", 2);
 	_fd_server = socket(AF_INET, SOCK_STREAM, 0);
@@ -64,17 +63,12 @@ Server::Server(const std::string server_name, int port, const std::string ip_add
 		close(_fd_server);
 		throw SetSocketOptionFailedException(_name);
 	}
+	_address.sin_addr.s_addr = INADDR_ANY;
 	_address.sin_port = htons(port);
-	// replace forbidden function
-	if (inet_pton(AF_INET, ip_address.c_str(), &_address.sin_addr) != 1)
-	{
-		close(_fd_server);
-		throw InvalidIPAdressException(_name, ip_address);
-	}
 	if (bind(_fd_server, (struct sockaddr *)&_address, sizeof(_address)) != 0)
 	{
 		close(_fd_server);
-		throw BindFailedException(_name, ip_address);
+		throw BindFailedException(_name, port);
 	}
 	if (listen(_fd_server ,SOMAXCONN) != 0)
 	{
@@ -135,16 +129,8 @@ std::string	Server::process_request(const Request& req)
 
 	if (method == GET || method == POST)
 	{
-		// std::cout << "File Path: " << req.get_file_path() << std::endl;
-// 		std::cout << "Method: " << method << std::endl;
-// std::cout << "File Path: '" << req.get_file_path() << "'" << std::endl;
-// std::cout << "File Path Length: " << req.get_file_path().size() << std::endl;
-// std::cout << "Compare: " << req.get_file_path().compare(0, 8, "/cgi-bin/") << std::endl;
-		// if (req.get_file_path().size() > 9 && req.get_file_path().compare(0, 8, "/cgi-bin/") == 0)
 		if (req.get_file_path().find(".py") != std::string::npos)
-		{
 			return (process_cgi(req));
-		}
 	}
 	switch (method)
 	{
@@ -161,10 +147,66 @@ std::string	Server::process_request(const Request& req)
 	return (send_error_message(400));
 }
 
+bool Server::uri_is_a_location(const std::vector<LocationData>& locations, const std::string& targetPath) 
+{
+	for (size_t i = 0; i < locations.size(); ++i)
+	{
+		if (locations[i].path == targetPath)
+			return true;
+	}
+	return false;
+}
+
+// A typical HTTP response of redirection is:
+/*
+HTTP/1.1 302 Found
+Location: https://www.google.com/
+Content-Length: 0
+Content-Type: text/html
+Connection: close
+*/
+std::string	Server::redirect_to(const std::string& redir_path)
+{
+	std::string	response = "HTTP/1.1 302 Found\r\n";
+	response += ("Location: " + redir_path + "\r\n");
+	response += ("Content-Length: 0\r\n");
+	response += ("Content-Type: text/html\r\n");
+	response += ("Connection: close\r\n");
+	_CLF_line += " " + std::to_string(302) + " 0";
+	return (response);
+}
+
+std::string	Server::handle_locations(const Request& req)
+{
+	std::string uri = req.get_file_path();
+	LocationData loc_data;
+
+	for (size_t i = 0; i < _locations.size(); ++i)
+	{
+		if (_locations[i].path == uri)
+			loc_data = _locations[i];
+	}
+	if (loc_data.redirection)
+	{
+		if (std::find(loc_data.allowed_methods.begin(), loc_data.allowed_methods.end(), req.get_method_in_string()) == loc_data.allowed_methods.end())
+			return (send_error_message(405));
+		else
+			return (redirect_to(loc_data.path_to_redirect));
+	}
+	return (send_error_message(405));
+}
+
 std::string	Server::process_get(const Request& req)
 {
 	std::string	url = req.get_file_path();
+
+	if (url != "/" && uri_is_a_location(this->_locations, url))
+	{
+		return (handle_locations(req));
+	}
+
 	std::string	file_path = map_to_directory(url);
+
 	std::string	response = "HTTP/1.1 200 OK\r\n";
 
 	if (_directory_listing_enabled == true && std::filesystem::is_directory(file_path))
@@ -238,7 +280,6 @@ std::string	Server::process_post(const Request& req)
 		std::ofstream out_file(full_path, std::ios::binary);
 		if (!out_file)
 		{
-			std::cout << "Failed" << std::endl;
 			failed++;
 			continue;
 		}
