@@ -291,8 +291,7 @@ std::string	SocketManager::handle_cgi(int client_fd, int server_port)
 		return (_server_map[server_port]->send_error_message(500));
 	}
 	// * Setting the output pipe to NON_BLOCKING so reading from it doesnt halt the whole program.
-	int flags = fcntl(out_pipe[1], F_GETFL, 0);
-	if (flags == -1 || fcntl(out_pipe[1], F_SETFL, flags | O_NONBLOCK) == -1)
+	if (fcntl(out_pipe[1], F_SETFL, O_NONBLOCK) == -1)
 	{
 		close(in_pipe[0]);
 		close(in_pipe[1]);
@@ -301,8 +300,7 @@ std::string	SocketManager::handle_cgi(int client_fd, int server_port)
 		Logger::getInstance().log("",  _request_map[client_fd].get_client_ip() + " on " + std::to_string(_request_map[client_fd].get_fd()) + " " + std::to_string(500) + " \"Configuring Pipe failed\"", 3);
 		return (_server_map[server_port]->send_error_message(500));
 	}
-	flags = fcntl(out_pipe[0], F_GETFL, 0);
-	if (flags == -1 || fcntl(out_pipe[0], F_SETFL, flags | O_NONBLOCK) == -1)
+	if (fcntl(out_pipe[0], F_SETFL, O_NONBLOCK) == -1)
 	{
 		close(in_pipe[0]);
 		close(in_pipe[1]);
