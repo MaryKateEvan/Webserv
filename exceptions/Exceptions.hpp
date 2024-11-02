@@ -60,12 +60,6 @@ class OpenFailedException : public BaseException
 		explicit OpenFailedException(const std::string& server_name, const std::string& file_path);
 };
 
-// class NoMethodFoundException : public BaseException
-// {
-// 	public:
-// 		explicit NoMethodFoundException(const std::string& request);
-// };
-
 class PollFailedException : public BaseException
 {
 	public:
