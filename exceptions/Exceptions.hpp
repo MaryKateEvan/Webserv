@@ -18,12 +18,6 @@ class BaseException : public std::exception
 		virtual const char*	what() const NOEXCEPT_SPEC override;
 };
 
-class InvalidIPAddressException : public BaseException
-{
-	public:
-		explicit InvalidIPAddressException(const std::string& ip_address);
-};
-
 class SocketCreationFailedException : public BaseException
 {
 	public:
@@ -34,12 +28,6 @@ class SetSocketOptionFailedException : public BaseException
 {
 	public:
 		explicit SetSocketOptionFailedException(const std::string& server_name);
-};
-
-class SetSocketNonBLockingModeException : public BaseException
-{
-	public:
-		explicit SetSocketNonBLockingModeException(const std::string& server_name);
 };
 
 class InvalidPortException : public BaseException
@@ -57,13 +45,7 @@ class InvalidIPAdressException : public BaseException
 class BindFailedException : public BaseException
 {
 	public:
-		explicit BindFailedException(const std::string& server_name, const std::string& ip_address);
-};
-
-class FailedToBindSocketException : public BaseException
-{
-	public:
-		explicit FailedToBindSocketException(const std::string& server_name);
+		explicit BindFailedException(const std::string& server_name, int port);
 };
 
 class ListenFailedException : public BaseException
@@ -78,17 +60,11 @@ class OpenFailedException : public BaseException
 		explicit OpenFailedException(const std::string& server_name, const std::string& file_path);
 };
 
-class NoMethodFoundException : public BaseException
-{
-	public:
-		explicit NoMethodFoundException(const std::string& request);
-};
-
-class SendFailedException : public BaseException
-{
-	public:
-		explicit SendFailedException(const std::string& server_name, const int& fd);
-};
+// class NoMethodFoundException : public BaseException
+// {
+// 	public:
+// 		explicit NoMethodFoundException(const std::string& request);
+// };
 
 class PollFailedException : public BaseException
 {

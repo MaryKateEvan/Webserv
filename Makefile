@@ -22,7 +22,7 @@ UTILS_SRC		:= utils.cpp
 
 SERVER_SRC		:= Server.cpp Request.cpp SocketManager.cpp MimeTypes.cpp
 
-EXCEPTIONS_SRC	:= Exception_server.cpp Exception_request.cpp
+EXCEPTIONS_SRC	:= Exception_server.cpp
 
 PARSER_SRC		:= stringing/StringHelp.cpp stringing/StringArr.cpp stringing/Pair.cpp \
 					stringing/Twin.cpp stringing/StringDataTracker.cpp parsing/ConfigParse.cpp \
