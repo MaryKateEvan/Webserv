@@ -58,6 +58,7 @@ struct ConnectionData
 class SocketManager
 {
 	private:
+		size_t												_global_timeout;
 		std::unordered_map<int, Request>					_request_map; // Tracking requests by client_fd
 		std::unordered_map<int, std::string>				_response_map; // Tracking responses by client_fd
 		std::unordered_map<int, std::unique_ptr<Server>>	_server_map; // Tracking servers by port
@@ -76,7 +77,7 @@ class SocketManager
 		void		set_pollevent(int client_fd, short events);
 		void		accept_connections();
 	public:
-		SocketManager();
+		SocketManager(size_t global_timeout);
 		~SocketManager();
 
 		void		add_server(int port, std::unique_ptr<Server> server);
