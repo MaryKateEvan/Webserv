@@ -4,8 +4,16 @@
 /*                           Orthodox Canonical Form                          */
 /* -------------------------------------------------------------------------- */
 
-SocketManager::SocketManager()
+SocketManager::SocketManager(size_t global_timeout)
 {
+	if (global_timeout > 1000)
+	{
+		_global_timeout = global_timeout;
+	}
+	else
+	{
+		_global_timeout = 20000;
+	}
 	Logger::getInstance().log("", "Socket Manager Constructor called", 2);
 }
 
@@ -67,7 +75,7 @@ void	SocketManager::handle_requests()
 	}
 	while (true)
 	{
-		int poll_count = poll(_fds.data(), _fds.size(), -1);
+		int poll_count = poll(_fds.data(), _fds.size(), _global_timeout);
 
 		if (poll_count == -1)
 		{

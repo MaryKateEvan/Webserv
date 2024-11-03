@@ -27,7 +27,7 @@ int main(int argc, char **argv)
 	std::cout << YELLOW(BOLD("💡 TIP: ")) << "For server's " << BOLD("output") 
 			<< " check the " << UNDERLINE("Log directory") << ". 📁 🔍" << std::endl;
 
-	std::vector<ServerData> server_vec;
+	std::vector<ServerData>	server_vec;
 	try
 	{
 		if (argc == 2)
@@ -43,14 +43,15 @@ int main(int argc, char **argv)
 	std::signal(SIGINT, signalHandler);
 	try
 	{
-		SocketManager	socket_manager;
+		size_t			global_timeout = server_vec[0].global_timeout;
+		SocketManager	socket_manager(global_timeout);
 		MimeTypes::getInstance();
 
 		for (size_t s = 0; s < server_vec.size(); s++)
 		{
 			ServerData const & server = server_vec[s];
 			socket_manager.add_server(server.port_to_listen, std::make_unique<Server>(server.server_name, server.port_to_listen, server.index_file,
-			"usrimg", server.root, server.directory_listing, server.keepalive_timeout, server.send_timeout, server.global_timeout, server.max_request_size, server.locations));
+			"usrimg", server.root, server.directory_listing, server.keepalive_timeout, server.send_timeout, server.max_request_size, server.locations));
 		}
 		socket_manager.handle_requests();
 	}
