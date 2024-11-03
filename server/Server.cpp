@@ -33,6 +33,7 @@ Server::Server(const std::string server_name, int port, const std::string index_
 		close(_fd_server);
 		throw SetSocketOptionFailedException(_name);
 	}
+	// Remove this line on MacOS to prevent issues
 	if (setsockopt(_fd_server, SOL_SOCKET, SO_KEEPALIVE, &opt, sizeof(opt)) < 0)
 	{
 		close(_fd_server);
@@ -47,6 +48,7 @@ Server::Server(const std::string server_name, int port, const std::string index_
 	struct timeval	send_timeout_val;
 	send_timeout_val.tv_sec = _send_timeout;
 	send_timeout_val.tv_usec = 0;
+	// Remove this line on MacOS to prevent issues
 	if (setsockopt(_fd_server, SOL_SOCKET, SO_SNDTIMEO, &send_timeout_val, sizeof(send_timeout_val)) < 0)
 	{
 		close(_fd_server);
