@@ -30,6 +30,7 @@ struct ServerData
 	size_t 			max_request_size;		// limitation of the request that the client can send
 	size_t			keepalive_timeout;		// the time to keep connections open between requests
 	size_t			send_timeout;			// the time to wait a response to be sent to the client
+	size_t			global_timeout;
 
 	std::vector<LocationData> locations;	// contains the info of the different `location` blocks
 };
