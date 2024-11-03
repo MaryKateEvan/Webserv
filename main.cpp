@@ -50,7 +50,7 @@ int main(int argc, char **argv)
 		{
 			ServerData const & server = server_vec[s];
 			socket_manager.add_server(server.port_to_listen, std::make_unique<Server>(server.server_name, server.port_to_listen, server.index_file,
-			"usrimg", server.root, server.directory_listing, server.keepalive_timeout, server.send_timeout, server.max_request_size, server.locations));
+			"usrimg", server.root, server.directory_listing, server.keepalive_timeout, server.send_timeout, server.global_timeout, server.max_request_size, server.locations));
 		}
 		socket_manager.handle_requests();
 	}

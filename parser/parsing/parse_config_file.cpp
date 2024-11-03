@@ -102,6 +102,8 @@ std::vector<ServerData>	read_config_file(std::string file)
 	std::vector<ServerData>	server_vec;
 	{
 		ConfigData::HttpData * http_ptr = data.http[0];
+		size_t global_timeout = http_ptr -> server_timeout_time.get<size_t>(1000);
+
 		for (size_t s = 0; s < http_ptr -> server.size(); s++)
 		{
 			ConfigData::ServerData * server_ptr = http_ptr -> server[s];
@@ -110,7 +112,7 @@ std::vector<ServerData>	read_config_file(std::string file)
 			server.server_name = server_ptr -> server_name.get<std::string>("default");
 			server.port_to_listen = server_ptr -> listen.get<int>(80);
 			server.root = server_ptr -> root.get<std::string>("/");
-			server.index_file = server_ptr -> index.get<std::string>("test");
+			server.index_file = server_ptr -> index.get<std::string>("index.html");
 
 			server.keepalive_timeout = server_ptr -> keepalive_timeout.get<size_t>(0);
 			server.max_request_size = server_ptr -> max_body_size.get<size_t>(0);
@@ -129,6 +131,8 @@ std::vector<ServerData>	read_config_file(std::string file)
 
 				server.locations.push_back(location);
 			}
+
+			server.global_timeout = global_timeout;
 
 			server_vec.push_back(server);
 		}

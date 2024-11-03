@@ -23,6 +23,7 @@ class Server
 		bool				_directory_listing_enabled;
 		size_t				_keepalive_timeout;
 		size_t				_send_timeout;
+		size_t				_global_timeout;
 		size_t				_max_body_size;
 		std::vector<LocationData> _locations; 
 		std::string			_CLF_line;
@@ -49,7 +50,7 @@ class Server
 	public:
 		Server(const std::string server_name, int port, const std::string index_file,
 		const std::string data_dir, const std::string www_dir, bool directory_listing_enabled, size_t keepalive_timeout,
-		size_t send_timeout, size_t max_body_size, std::vector<LocationData> locations);
+		size_t send_timeout, size_t global_timeout, size_t max_body_size, std::vector<LocationData> locations);
 		~Server();
 
 		int							getServerFD(void) const;

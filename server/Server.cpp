@@ -18,10 +18,10 @@
  */
 Server::Server(const std::string server_name, int port, const std::string index_file,
 		const std::string data_dir, const std::string www_dir, bool directory_listing_enabled, size_t keepalive_timeout,
-		size_t send_timeout, size_t max_body_size, std::vector<LocationData> locations)
+		size_t send_timeout, size_t global_timeout, size_t max_body_size, std::vector<LocationData> locations)
 	: _name(server_name), _index_file(index_file), _data_dir(data_dir), _www_dir(www_dir),
 	_directory_listing_enabled(directory_listing_enabled), _keepalive_timeout(keepalive_timeout),
-	_send_timeout(send_timeout), _max_body_size(max_body_size), _locations(locations)
+	_send_timeout(send_timeout), _global_timeout(global_timeout), _max_body_size(max_body_size), _locations(locations)
 {
 	Logger::getInstance().log(server_name, "Constructor called", 2);
 	_fd_server = socket(AF_INET, SOCK_STREAM, 0);
@@ -76,7 +76,6 @@ Server::Server(const std::string server_name, int port, const std::string index_
 		throw ListenFailedException(_name);
 	}
 	Logger::getInstance().log(server_name, "Server is now listening on " + std::to_string(port), 2);
-
 }
 
 Server::~Server()
