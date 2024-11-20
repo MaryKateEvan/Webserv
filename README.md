@@ -82,6 +82,7 @@ make
 
 ## 🚀 Usage
 
+### 🌐 The Webpage:
 You can access any of the configured servers  in a web-browser by typing in the search-bar:<br>
 🔎 &nbsp;  ***localhost:<port_it_listens_to>***
 
@@ -94,6 +95,24 @@ You can access any of the configured servers  in a web-browser by typing in the 
  - `server1`, which listens to port `8080`, allows all methods, redirections (e.g. **localhost:8080/google**), and has a big body size, so there you can upload even large files.
  - `server2`, which listens to port `8081`, allows all methods and redirections, but you can only upload small images up to 200KB and doesn't allow directory listing.
  - `server3`, which listens to port `8082`, allows all methods and has a big body size, but it doesn't redirect because the GET method is not configured in its redirections.
+
+### 🖥️ &nbsp; LOGGER:
+You can view the webserver's output in the `log` directory, to keep track of the actions happening. 
+For example, this is the initial log when you launch the program by running `./webserv`:
+```log
+[20-11-2024:02:50:13] [INFO]	Config file read
+[20-11-2024:02:50:13] [INFO]	Config file interpreted
+[20-11-2024:02:50:13] [INFO]	Socket Manager Constructor called
+[20-11-2024:02:50:13] [INFO]	server1:	Constructor called
+[20-11-2024:02:50:13] [INFO]	server1:	Server is now listening on 8080
+[20-11-2024:02:50:13] [INFO]	server2:	Constructor called
+[20-11-2024:02:50:13] [INFO]	server2:	Server is now listening on 8081
+[20-11-2024:02:50:13] [INFO]	server3:	Constructor called
+[20-11-2024:02:50:13] [INFO]	server3:	Server is now listening on 8082
+```
+
+### 🛑 Termination of the Server:
+You can close the server by simply clicking `CTRL + C` on the terminal where you initially ran the server by doing: `./webserv ...`
 
 ---
 
