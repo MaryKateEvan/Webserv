@@ -76,7 +76,7 @@ make
 ```bash
 ./webserv config_files/<file_of_your_choice>
 ```
-&nbsp; &nbsp; &nbsp; 💡 You can also run just `./webserv`: in this case, the server uses a [default configuration](https://github.com/MaryKateEvan/Webserv/blob/main/config_files/default.conf):
+&nbsp; &nbsp; 💡 You can also run just `./webserv`: in this case, the server uses a [default configuration](https://github.com/MaryKateEvan/Webserv/blob/main/config_files/default.conf)
 
 ---
 
