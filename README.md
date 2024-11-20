@@ -6,6 +6,8 @@
 ## 📝 Description
 Webserv is our custom implementation of an **HTTP/1.1** server written in **C++17**. Designed for efficiency and compliance with HTTP standards, our server supports **non-blocking I/O operations** and is compatible with modern web browsers. It offers essential functionality for hosting static and dynamic content while ensuring scalability and flexibility.
 
+---
+
 ## ✨ Features
 
 ### 💡 Core Features:
@@ -93,11 +95,15 @@ You can access any of the configured servers  in a web-browser by typing in the 
  - `server2`, which listens to port `8081`, allows all methods and redirections, but you can only upload small images up to 200KB and doesn't allow directory listing.
  - `server3`, which listens to port `8082`, allows all methods and has a big body size, but it doesn't redirect because the GET method is not configured in its redirections.
 
+---
+
 ## 🌱 Future Enhancements
 
 - **Cookie and Session Management**: Support for client state management.
 - **Advanced CGI Handling**: Simultaneous support for multiple CGI environments.
 - **HTTPS Support**: Implementation of SSL/TLS for secure communication.
+
+---
 
 ## 📜 License
 This project is released under the [MIT License](https://github.com/MaryKateEvan/Webserv/blob/main/LICENSE). Contributions are welcome!
